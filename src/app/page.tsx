@@ -1,26 +1,32 @@
 
 import HeroSlider from '@/components/features/home/hero-slider';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card'; // CardDescription, CardHeader, CardTitle removed as not directly used for category
+import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingBag, Zap } from 'lucide-react';
+import { ShoppingBag, Zap, Award, Truck, Users, Mail } from 'lucide-react';
 import ProductCard from '@/components/features/home/product-card';
 import WeeklyDealsSlider from '@/components/features/home/weekly-deals-slider';
-import { getFeaturedProducts, getWeeklyDeals } from '@/services/productService'; // Import Firestore service
+import { getFeaturedProducts, getWeeklyDeals } from '@/services/productService';
+import { Input } from '@/components/ui/input'; // For Newsletter
 
 const categoryHighlights = [
   { name: "Electronics", image: "https://placehold.co/400x300.png", dataAiHint: "gadgets technology", href: "/products/category/electronics" },
   { name: "Fashion", image: "https://placehold.co/400x300.png", dataAiHint: "apparel clothing", href: "/products/category/fashion" },
-  { name: "Home Goods", image: "https://placehold.co/400x300.png", dataAiHint: "furniture decor", href: "/products/home" },
+  { name: "Home Goods", image: "https://placehold.co/400x300.png", dataAiHint: "furniture decor", href: "/products/category/home-living" }, // Corrected href
 ];
 
 const promotionalBanners = [
-  { title: "Weekend Sale", description: "Up to 50% off on selected items!", image: "https://placehold.co/600x400.png", dataAiHint: "sale discount", bgColor: "bg-primary/10", textColor: "text-primary-foreground", href: "/products?filter=sale" },
-  { title: "New Arrivals", description: "Check out the latest trends.", image: "https://placehold.co/600x400.png", dataAiHint: "new products", bgColor: "bg-accent/10", textColor: "text-accent-foreground", href: "/products?filter=new" },
+  { title: "Weekend Sale Extravaganza", description: "Up to 50% off on selected items! Don't miss out.", image: "https://placehold.co/600x400.png", dataAiHint: "sale discount", bgColor: "bg-primary/10", textColor: "text-primary-foreground", href: "/products?filter=sale" },
+  { title: "Fresh New Arrivals", description: "Check out the latest trends and must-have products.", image: "https://placehold.co/600x400.png", dataAiHint: "new products", bgColor: "bg-accent/10", textColor: "text-accent-foreground", href: "/products?filter=new" },
 ];
 
-// HomePage is now an async Server Component
+const whyChooseUsFeatures = [
+  { title: "Quality You Can Trust", description: "Curated selection of high-quality items from top brands.", icon: Award, dataAiHint:"quality badge" },
+  { title: "Reliable & Fast Delivery", description: "Swift and dependable shipping services across Kenya.", icon: Truck, dataAiHint:"delivery truck" },
+  { title: "Dedicated Customer Support", description: "Our friendly team is always ready to assist you with any queries.", icon: Users, dataAiHint:"customer support" },
+];
+
 export default async function HomePage() {
   const featuredProductsData = await getFeaturedProducts();
   const weeklyDealsData = await getWeeklyDeals();
@@ -73,6 +79,23 @@ export default async function HomePage() {
           <WeeklyDealsSlider deals={weeklyDealsData} />
         </div>
       </section>
+
+      <section className="py-12 md:py-16 bg-secondary/20" id="why-choose-us">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold tracking-tight text-center text-foreground sm:text-4xl font-headline mb-12">
+            Why Choose Creme Collections?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            {whyChooseUsFeatures.map((feature) => (
+              <div key={feature.title} className="flex flex-col items-center p-6 bg-card rounded-lg shadow-lg">
+                <feature.icon className="w-12 h-12 text-primary mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2 font-headline">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
       
       <section className="py-12 md:py-16 bg-secondary/30" id="promotions">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -109,6 +132,31 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="py-12 md:py-16 bg-background" id="newsletter">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto text-center bg-card p-8 md:p-12 rounded-xl shadow-xl border border-primary/20">
+            <Mail className="w-12 h-12 text-primary mb-4 mx-auto" />
+            <h2 className="text-3xl font-bold text-foreground sm:text-4xl font-headline mb-3">
+              Stay Updated with Creme Collections
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Get the latest deals, new arrivals, and special offers directly to your inbox.
+            </p>
+            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <Input 
+                type="email" 
+                placeholder="Enter your email address" 
+                className="h-12 text-base sm:flex-grow" 
+                aria-label="Email address for newsletter"
+              />
+              <Button type="submit" size="lg" className="h-12 sm:w-auto">
+                Subscribe
+              </Button>
+            </form>
+          </div>
+        </div>
+      </section>
+
       <section className="py-12 md:py-20 bg-background" id="new-arrivals">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold tracking-tight text-center text-foreground sm:text-4xl font-headline mb-12">
@@ -119,7 +167,7 @@ export default async function HomePage() {
               {featuredProductsData.map((product) => (
                 <ProductCard
                   key={product.id}
-                  id={product.id} // Already string from service
+                  id={product.id}
                   name={product.name}
                   description={product.description}
                   image={product.image}

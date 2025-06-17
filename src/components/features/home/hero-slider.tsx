@@ -28,7 +28,7 @@ const slidesData: Slide[] = [
     title: 'Summer Collection is Here!',
     subtitle: 'Discover vibrant styles and fresh looks for the season.',
     buttonText: 'Shop Now',
-    buttonLink: '/products?category=summer',
+    buttonLink: '/products/category/fashion', // Updated link to be more specific
     textAlign: 'left',
     textColor: 'text-white',
     overlayColor: 'bg-black/40'
@@ -40,7 +40,7 @@ const slidesData: Slide[] = [
     title: 'Latest Tech Gadgets',
     subtitle: 'Upgrade your life with cutting-edge technology.',
     buttonText: 'Explore Tech',
-    buttonLink: '/products?category=electronics',
+    buttonLink: '/products/category/electronics',
     textAlign: 'center',
     textColor: 'text-white',
     overlayColor: 'bg-primary/30'
@@ -52,11 +52,23 @@ const slidesData: Slide[] = [
     title: 'Transform Your Home',
     subtitle: 'Find elegant decor and furnishings for every room.',
     buttonText: 'Discover Home Goods',
-    buttonLink: '/products?category=home',
+    buttonLink: '/products/category/home-living', // Updated link to be more specific
     textAlign: 'right',
-    textColor: 'text-foreground', // Better for lighter overlay or no overlay
+    textColor: 'text-foreground',
     overlayColor: 'bg-accent/20'
   },
+  {
+    id: 4,
+    image: 'https://placehold.co/1600x800.png',
+    dataAiHint: 'special offer',
+    title: 'Exclusive Member Deals',
+    subtitle: 'Sign up today and get access to special discounts.',
+    buttonText: 'Join Now',
+    buttonLink: '/register',
+    textAlign: 'left',
+    textColor: 'text-white',
+    overlayColor: 'bg-slate-800/50'
+  }
 ];
 
 const HeroSlider = () => {
@@ -95,8 +107,8 @@ const HeroSlider = () => {
           <Image
             src={slide.image}
             alt={slide.title}
-            layout="fill"
-            objectFit="cover"
+            fill // Changed from layout="fill" objectFit="cover"
+            style={{ objectFit: 'cover' }} // Added for fill
             priority={index === 0}
             className="transition-transform duration-\[7000ms\] ease-linear group-hover:scale-105"
             data-ai-hint={slide.dataAiHint}
@@ -152,3 +164,4 @@ const HeroSlider = () => {
 };
 
 export default HeroSlider;
+
