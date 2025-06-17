@@ -1,12 +1,21 @@
 
+"use client"; 
 import type { Metadata } from 'next';
+import { useState, useEffect } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy - Creme Lite',
-  description: 'Read the Creme Lite Privacy Policy to understand how we collect, use, and protect your personal information.',
-};
+// export const metadata: Metadata = { // Cannot be used in client components this way
+//   title: 'Privacy Policy - Creme Lite',
+//   description: 'Read the Creme Lite Privacy Policy to understand how we collect, use, and protect your personal information.',
+// };
 
 export default function PrivacyPage() {
+  const [lastUpdatedDate, setLastUpdatedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = 'Privacy Policy - Creme Lite';
+    setLastUpdatedDate(new Date().toLocaleDateString());
+  }, []);
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
       <div className="max-w-3xl mx-auto">
@@ -99,7 +108,9 @@ export default function PrivacyPage() {
             Address: 123 Creme Lite St, Suite 100, Commerce City, EC 54321, Kenya
           </p>
           
-          <p className="text-sm text-muted-foreground pt-6">Last updated: {new Date().toLocaleDateString()}</p>
+          {lastUpdatedDate && (
+            <p className="text-sm text-muted-foreground pt-6">Last updated: {lastUpdatedDate}</p>
+          )}
         </div>
       </div>
     </div>

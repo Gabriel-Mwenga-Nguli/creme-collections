@@ -1,13 +1,22 @@
 
+"use client";
 import type { Metadata } from 'next';
 import { Package, Undo } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Shipping & Returns - Creme Lite',
-  description: 'Learn about Creme Lite\'s shipping policies, delivery times, and returns process.',
-};
+// export const metadata: Metadata = { // Cannot be used in client components this way
+//   title: 'Shipping & Returns - Creme Lite',
+//   description: 'Learn about Creme Lite\'s shipping policies, delivery times, and returns process.',
+// };
 
 export default function ShippingReturnsPage() {
+  const [lastUpdatedDate, setLastUpdatedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = 'Shipping & Returns - Creme Lite';
+    setLastUpdatedDate(new Date().toLocaleDateString());
+  }, []);
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
       <div className="max-w-3xl mx-auto">
@@ -89,7 +98,9 @@ export default function ShippingReturnsPage() {
               If you have any questions about our Shipping & Returns Policy, please contact us at <a href="mailto:support@cremelite.com" className="text-primary hover:underline">support@cremelite.com</a>.
             </p>
           </section>
-          <p className="text-sm text-muted-foreground pt-6">Last updated: {new Date().toLocaleDateString()}</p>
+          {lastUpdatedDate && (
+            <p className="text-sm text-muted-foreground pt-6">Last updated: {lastUpdatedDate}</p>
+          )}
         </div>
       </div>
     </div>

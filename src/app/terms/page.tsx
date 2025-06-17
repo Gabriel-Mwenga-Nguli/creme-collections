@@ -1,12 +1,21 @@
 
+"use client";
 import type { Metadata } from 'next';
+import { useState, useEffect } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Terms & Conditions - Creme Lite',
-  description: 'Read the Terms and Conditions for using the Creme Lite website and services.',
-};
+// export const metadata: Metadata = { // Cannot be used in client components this way
+//   title: 'Terms & Conditions - Creme Lite',
+//   description: 'Read the Terms and Conditions for using the Creme Lite website and services.',
+// };
 
 export default function TermsPage() {
+  const [lastUpdatedDate, setLastUpdatedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = 'Terms & Conditions - Creme Lite';
+    setLastUpdatedDate(new Date().toLocaleDateString());
+  }, []);
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
       <div className="max-w-3xl mx-auto">
@@ -84,7 +93,9 @@ export default function TermsPage() {
             Creme Lite reserves the right to revise these terms and conditions at any time as it sees fit, and by using this Website you are expected to review these terms on a regular basis.
           </p>
           
-          <p className="text-sm text-muted-foreground pt-6">Last updated: {new Date().toLocaleDateString()}</p>
+          {lastUpdatedDate && (
+            <p className="text-sm text-muted-foreground pt-6">Last updated: {lastUpdatedDate}</p>
+          )}
         </div>
       </div>
     </div>
