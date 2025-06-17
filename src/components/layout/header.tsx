@@ -2,8 +2,8 @@
 "use client";
 
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, Heart, ShoppingCart, User, ChevronDown } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Menu, X, Sun, Moon, Heart, ShoppingCart, User, ChevronDown, type LucideIcon } from 'lucide-react';
+import { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef } from 'react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,17 @@ import { useTheme } from 'next-themes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AISearchBar from '@/components/features/search/AISearchBar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import MegaMenu from './MegaMenu'; // New component
+import MegaMenu from './MegaMenu';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { cn } from '@/lib/utils';
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -40,6 +50,35 @@ const ThemeToggle = () => {
     </Button>
   );
 };
+
+const ListItem = forwardRef<
+  ElementRef<"a">,
+  ComponentPropsWithoutRef<"a"> & { title: string }
+>(({ className, title, children, href, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <Link
+          href={href!}
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          {children && (
+            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+              {children}
+            </p>
+          )}
+        </Link>
+      </NavigationMenuLink>
+    </li>
+  );
+});
+ListItem.displayName = "ListItem";
 
 export default function Header() {
   const isMobile = useIsMobile();
@@ -116,7 +155,6 @@ export default function Header() {
                       <AISearchBar />
                     </div>
 
-                    {/* Mobile Main Navigation (like blue bar) */}
                     <nav className="flex flex-col gap-1 mb-4">
                        {MAIN_NAV_LINKS.map((link) => (
                          <SheetClose asChild key={link.label}>
@@ -194,33 +232,79 @@ export default function Header() {
         {/* Bottom Row - Desktop Only */}
         {!isMobile && (
           <div className="flex h-12 items-center justify-start border-t border-border/20 bg-primary/5 relative">
-            <nav className="flex gap-1 overflow-x-auto scrollbar-hide">
-              {MAIN_NAV_LINKS.map((link) => (
-                link.isMegaMenuTrigger ? (
-                  <Button
-                    key={link.label}
-                    variant="ghost"
-                    onClick={toggleMegaMenu}
-                    className={`text-sm font-medium px-3 py-2 h-auto rounded-md hover:bg-primary/20 hover:text-primary ${isMegaMenuOpen ? 'bg-primary/15 text-primary' : 'text-foreground'}`}
-                  >
-                    {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
-                    {link.label}
-                    <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${isMegaMenuOpen ? 'rotate-180' : ''}`} />
-                  </Button>
-                ) : (
-                  <Button
-                    key={link.label}
-                    variant="ghost"
-                    asChild
-                    className="text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary"
-                  >
-                    <Link href={link.href} onClick={closeMegaMenu}>
-                      {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
-                      {link.label}
-                    </Link>
-                  </Button>
-                )
-              ))}
+            <nav className="flex gap-1 overflow-x-auto scrollbar-hide items-center">
+              {MAIN_NAV_LINKS.find(link => link.isMegaMenuTrigger) && (() => {
+                const megaMenuTriggerLink = MAIN_NAV_LINKS.find(link => link.isMegaMenuTrigger)!;
+                return (
+                    <Button
+                        key={megaMenuTriggerLink.label}
+                        variant="ghost"
+                        onClick={toggleMegaMenu}
+                        className={`text-sm font-medium px-3 py-2 h-auto rounded-md hover:bg-primary/20 hover:text-primary ${isMegaMenuOpen ? 'bg-primary/15 text-primary' : 'text-foreground'}`}
+                    >
+                        {megaMenuTriggerLink.icon && <megaMenuTriggerLink.icon className="mr-1.5 h-4 w-4" />}
+                        {megaMenuTriggerLink.label}
+                        <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${isMegaMenuOpen ? 'rotate-180' : ''}`} />
+                    </Button>
+                );
+              })()}
+              
+              <NavigationMenu className="ml-1">
+                <NavigationMenuList>
+                  {MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger).map((link) => {
+                    const parentCategoryData = CATEGORY_NAV_LINKS.find(cat => cat.href === link.href);
+
+                    if (parentCategoryData && parentCategoryData.subLinks && parentCategoryData.subLinks.length > 0) {
+                      return (
+                        <NavigationMenuItem key={link.label}>
+                          <NavigationMenuTrigger 
+                            className="text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 data-[state=open]:bg-primary/10"
+                          >
+                            {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
+                            {link.label}
+                          </NavigationMenuTrigger>
+                          <NavigationMenuContent>
+                            <ul className="flex flex-col w-[250px] gap-1 p-2 md:w-[300px]">
+                               <ListItem
+                                  key={`all-${parentCategoryData.label}`}
+                                  href={parentCategoryData.href}
+                                  title={`All ${parentCategoryData.label}`}
+                                  onClick={closeMegaMenu}
+                                  className="font-semibold"
+                                >
+                                  Browse all items in {parentCategoryData.label}.
+                                </ListItem>
+                                <hr className="my-1"/>
+                              {parentCategoryData.subLinks.map((subLink) => (
+                                <ListItem
+                                  key={subLink.label}
+                                  href={subLink.href}
+                                  title={subLink.label}
+                                  onClick={closeMegaMenu}
+                                />
+                              ))}
+                            </ul>
+                          </NavigationMenuContent>
+                        </NavigationMenuItem>
+                      );
+                    } else {
+                      return (
+                        <NavigationMenuItem key={link.label}>
+                          <Link href={link.href} legacyBehavior passHref>
+                            <NavigationMenuLink 
+                              className={cn(navigationMenuTriggerStyle(), "text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10")}
+                              onClick={closeMegaMenu}
+                            >
+                              {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
+                              {link.label}
+                            </NavigationMenuLink>
+                          </Link>
+                        </NavigationMenuItem>
+                      );
+                    }
+                  })}
+                </NavigationMenuList>
+              </NavigationMenu>
             </nav>
           </div>
         )}
