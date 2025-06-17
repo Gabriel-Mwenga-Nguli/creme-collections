@@ -140,8 +140,8 @@ export default function Header() {
               </Link>
             </Button>
              {!isMobile && (
-                 <Button variant="ghost" size="icon" asChild aria-label="User Profile" className="text-foreground hover:text-primary">
-                    <Link href="/profile"><User className="h-5 w-5" /></Link>
+                 <Button variant="ghost" size="icon" asChild aria-label="User Account" className="text-foreground hover:text-primary">
+                    <Link href="/login"><User className="h-5 w-5" /></Link>
                  </Button>
              )}
             <ThemeToggle />
