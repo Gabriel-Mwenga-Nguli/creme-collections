@@ -10,6 +10,7 @@ export default function Footer() {
       <div className="container mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           
+          {/* Column 1: Logo & Location */}
           <div className="lg:col-span-1 lg:border-r lg:border-slate-700 lg:pr-8">
             <Logo />
             <p className="mt-4 text-sm text-slate-400">
@@ -27,7 +28,8 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:col-span-2 lg:border-r lg:border-slate-700 lg:pr-8">
+          {/* Column 2: Shop & Company Links */}
+          <div className="lg:col-span-1 lg:border-r lg:border-slate-700 lg:px-8 space-y-8 md:space-y-10">
             <div>
               <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase">Shop</h3>
               <ul role="list" className="mt-4 space-y-2">
@@ -51,8 +53,11 @@ export default function Footer() {
                 ))}
               </ul>
             </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase">Support</h3>
+          </div>
+          
+          {/* Column 3: Support Links & Contact Details */}
+          <div className="lg:col-span-1 lg:border-r lg:border-slate-700 lg:px-8">
+             <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase">Support</h3>
               <ul role="list" className="mt-4 space-y-2">
                 {FOOTER_SUPPORT_LINKS.map((link) => (
                   <li key={link.label}>
@@ -65,40 +70,36 @@ export default function Footer() {
                     </Link>
                   </li>
                 ))}
-                 <li className="mt-4 pt-2 border-t border-slate-700/50">
+              </ul>
+              <div className="mt-6 pt-4 border-t border-slate-700/30 space-y-3">
                   <div className="flex items-center text-sm text-slate-300">
-                    <Mail className="w-4 h-4 mr-2 text-primary shrink-0" />
+                    <Mail className="w-4 h-4 mr-2.5 text-primary shrink-0" />
                     <div className="flex flex-col">
                         <a href="mailto:support@cremecollections.shop" className="hover:text-primary transition-colors">support@cremecollections.shop</a>
                         <a href="mailto:creme.collectionlt@gmail.com" className="hover:text-primary transition-colors">creme.collectionlt@gmail.com</a>
                     </div>
                   </div>
-                </li>
-                <li>
                   <div className="flex items-center text-sm text-slate-300">
-                    <MessageSquare className="w-4 h-4 mr-2 text-primary shrink-0" />
+                    <MessageSquare className="w-4 h-4 mr-2.5 text-primary shrink-0" />
                     <div className="flex flex-col">
                         <a href="https://wa.me/254742468070" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">+254 742 468070</a>
                         <a href="https://wa.me/254743117211" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">+254 743 117211</a>
                         <a href="https://wa.me/254717988700" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">+254 717 988700</a>
                     </div>
                   </div>
-                </li>
-                <li className="mt-2">
-                    <div className="flex items-start text-sm text-slate-400">
-                        <Clock className="w-4 h-4 mr-2 text-primary shrink-0 mt-0.5" />
-                        <div>
-                            <span>Mon – Fri: 9am – 5pm EAT</span><br/>
-                            <span>Saturday: 9am – 12pm EAT</span><br/>
-                            <span>Sun & Holidays: Closed</span>
-                        </div>
-                    </div>
-                </li>
-              </ul>
-            </div>
+                  <div className="flex items-start text-sm text-slate-300">
+                      <Clock className="w-4 h-4 mr-2.5 text-primary shrink-0 mt-0.5" />
+                      <div>
+                          <span>Mon – Fri: 9am – 5pm EAT</span><br/>
+                          <span>Saturday: 9am – 12pm EAT</span><br/>
+                          <span className="text-slate-400">Sun & Holidays: Closed</span>
+                      </div>
+                  </div>
+              </div>
           </div>
-          
-          <div className="lg:col-span-1">
+
+          {/* Column 4: Map */}
+          <div className="lg:col-span-1 lg:pl-8">
              <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase mb-4 flex items-center">
                 <MapPin className="w-4 h-4 mr-2 text-primary" /> Our Store
              </h3>
