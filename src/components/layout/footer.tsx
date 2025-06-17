@@ -5,11 +5,12 @@ import Logo from '@/components/logo';
 import { MapPin } from 'lucide-react';
 
 export default function Footer() {
-  const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  // The user provided a direct iframe embed, so API key logic is not needed for this specific map.
+  // const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   // Default to a generic location if API key is not set, or use a placeholder view
-  const mapEmbedSrc = mapsApiKey 
-    ? `https://www.google.com/maps/embed/v1/place?key=${mapsApiKey}&q=Nairobi,Kenya`
-    : `https://www.google.com/maps/embed/v1/view?zoom=12&center=-1.286389,36.817223`;
+  // const mapEmbedSrc = mapsApiKey 
+  //   ? `https://www.google.com/maps/embed/v1/place?key=${mapsApiKey}&q=Nairobi,Kenya`
+  //   : `https://www.google.com/maps/embed/v1/view?zoom=12&center=-1.286389,36.817223`;
 
 
   return (
@@ -77,25 +78,19 @@ export default function Footer() {
              <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase mb-4 flex items-center">
                 <MapPin className="w-4 h-4 mr-2 text-primary" /> Find Us
              </h3>
-            {mapsApiKey ? (
-              <div className="aspect-video w-full overflow-hidden rounded-lg shadow-md border border-slate-700">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  src={mapEmbedSrc}
-                  title="Shop Location Map"
-                >
-                </iframe>
-              </div>
-            ) : (
-              <div className="aspect-video w-full overflow-hidden rounded-lg shadow-md border border-slate-700 bg-slate-800 flex items-center justify-center">
-                <p className="text-slate-400 text-sm px-4 text-center">Google Maps API key not configured. Map display is unavailable.</p>
-              </div>
-            )}
+            <div className="aspect-video w-full overflow-hidden rounded-lg shadow-md border border-slate-700">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.8176281179212!2d36.8256143!3d-1.283277!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f11bfdd229f0f%3A0x1bb6f341ce62e64e!2sCreme%20Collections!5e0!3m2!1sen!2ske!4v1750153131200!5m2!1sen!2ske" 
+                width="100%" 
+                height="100%" 
+                style={{ border:0 }} 
+                allowFullScreen={true} 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Creme Collections Location Map"
+              >
+              </iframe>
+            </div>
           </div>
 
         </div>

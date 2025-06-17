@@ -12,12 +12,16 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, // Optional
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, // Optional, but often included
 };
 
 // Initialize Firebase
 let app;
 if (!getApps().length) {
+  // Check if all required Firebase config keys are present
+  if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+    console.error("Firebase configuration error: API Key, Auth Domain, or Project ID is missing. Check your .env.local file and ensure it's loaded correctly.");
+  }
   app = initializeApp(firebaseConfig);
 } else {
   app = getApp();
@@ -30,6 +34,5 @@ const auth = getAuth(app);
 // if (typeof window !== 'undefined') { // Ensure Analytics is only initialized on the client
 //   analytics = getAnalytics(app);
 // }
-
 
 export { db, auth /*, storage, analytics */ }; // Add other exports as needed
