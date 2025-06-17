@@ -1,38 +1,15 @@
 
 "use client";
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, Trash2, Plus, Minus, X, ChevronLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ShoppingCart, Trash2, Plus, Minus, ChevronLeft } from 'lucide-react';
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-// Metadata for client components needs to be handled differently, e.g. via useEffect
-// export const metadata: Metadata = {
-//   title: 'Shopping Cart - Creme Lite',
-//   description: 'Review items in your shopping cart and proceed to checkout.',
-// };
-
-interface CartItem {
-  id: number;
-  name: string;
-  image: string;
-  dataAiHint: string;
-  price: number;
-  quantity: number;
-  color?: string;
-  size?: string;
-}
-
-const initialCartItems: CartItem[] = [
-  { id: 401, name: "Modern Desk Lamp", image: "https://placehold.co/100x100.png", dataAiHint: "lamp decor", price: 3500, quantity: 1, color: "Black", size: "Medium" },
-  { id: 402, name: "Wireless Bluetooth Keyboard", image: "https://placehold.co/100x100.png", dataAiHint: "keyboard tech", price: 7200, quantity: 2, color: "Silver", size: "Standard" },
-  { id: 403, name: "Ergonomic Office Chair", image: "https://placehold.co/100x100.png", dataAiHint: "office furniture", price: 12500, quantity: 1, color: "Gray", size: "Large" },
-];
+import { useCart } from '@/context/CartContext'; 
 
 // WhatsApp Icon SVG
 const WhatsAppIcon = () => (
@@ -47,27 +24,26 @@ const WhatsAppIcon = () => (
   );
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
+  const { cartItems, updateItemQuantity, removeItemFromCart, getCartTotal } = useCart();
 
   useEffect(() => {
     document.title = 'Shopping Cart - Creme Lite';
   }, []);
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity < 1) return; // Minimum quantity is 1
-    setCartItems(items => items.map(item => item.id === id ? { ...item, quantity: newQuantity } : item));
+  const handleQuantityChange = (id: number, newQuantity: number) => {
+    if (newQuantity < 1) {
+        removeItemFromCart(id); // Remove item if quantity is less than 1
+    } else {
+        updateItemQuantity(id, newQuantity);
+    }
   };
 
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = getCartTotal();
   const shippingCost = subtotal > 10000 ? 0 : 500; // Free shipping over KES 10,000
   const total = subtotal + shippingCost;
 
   const handleWhatsAppCheckout = () => {
-    const itemDetails = cartItems.map(item => `${item.name} (x${item.quantity}) - KES ${(item.price * item.quantity).toLocaleString()}`).join('\n');
+    const itemDetails = cartItems.map(item => `${item.name} (x${item.quantity}) - KES ${(item.fixedOfferPrice! * item.quantity).toLocaleString()}`).join('\n');
     const message = `Hello Creme Lite! I'd like to place an order for the following items:\n\n${itemDetails}\n\nSubtotal: KES ${subtotal.toLocaleString()}\nShipping: KES ${shippingCost.toLocaleString()}\nTotal: KES ${total.toLocaleString()}\n\nPlease advise on payment and delivery.`;
     
     const whatsappNumber = "254743117211";
@@ -110,28 +86,36 @@ export default function CartPage() {
                     <Link href={`/products/item/product-${item.id}`}>
                         <h2 className="text-lg font-semibold text-foreground hover:text-primary transition-colors">{item.name}</h2>
                     </Link>
-                    {item.color && <p className="text-sm text-muted-foreground">Color: {item.color}</p>}
-                    {item.size && <p className="text-sm text-muted-foreground">Size: {item.size}</p>}
-                    <p className="text-md font-medium text-primary mt-1">KES {item.price.toLocaleString()}</p>
+                    {/* item.color and item.size might not exist on ProductCardProps, ensure they are optional or add to type */}
+                    {/* {item.color && <p className="text-sm text-muted-foreground">Color: {item.color}</p>} */}
+                    {/* {item.size && <p className="text-sm text-muted-foreground">Size: {item.size}</p>} */}
+                    <p className="text-md font-medium text-primary mt-1">KES {(item.fixedOfferPrice || 0).toLocaleString()}</p>
                   </div>
                   <div className="flex flex-col items-end gap-3 mt-2 sm:mt-0 w-full sm:w-auto">
                     <div className="flex items-center border rounded-md">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Decrease quantity">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => handleQuantityChange(item.id, item.quantity - 1)} aria-label="Decrease quantity">
                         <Minus className="h-4 w-4" />
                       </Button>
                       <Input
-                        type="number"
+                        type="number" // Changed to text to allow direct value setting from state. Parsing will handle it.
                         value={item.quantity}
-                        onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                        onChange={(e) => {
+                            const newQuantity = parseInt(e.target.value);
+                            if (!isNaN(newQuantity) && newQuantity >= 0) { // Allow 0 for potential removal logic
+                                handleQuantityChange(item.id, newQuantity);
+                            } else if (e.target.value === "") { // Handle empty input if needed
+                                handleQuantityChange(item.id, 0); // Or some default like 1
+                            }
+                        }}
                         className="h-8 w-12 text-center border-0 focus-visible:ring-0 bg-transparent font-medium"
                         aria-label="Quantity"
-                        min="1"
+                        min="0" // Allow 0 for removal
                       />
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label="Increase quantity">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => handleQuantityChange(item.id, item.quantity + 1)} aria-label="Increase quantity">
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10" onClick={() => removeItem(item.id)}>
+                    <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10" onClick={() => removeItemFromCart(item.id)}>
                       <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
                     </Button>
                   </div>
@@ -196,4 +180,4 @@ export default function CartPage() {
     </div>
   );
 }
-
+    

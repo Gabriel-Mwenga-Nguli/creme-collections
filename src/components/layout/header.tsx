@@ -23,6 +23,8 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from '@/lib/utils';
+import { useCart } from '@/context/CartContext'; // Import useCart
+import { Badge } from '@/components/ui/badge'; // Import Badge
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -53,8 +55,8 @@ const ThemeToggle = () => {
 
 const ListItem = forwardRef<
   ElementRef<"a">,
-  Omit<ComponentPropsWithoutRef<typeof Link>, "href"> & { title: string; href: string }
->(({ className, title, children, href, ...props }, ref) => {
+  Omit<ComponentPropsWithoutRef<typeof Link>, "href"> & { title: string; href: string; onClick?: () => void; }
+>(({ className, title, children, href, onClick, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -65,6 +67,7 @@ const ListItem = forwardRef<
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
+          onClick={onClick}
           {...props}
         >
           <div className="text-sm font-medium leading-none">{title}</div>
@@ -83,10 +86,12 @@ ListItem.displayName = "ListItem";
 export default function Header() {
   const isMobile = useIsMobile();
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const { getCartItemCount } = useCart(); 
+  const cartItemCount = getCartItemCount();
 
   useEffect(() => {
     if (isMobile && isMegaMenuOpen) {
-      setIsMegaMenuOpen(false); // Close mega menu on mobile view
+      setIsMegaMenuOpen(false); 
     }
   }, [isMobile, isMegaMenuOpen]);
 
@@ -124,8 +129,15 @@ export default function Header() {
             <Button variant="ghost" size="icon" asChild aria-label="Wishlist" className="text-foreground hover:text-primary">
               <Link href="/wishlist"><Heart className="h-5 w-5" /></Link>
             </Button>
-            <Button variant="ghost" size="icon" asChild aria-label="Shopping Cart" className="text-foreground hover:text-primary">
-              <Link href="/cart"><ShoppingCart className="h-5 w-5" /></Link>
+            <Button variant="ghost" size="icon" asChild aria-label="Shopping Cart" className="relative text-foreground hover:text-primary">
+              <Link href="/cart">
+                <ShoppingCart className="h-5 w-5" />
+                {cartItemCount > 0 && (
+                  <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 min-w-[0.75rem] p-[2px] text-[10px] flex items-center justify-center leading-none">
+                    {cartItemCount}
+                  </Badge>
+                )}
+              </Link>
             </Button>
              {!isMobile && (
                  <Button variant="ghost" size="icon" asChild aria-label="User Profile" className="text-foreground hover:text-primary">
@@ -290,7 +302,7 @@ export default function Header() {
                     } else {
                       return (
                         <NavigationMenuItem key={link.label}>
-                          <NavigationMenuLink asChild>
+                           <NavigationMenuLink asChild>
                             <Link 
                               href={link.href}
                               className={cn(navigationMenuTriggerStyle(), "text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10")}
@@ -316,3 +328,4 @@ export default function Header() {
     </header>
   );
 }
+    

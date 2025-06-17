@@ -1,9 +1,11 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
+import { CartProvider } from '@/context/CartContext'; // Import CartProvider
 
 export const metadata: Metadata = {
   title: 'Creme Lite',
@@ -29,12 +31,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-          <Toaster />
+          <CartProvider> {/* Wrap with CartProvider */}
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+            <Toaster />
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
+    
