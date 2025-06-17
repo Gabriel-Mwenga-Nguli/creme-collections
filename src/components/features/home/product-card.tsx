@@ -27,8 +27,9 @@ export default function ProductCard({ id, name, description, image, dataAiHint }
     const calculatedOfferPrice = basePrice * (1 - discount);
     const calculatedOriginalPrice = basePrice;
 
-    setOfferPrice(calculatedOfferPrice.toFixed(0));
-    setOriginalPrice(calculatedOriginalPrice.toFixed(0));
+    // Format with thousand separators
+    setOfferPrice(Math.round(calculatedOfferPrice).toLocaleString('en-US'));
+    setOriginalPrice(Math.round(calculatedOriginalPrice).toLocaleString('en-US'));
   }, [id]); // Re-calculate if id changes, though likely stable
 
   return (
@@ -73,3 +74,4 @@ export default function ProductCard({ id, name, description, image, dataAiHint }
     </Card>
   );
 }
+
