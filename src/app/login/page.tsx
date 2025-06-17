@@ -1,4 +1,6 @@
 
+"use client"; // Add this directive
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -7,10 +9,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-export const metadata: Metadata = {
-  title: 'Login - Creme Lite',
-  description: 'Log in to your Creme Lite account.',
-};
+// Metadata needs to be handled differently in client components, or set in layout/generateMetadata
+// export const metadata: Metadata = {
+//   title: 'Login - Creme Lite',
+//   description: 'Log in to your Creme Lite account.',
+// };
 
 // Google Icon SVG
 const GoogleIcon = () => (
