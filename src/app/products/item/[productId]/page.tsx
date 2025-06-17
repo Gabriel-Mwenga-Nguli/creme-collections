@@ -1,14 +1,14 @@
 
-"use client"; // Make it a client component for useState, useEffect and useToast
+"use client"; 
 
-import type { Metadata } from 'next'; // Metadata can't be used directly in client components
+import type { Metadata } from 'next'; 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, Share2, MessageCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import ProductCard from '@/components/features/home/product-card'; // For related products
+import ProductCard from '@/components/features/home/product-card'; 
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react'; // Added 'use'
 
 // Define a type for the product details
 interface ProductDetails {
@@ -64,21 +64,24 @@ const relatedProductsData = [
   { id: 104, name: "Related Product 4", description: "Description for related product 4.", image: "https://placehold.co/300x300.png", dataAiHint: "home electronics" },
 ];
 
-export default function ProductDetailPage({ params }: { params: { productId: string } }) {
+export default function ProductDetailPage({ params: paramsPromise }: { params: Promise<{ productId: string }> }) {
+  const { productId } = use(paramsPromise); // Unwrap the params Promise
+  
   const { toast } = useToast();
   const [product, setProduct] = useState<ProductDetails | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProduct() {
-      const productDetails = await fetchProductDetails(params.productId);
-      setProduct(productDetails);
-      setSelectedImage(productDetails.image); // Set initial main image
-       // Set document title (alternative to Metadata for client components)
-      document.title = `${productDetails.name} - Creme Lite`;
+      if (productId) { // Check if productId is available
+        const productDetails = await fetchProductDetails(productId);
+        setProduct(productDetails);
+        setSelectedImage(productDetails.image); 
+        document.title = `${productDetails.name} - Creme Lite`;
+      }
     }
     loadProduct();
-  }, [params.productId]);
+  }, [productId]); // Depend on the unwrapped productId
 
   if (!product || selectedImage === null) {
     return (
@@ -88,9 +91,7 @@ export default function ProductDetailPage({ params }: { params: { productId: str
     );
   }
   
-  // Ensure originalPrice is greater than price if both are set
   const displayOriginalPrice = product.originalPrice && parseFloat(product.originalPrice) > parseFloat(product.price) ? product.originalPrice : (parseFloat(product.price) * 1.25).toFixed(0);
-
 
   const handleAddToCart = () => {
     toast({
@@ -249,3 +250,4 @@ export default function ProductDetailPage({ params }: { params: { productId: str
     </div>
   );
 }
+
