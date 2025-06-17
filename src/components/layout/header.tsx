@@ -53,13 +53,13 @@ const ThemeToggle = () => {
 
 const ListItem = forwardRef<
   ElementRef<"a">,
-  ComponentPropsWithoutRef<"a"> & { title: string }
+  Omit<ComponentPropsWithoutRef<typeof Link>, "href"> & { title: string; href: string }
 >(({ className, title, children, href, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
         <Link
-          href={href!}
+          href={href}
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -232,7 +232,7 @@ export default function Header() {
         {/* Bottom Row - Desktop Only */}
         {!isMobile && (
           <div className="flex h-12 items-center justify-start border-t border-border/20 bg-primary/5 relative">
-            <nav className="flex gap-1 items-center"> {/* Removed overflow-x-auto scrollbar-hide */}
+            <nav className="flex gap-1 items-center">
               {MAIN_NAV_LINKS.find(link => link.isMegaMenuTrigger) && (() => {
                 const megaMenuTriggerLink = MAIN_NAV_LINKS.find(link => link.isMegaMenuTrigger)!;
                 return (
@@ -290,15 +290,16 @@ export default function Header() {
                     } else {
                       return (
                         <NavigationMenuItem key={link.label}>
-                          <Link href={link.href} legacyBehavior passHref>
-                            <NavigationMenuLink 
+                          <NavigationMenuLink asChild>
+                            <Link 
+                              href={link.href}
                               className={cn(navigationMenuTriggerStyle(), "text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10")}
                               onClick={closeMegaMenu}
                             >
                               {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
                               {link.label}
-                            </NavigationMenuLink>
-                          </Link>
+                            </Link>
+                          </NavigationMenuLink>
                         </NavigationMenuItem>
                       );
                     }
@@ -315,4 +316,3 @@ export default function Header() {
     </header>
   );
 }
-
