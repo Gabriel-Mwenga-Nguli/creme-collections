@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, MessageSquare, MapPin, Clock } from 'lucide-react'; // Replaced Phone with MessageSquare for WhatsApp, added Clock
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from 'react';
 
@@ -61,18 +61,31 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">Email Us</h3>
-                  <a href="mailto:support@cremelite.com" className="text-primary hover:underline">support@cremelite.com</a>
+                  <a href="mailto:support@cremecollections.shop" className="text-primary hover:underline block">support@cremecollections.shop</a>
+                  <a href="mailto:creme.collectionlt@gmail.com" className="text-primary hover:underline block">creme.collectionlt@gmail.com</a>
                   <p className="text-sm text-muted-foreground">We typically respond within 24 hours.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center mt-1">
-                  <Phone className="w-5 h-5" />
+                  <MessageSquare className="w-5 h-5" /> {/* Changed from Phone to MessageSquare for WhatsApp */}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">Call Us</h3>
-                  <a href="tel:+1234567890" className="text-primary hover:underline">+1 (234) 567-890</a>
-                  <p className="text-sm text-muted-foreground">Mon-Fri, 9am-5pm EST</p>
+                  <h3 className="font-semibold text-foreground">WhatsApp Us</h3>
+                  <a href="https://wa.me/254742468070" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline block">+254 742 468070</a>
+                  <a href="https://wa.me/254743117211" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline block">+254 743 117211</a>
+                  <a href="https://wa.me/254717988700" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline block">+254 717 988700</a>
+                </div>
+              </div>
+               <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center mt-1">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Operating Hours (EAT)</h3>
+                  <p className="text-muted-foreground">Mon – Fri: 9am – 5pm</p>
+                  <p className="text-muted-foreground">Saturday: 9am – 12pm</p>
+                  <p className="text-muted-foreground">Sunday & Public Holidays: Closed</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">

@@ -95,7 +95,7 @@ export default function ShippingReturnsPage() {
             </p>
             <h3 className="text-xl font-semibold text-foreground font-headline !mt-6 !mb-2">Contact Us</h3>
             <p>
-              If you have any questions about our Shipping & Returns Policy, please contact us at <a href="mailto:support@cremelite.com" className="text-primary hover:underline">support@cremelite.com</a>.
+              If you have any questions about our Shipping & Returns Policy, please contact us at <a href="mailto:support@cremecollections.shop" className="text-primary hover:underline">support@cremecollections.shop</a>.
             </p>
           </section>
           {lastUpdatedDate && (

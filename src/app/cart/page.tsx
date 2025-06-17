@@ -50,7 +50,7 @@ export default function CartPage() {
       .join('\n');
     const message = `Hello Creme Lite! I'd like to place an order for the following items:\n\n${itemDetails}\n\nSubtotal: KES ${subtotal.toLocaleString()}\nShipping: KES ${shippingCost.toLocaleString()}\nTotal: KES ${total.toLocaleString()}\n\nPlease advise on payment and delivery.`;
     
-    const whatsappNumber = "254743117211";
+    const whatsappNumber = "254742468070"; // Updated to the first provided WhatsApp number
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank');
@@ -181,5 +181,3 @@ export default function CartPage() {
     </div>
   );
 }
-    
-    

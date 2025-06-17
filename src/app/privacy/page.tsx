@@ -104,7 +104,7 @@ export default function PrivacyPage() {
             If you have any questions about this Privacy Policy, please contact us at:
           </p>
           <p>
-            Email: <a href="mailto:privacy@cremelite.com" className="text-primary hover:underline">privacy@cremelite.com</a><br />
+            Email: <a href="mailto:support@cremecollections.shop" className="text-primary hover:underline">support@cremecollections.shop</a><br />
             Address: 123 Creme Lite St, Suite 100, Commerce City, EC 54321, Kenya
           </p>
           
