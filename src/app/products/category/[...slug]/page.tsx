@@ -85,7 +85,8 @@ export default async function CategoryPage({ params }: PageProps) {
   }
 
   // Fetch products from Firestore based on category/subcategory slugs
-  const products = await getAllProducts(categoryInfo.categorySlug, categoryInfo.subCategorySlug || undefined);
+  // getAllProducts now returns Product[]
+  const products: Product[] = await getAllProducts(categoryInfo.categorySlug, categoryInfo.subCategorySlug || undefined);
 
 
   return (
@@ -119,13 +120,13 @@ export default async function CategoryPage({ params }: PageProps) {
           {products.map((product) => (
             <ProductCard
               key={product.id}
-              id={product.id} // Already string from service
+              id={product.id}
               name={product.name}
               description={product.description}
               image={product.image}
               dataAiHint={product.dataAiHint}
-              fixedOfferPrice={product.fixedOfferPrice}
-              fixedOriginalPrice={product.fixedOriginalPrice}
+              fixedOfferPrice={product.offerPrice} // map from Product to ProductCardProps
+              fixedOriginalPrice={product.originalPrice} // map from Product to ProductCardProps
             />
           ))}
         </div>

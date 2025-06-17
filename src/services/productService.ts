@@ -23,6 +23,7 @@ export interface Product {
   availability?: string;
   category?: string; // Main category name/slug
   categorySlug?: string; // Slug for main category
+  subCategory?: string; // Sub-category name
   subCategorySlug?: string; // Slug for sub-category
   brand?: string;
   stock?: number;
@@ -51,10 +52,11 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
     rating: data.rating,
     reviewsCount: typeof data.reviewsCount === 'number' ? data.reviewsCount : 0,
     availability: data.availability || 'N/A',
-    category: data.category,
+    category: data.category || 'Uncategorized',
     categorySlug: data.categorySlug,
+    subCategory: data.subCategory,
     subCategorySlug: data.subCategorySlug,
-    brand: data.brand,
+    brand: data.brand || 'Unbranded',
     stock: typeof data.stock === 'number' ? data.stock : 0,
     isFeatured: typeof data.isFeatured === 'boolean' ? data.isFeatured : false,
     isWeeklyDeal: typeof data.isWeeklyDeal === 'boolean' ? data.isWeeklyDeal : false,
@@ -145,9 +147,9 @@ export async function getProductDetailsById(productId: string): Promise<ProductD
   }
 }
 
-export async function getAllProducts(categorySlugParam?: string, subCategorySlugParam?: string): Promise<ProductCardProps[]> {
+export async function getAllProducts(categorySlugParam?: string, subCategorySlugParam?: string): Promise<Product[]> {
   if (!db) {
-    console.error("Firestore 'db' object is not initialized. Cannot fetch all products.");
+    console.error("Firestore 'db' object is not initialized. Cannot fetch products.");
     return [];
   }
   try {
@@ -155,30 +157,20 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
     let q;
 
     if (subCategorySlugParam) {
-       q = query(productsRef, where('categorySlug', '==', categorySlugParam), where('subCategorySlug', '==', subCategorySlugParam), limit(12));
+       q = query(productsRef, where('categorySlug', '==', categorySlugParam), where('subCategorySlug', '==', subCategorySlugParam));
     } else if (categorySlugParam) {
-      q = query(productsRef, where('categorySlug', '==', categorySlugParam), limit(12));
+      q = query(productsRef, where('categorySlug', '==', categorySlugParam));
     } else {
-      q = query(productsRef, limit(12));
+      // Fetch all products if no category/subcategory is specified
+      q = query(productsRef); 
     }
     
     const querySnapshot = await getDocs(q);
     
-    const products = querySnapshot.docs.map(docSn => { // Renamed doc to docSn to avoid conflict with doc from getDoc
-      const productData = mapDocToProduct(docSn);
-      return {
-        id: productData.id,
-        name: productData.name,
-        description: productData.description,
-        image: productData.image,
-        dataAiHint: productData.dataAiHint,
-        fixedOfferPrice: productData.offerPrice,
-        fixedOriginalPrice: productData.originalPrice,
-      };
-    });
+    const products = querySnapshot.docs.map(docSn => mapDocToProduct(docSn));
     return products;
   } catch (error) {
-    console.error("Error fetching all products: ", error);
+    console.error("Error fetching products: ", error);
     return [];
   }
 }
