@@ -13,30 +13,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ShoppingBag, Truck, CreditCard, Lock, ChevronLeft, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-interface CartItem {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  quantity: number;
-  color?: string;
-  size?: string;
-}
-
-// Dummy cart data for summary - in a real app, this would come from cart state/context
-const dummyCartItems: CartItem[] = [
-  { id: 401, name: "Modern Desk Lamp", image: "https://placehold.co/80x80.png", price: 3500, quantity: 1 },
-  { id: 402, name: "Wireless Keyboard", image: "https://placehold.co/80x80.png", price: 7200, quantity: 2 },
-];
-
-const subtotal = dummyCartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-const shippingEstimate = 500;
-const taxesEstimate = Math.round(subtotal * 0.16); // Example 16% VAT
-const total = subtotal + shippingEstimate + taxesEstimate;
+import { useCart, type CartItem } from '@/context/CartContext'; // Import useCart and CartItem
 
 export default function CheckoutPage() {
   const { toast } = useToast();
+  const { cartItems, getCartTotal, clearCart } = useCart(); // Get cart data from context
+
   const [currentStep, setCurrentStep] = useState('shipping'); // 'shipping', 'delivery', 'payment', 'review'
   const [formData, setFormData] = useState({
     email: '',
@@ -49,8 +31,8 @@ export default function CheckoutPage() {
       postalCode: '',
       phone: '',
     },
-    deliveryMethod: 'standard', // 'standard', 'express'
-    paymentMethod: 'card', // 'card', 'mpesa'
+    deliveryMethod: 'standard', 
+    paymentMethod: 'card', 
   });
 
   useEffect(() => {
@@ -69,7 +51,7 @@ export default function CheckoutPage() {
   };
   
   const handlePlaceOrder = () => {
-    console.log("Order placed with data:", formData);
+    console.log("Order placed with data:", { ...formData, cartItems, total: finalTotal });
     // Add validation here before showing toast
     toast({
       title: "Order Placed Successfully!",
@@ -77,9 +59,21 @@ export default function CheckoutPage() {
       variant: "default",
       duration: 5000,
     });
-    // Potentially redirect to an order confirmation page or clear cart
-    // For now, just log and show toast.
+    clearCart(); // Clear cart after successful order
+    // Potentially redirect to an order confirmation page
+    // For now, just log, show toast, and clear cart.
+    // router.push('/order-confirmation/some-order-id'); // Example redirect
   };
+
+  const subtotal = getCartTotal();
+  const shippingEstimate = formData.deliveryMethod === 'express' ? 1000 : (subtotal > 0 ? 500 : 0); // Example: Express shipping is KES 1000
+  const taxesEstimate = Math.round(subtotal * 0.16); // Example 16% VAT
+  const finalTotal = subtotal + shippingEstimate + taxesEstimate;
+
+
+  const isShippingComplete = formData.email && formData.shippingAddress.address && formData.shippingAddress.firstName && formData.shippingAddress.lastName && formData.shippingAddress.city && formData.shippingAddress.phone;
+  const isDeliveryComplete = !!formData.deliveryMethod;
+  const isPaymentComplete = !!formData.paymentMethod; // Add more checks for payment fields if needed
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -106,7 +100,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center gap-3">
                   <Truck className="h-6 w-6 text-primary" />
                   Shipping Address
-                  {formData.email && formData.shippingAddress.address && currentStep !== 'shipping' && <CheckCircle className="h-5 w-5 text-green-500 ml-2"/>}
+                  {isShippingComplete && currentStep !== 'shipping' && <CheckCircle className="h-5 w-5 text-green-500 ml-2"/>}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pt-4">
@@ -149,19 +143,19 @@ export default function CheckoutPage() {
                       <Label htmlFor="phone">Phone Number</Label>
                       <Input id="phone" type="tel" placeholder="+254 7XX XXX XXX" value={formData.shippingAddress.phone} onChange={(e) => handleInputChange('shippingAddress', 'phone', e.target.value)} required />
                     </div>
-                    <Button onClick={() => setCurrentStep('delivery')} className="w-full sm:w-auto">Continue to Delivery</Button>
+                    <Button onClick={() => {if(isShippingComplete) setCurrentStep('delivery')}} disabled={!isShippingComplete} className="w-full sm:w-auto">Continue to Delivery</Button>
                   </CardContent>
                 </Card>
               </AccordionContent>
             </AccordionItem>
 
             {/* Delivery Method */}
-            <AccordionItem value="delivery">
+            <AccordionItem value="delivery" disabled={!isShippingComplete}>
               <AccordionTrigger className="text-xl font-semibold">
                 <div className="flex items-center gap-3">
-                 <Truck className="h-6 w-6 text-primary" /> {/* Changed icon */}
+                 <Truck className="h-6 w-6 text-primary" /> 
                   Delivery Method
-                  {currentStep !== 'delivery' && <CheckCircle className="h-5 w-5 text-green-500 ml-2"/>}
+                  {isDeliveryComplete && currentStep !== 'delivery' && <CheckCircle className="h-5 w-5 text-green-500 ml-2"/>}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pt-4">
@@ -171,31 +165,31 @@ export default function CheckoutPage() {
                             <Label htmlFor="deliveryStandard" className="flex items-center justify-between p-4 border rounded-md cursor-pointer hover:border-primary has-[input:checked]:border-primary has-[input:checked]:ring-2 has-[input:checked]:ring-primary">
                                 <div>
                                     <h3 className="font-medium">Standard Shipping</h3>
-                                    <p className="text-sm text-muted-foreground">4-7 business days - KES {shippingEstimate.toLocaleString()}</p>
+                                    <p className="text-sm text-muted-foreground">4-7 business days - KES {subtotal > 0 ? '500' : '0'}</p>
                                 </div>
                                 <RadioGroupItem value="standard" id="deliveryStandard" />
                             </Label>
                             <Label htmlFor="deliveryExpress" className="flex items-center justify-between p-4 border rounded-md cursor-pointer hover:border-primary has-[input:checked]:border-primary has-[input:checked]:ring-2 has-[input:checked]:ring-primary">
                                 <div>
                                     <h3 className="font-medium">Express Shipping</h3>
-                                    <p className="text-sm text-muted-foreground">1-2 business days - KES {(shippingEstimate * 2).toLocaleString()}</p>
+                                    <p className="text-sm text-muted-foreground">1-2 business days - KES 1,000</p>
                                 </div>
                                 <RadioGroupItem value="express" id="deliveryExpress" />
                             </Label>
                         </RadioGroup>
-                        <Button onClick={() => setCurrentStep('payment')} className="w-full sm:w-auto">Continue to Payment</Button>
+                        <Button onClick={() => {if(isDeliveryComplete) setCurrentStep('payment')}} disabled={!isDeliveryComplete} className="w-full sm:w-auto">Continue to Payment</Button>
                     </CardContent>
                 </Card>
               </AccordionContent>
             </AccordionItem>
 
             {/* Payment Method */}
-            <AccordionItem value="payment">
+            <AccordionItem value="payment" disabled={!isShippingComplete || !isDeliveryComplete}>
               <AccordionTrigger className="text-xl font-semibold">
                 <div className="flex items-center gap-3">
                   <CreditCard className="h-6 w-6 text-primary" />
                   Payment Method
-                  {currentStep !== 'payment' && <CheckCircle className="h-5 w-5 text-green-500 ml-2"/>}
+                   {isPaymentComplete && currentStep !== 'payment' && <CheckCircle className="h-5 w-5 text-green-500 ml-2"/>}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pt-4">
@@ -212,7 +206,6 @@ export default function CheckoutPage() {
                                 <RadioGroupItem value="card" id="paymentCard" className="ml-auto" />
                             </Label>
                             <Label htmlFor="paymentMpesa" className="flex items-center p-4 border rounded-md cursor-pointer hover:border-primary has-[input:checked]:border-primary has-[input:checked]:ring-2 has-[input:checked]:ring-primary">
-                                {/* Placeholder for M-Pesa Icon */}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3 text-muted-foreground"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
                                 <span className="font-medium">M-Pesa</span>
                                 <RadioGroupItem value="mpesa" id="paymentMpesa" className="ml-auto" />
@@ -246,7 +239,7 @@ export default function CheckoutPage() {
                                 <p className="text-sm text-muted-foreground">You will receive a prompt on your phone to enter your M-Pesa PIN.</p>
                             </div>
                         )}
-                         <Button onClick={() => setCurrentStep('review')} className="w-full sm:w-auto">Review Order</Button>
+                         <Button onClick={() => {if(isPaymentComplete)setCurrentStep('review')}} disabled={!isPaymentComplete} className="w-full sm:w-auto">Review Order</Button>
                     </CardContent>
                 </Card>
               </AccordionContent>
@@ -256,21 +249,22 @@ export default function CheckoutPage() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <Card className="shadow-lg sticky top-24"> {/* Sticky for long forms */}
+          <Card className="shadow-lg sticky top-24"> 
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-foreground font-headline">Order Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {dummyCartItems.map(item => (
+              {cartItems.length === 0 && <p className="text-sm text-muted-foreground">Your cart is empty.</p>}
+              {cartItems.map(item => (
                 <div key={item.id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-3">
                         <Image src={item.image} alt={item.name} width={40} height={40} className="rounded border object-cover" data-ai-hint="product item" />
                         <div>
                             <p className="font-medium text-foreground">{item.name} (x{item.quantity})</p>
-                            {item.color && item.size && <p className="text-xs text-muted-foreground">{item.color}, {item.size}</p>}
+                            {/* Removed color/size as it's not in CartItem definition currently */}
                         </div>
                     </div>
-                    <span className="text-foreground">KES {(item.price * item.quantity).toLocaleString()}</span>
+                    <span className="text-foreground">KES {((item.fixedOfferPrice || 0) * item.quantity).toLocaleString()}</span>
                 </div>
               ))}
               <Separator />
@@ -291,14 +285,14 @@ export default function CheckoutPage() {
               <Separator />
               <div className="flex justify-between text-lg font-bold text-foreground">
                 <span>Total</span>
-                <span>KES {total.toLocaleString()}</span>
+                <span>KES {finalTotal.toLocaleString()}</span>
               </div>
-              {currentStep === 'review' ? (
-                <Button size="lg" className="w-full mt-4" onClick={handlePlaceOrder}>
+              {currentStep === 'review' && isShippingComplete && isDeliveryComplete && isPaymentComplete ? (
+                <Button size="lg" className="w-full mt-4" onClick={handlePlaceOrder} disabled={cartItems.length === 0}>
                   <Lock className="mr-2 h-5 w-5" /> Place Order
                 </Button>
               ) : (
-                <Button size="lg" className="w-full mt-4" disabled>
+                <Button size="lg" className="w-full mt-4" disabled title={ cartItems.length === 0 ? "Your cart is empty" : "Complete all steps to place order"}>
                   Complete Previous Steps
                 </Button>
               )}
@@ -312,3 +306,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+    

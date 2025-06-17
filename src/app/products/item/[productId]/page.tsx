@@ -1,116 +1,119 @@
 
 "use client"; 
 
-import type { Metadata } from 'next'; 
+import { use } from 'react'; // Keep React.use for params
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Star, ShoppingCart, Heart, Share2, MessageCircle, Plus, Minus } from 'lucide-react';
+import { Star, ShoppingCart, Heart, Share2, MessageCircle, Plus, Minus, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import ProductCard, { type ProductCardProps } from '@/components/features/home/product-card'; 
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState } from 'react'; // Removed 'use' from here
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useCart } from '@/context/CartContext'; // Import useCart
+import { useCart } from '@/context/CartContext';
+import { getProductDetailsById, type ProductDetailsPageData, getFeaturedProducts } from '@/services/productService'; // Import Firestore service
+import { notFound } from 'next/navigation';
 
-// Define a type for the product details
-interface ProductDetails extends ProductCardProps {
-  longDescription: string;
-  images: string[];
-  // originalPrice?: string; // Already in ProductCardProps via fixedOriginalPrice
-  rating: string;
-  reviewsCount: number;
-  availability: string;
-  category: string;
-  brand: string;
+
+// This interface can be simplified if ProductDetailsPageData covers everything
+interface ProductDetailsComponentData extends ProductDetailsPageData {
+  // Already includes id as string from Product (extended by ProductDetailsPageData)
 }
 
-// Helper function to get product details (replace with actual data fetching in a real app)
-async function fetchProductDetails(productId: string): Promise<ProductDetails> {
-  // For now, we'll use placeholder data based on the ID
-  const numericId = parseInt(productId.replace('product-', ''), 10) || 1;
-  const randomBasePrice = Math.random() * 7000 + 3000; // 2000-9000
-  const offerPrice = parseFloat(randomBasePrice.toFixed(0));
-  const originalPrice = parseFloat((randomBasePrice * (Math.random() * 0.3 + 1.1)).toFixed(0)); // 10-40% higher
-
-  return {
-    id: numericId,
-    name: `Product Name ${numericId}`,
-    description: `This is a detailed description for Product ${numericId}. It's a fantastic item with many great features and benefits. You'll love the quality and craftsmanship. Perfect for various uses and occasions.`,
-    longDescription: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida. Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis, id tincidunt sapien risus a quam. Maecenas fermentum consequat mi. Donec fermentum. Pellentesque malesuada nulla a mi. Duis sapien sem, aliquet nec, commodo eget, consequat quis, neque. Aliquam faucibus, elit ut dictum aliquet, felis nisl adipiscing sapien, sed malesuada diam lacus eget erat. Cras mollis scelerisque nunc. Nullam arcu. Aliquam erat volutpat.`,
-    image: `https://placehold.co/600x600.png`, 
-    dataAiHint: "modern gadget",
-    images: [ 
-      `https://placehold.co/100x100.png`,
-      `https://placehold.co/100x100.png`,
-      `https://placehold.co/100x100.png`,
-      `https://placehold.co/100x100.png`,
-    ],
-    fixedOfferPrice: offerPrice,
-    fixedOriginalPrice: originalPrice,
-    rating: (Math.random() * 1.5 + 3.5).toFixed(1), // Rating between 3.5 and 5.0
-    reviewsCount: Math.floor(Math.random() * 200) + 10, // 10-210 reviews
-    availability: Math.random() > 0.3 ? 'In Stock' : 'Out of Stock',
-    category: 'Electronics', 
-    brand: 'BrandName', 
-  };
-}
-
-// Mock related products data
-const relatedProductsData = [
-  { id: 101, name: "Related Product 1", description: "Description for related product 1.", image: "https://placehold.co/300x300.png", dataAiHint: "tech accessory", fixedOfferPrice: 2500, fixedOriginalPrice: 3000 },
-  { id: 102, name: "Related Product 2", description: "Description for related product 2.", image: "https://placehold.co/300x300.png", dataAiHint: "smart device", fixedOfferPrice: 4500, fixedOriginalPrice: 5500 },
-  { id: 103, name: "Related Product 3", description: "Description for related product 3.", image: "https://placehold.co/300x300.png", dataAiHint: "office gadget", fixedOfferPrice: 1800, fixedOriginalPrice: 2200 },
-  { id: 104, name: "Related Product 4", description: "Description for related product 4.", image: "https://placehold.co/300x300.png", dataAiHint: "home electronics", fixedOfferPrice: 6000, fixedOriginalPrice: 7500 },
-];
+// Mock related products data - will be replaced by actual fetching or removed
+// const relatedProductsData = [
+//   { id: "rp1", name: "Related Product 1", description: "Description for related product 1.", image: "https://placehold.co/300x300.png", dataAiHint: "tech accessory", fixedOfferPrice: 2500, fixedOriginalPrice: 3000 },
+//   { id: "rp2", name: "Related Product 2", description: "Description for related product 2.", image: "https://placehold.co/300x300.png", dataAiHint: "smart device", fixedOfferPrice: 4500, fixedOriginalPrice: 5500 },
+//   { id: "rp3", name: "Related Product 3", description: "Description for related product 3.", image: "https://placehold.co/300x300.png", dataAiHint: "office gadget", fixedOfferPrice: 1800, fixedOriginalPrice: 2200 },
+//   { id: "rp4", name: "Related Product 4", description: "Description for related product 4.", image: "https://placehold.co/300x300.png", dataAiHint: "home electronics", fixedOfferPrice: 6000, fixedOriginalPrice: 7500 },
+// ];
 
 export default function ProductDetailPage({ params: paramsPromise }: { params: Promise<{ productId: string }> }) {
   const { productId } = use(paramsPromise); 
   
   const { toast } = useToast();
   const { addToCart } = useCart(); 
-  const [product, setProduct] = useState<ProductDetails | null>(null);
+  const [product, setProduct] = useState<ProductDetailsComponentData | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<ProductCardProps[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function loadProduct() {
+    async function loadProductData() {
       if (productId) { 
-        const productDetails = await fetchProductDetails(productId);
-        setProduct(productDetails);
-        setSelectedImage(productDetails.image); 
-        document.title = `${productDetails.name} - Creme Lite`;
+        setIsLoading(true);
+        try {
+          const productDetails = await getProductDetailsById(productId);
+          if (productDetails) {
+            setProduct(productDetails as ProductDetailsComponentData); // Cast if ProductDetailsPageData is directly usable
+            setSelectedImage(productDetails.image); 
+            document.title = `${productDetails.name} - Creme Lite`;
+
+            // Fetch related products (e.g., featured products as placeholders)
+            const fetchedRelatedProducts = await getFeaturedProducts(); // Or a more specific "related products" logic
+            setRelatedProducts(fetchedRelatedProducts.filter(p => p.id !== productId).slice(0, 4));
+
+          } else {
+            // Handle product not found (though notFound() from next/navigation is for server components)
+            // For client components, you might redirect or show a "not found" message
+            console.error("Product not found on client side after fetch");
+            // Potentially set a "notFound" state to render a message
+          }
+        } catch (error) {
+          console.error("Error loading product data:", error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
-    loadProduct();
+    loadProductData();
   }, [productId]); 
 
-  if (!product || selectedImage === null) {
+  if (isLoading) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 text-center">
-        <p>Loading product details...</p>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 text-center min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
+
+  if (!product) {
+    // This state could be set if productDetails was null from fetch
+    // For robust "not found", server-side check or redirect is better
+    // but this handles client-side fetch failure.
+    notFound(); // This will only work if this component can be server-rendered with this path.
+                 // For pure client-side not found, you'd render a message.
+    return (
+         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 text-center">
+            <p className="text-2xl font-semibold">Product Not Found</p>
+            <p className="text-muted-foreground mt-2">The product you are looking for does not exist or could not be loaded.</p>
+            <Button asChild className="mt-6">
+                <Link href="/">Go to Homepage</Link>
+            </Button>
+        </div>
+    )
+  }
   
-  const displayOriginalPrice = product.fixedOriginalPrice && product.fixedOfferPrice && product.fixedOriginalPrice > product.fixedOfferPrice 
-    ? product.fixedOriginalPrice 
-    : (product.fixedOfferPrice || 0) * 1.25;
+  const displayOriginalPrice = product.originalPrice && product.offerPrice && product.originalPrice > product.offerPrice 
+    ? product.originalPrice 
+    : (product.offerPrice || 0) * 1.25; // Fallback if originalPrice is not significantly higher
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
   const handleAddToCart = () => {
     if (product) {
+      // Ensure ProductCardProps structure matches what addToCart expects
       const productToAdd: ProductCardProps = {
-        id: product.id,
+        id: product.id, // string
         name: product.name,
         description: product.description, 
         image: product.image,
         dataAiHint: product.dataAiHint,
-        fixedOfferPrice: product.fixedOfferPrice,
-        fixedOriginalPrice: product.fixedOriginalPrice,
+        fixedOfferPrice: product.offerPrice, // Use offerPrice from ProductDetails
+        fixedOriginalPrice: product.originalPrice,
       };
       addToCart(productToAdd, quantity);
     }
@@ -140,25 +143,30 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
     }
   };
 
+  const currentGalleryImages = product.images && product.images.length > 0 ? product.images : [product.image];
+
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
         {/* Image Gallery */}
         <div className="space-y-4">
           <div className="aspect-square rounded-lg overflow-hidden shadow-lg bg-card">
-            <Image
-              key={selectedImage}
-              src={selectedImage}
-              alt={product.name}
-              width={600}
-              height={600}
-              className="object-cover w-full h-full transition-opacity duration-300"
-              data-ai-hint={product.dataAiHint}
-              priority
-            />
+            {selectedImage && (
+              <Image
+                key={selectedImage} // Add key here
+                src={selectedImage}
+                alt={product.name}
+                width={600}
+                height={600}
+                className="object-cover w-full h-full transition-opacity duration-300"
+                data-ai-hint={product.dataAiHint}
+                priority
+              />
+            )}
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {[product.image, ...product.images].slice(0,4).map((img, index) => (
+            {currentGalleryImages.slice(0,4).map((img, index) => (
               <button 
                 key={index} 
                 className={`aspect-square rounded-md overflow-hidden border-2 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary outline-none ${selectedImage === img ? 'border-primary ring-2 ring-primary' : 'border-transparent'}`}
@@ -171,7 +179,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
                   width={100}
                   height={100}
                   className="object-cover w-full h-full"
-                  data-ai-hint="product detail"
+                  data-ai-hint="product detail" // This might be the source of hydration if product.dataAiHint differs for thumbnails
                 />
               </button>
             ))}
@@ -181,41 +189,39 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
         {/* Product Information */}
         <div className="space-y-6">
           <div>
-            <span className="text-sm text-muted-foreground">{product.category} / {product.brand}</span>
+            <span className="text-sm text-muted-foreground">{product.category || 'N/A'} / {product.brand || 'N/A'}</span>
             <h1 className="text-3xl lg:text-4xl font-bold text-foreground font-headline mt-1">{product.name}</h1>
           </div>
 
           <div className="flex items-center space-x-3">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(product.rating)) ? 'text-accent fill-accent' : 'text-muted-foreground/50'}`} />
+                <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(String(product.rating || 0))) ? 'text-accent fill-accent' : 'text-muted-foreground/50'}`} />
               ))}
             </div>
-            <span className="text-sm text-muted-foreground">({product.rating} based on {product.reviewsCount} reviews)</span>
+            <span className="text-sm text-muted-foreground">({product.rating || 'N/A'} based on {product.reviewsCount || 0} reviews)</span>
           </div>
 
           <p className="text-lg text-muted-foreground">{product.description}</p>
           
           <div className="space-y-2">
              <p className="text-3xl font-bold text-primary">
-                KES {(product.fixedOfferPrice || 0).toLocaleString()}
+                KES {(product.offerPrice || 0).toLocaleString()}
               </p>
-            {product.fixedOriginalPrice && product.fixedOfferPrice && product.fixedOriginalPrice > product.fixedOfferPrice && (
+            {product.originalPrice && product.offerPrice && product.originalPrice > product.offerPrice && (
               <p className="text-xl text-muted-foreground line-through">
-                KES {product.fixedOriginalPrice.toLocaleString()}
+                KES {product.originalPrice.toLocaleString()}
               </p>
             )}
           </div>
           
           <p className={`text-sm font-semibold ${product.availability === 'In Stock' ? 'text-green-600' : 'text-red-600'}`}>
-            {product.availability}
+            {product.availability || "N/A"}
           </p>
 
           <Separator />
 
-          {/* Actions */}
           <div className="space-y-4">
-            {/* Quantity Selector */}
             <div className="flex items-center space-x-2">
               <Label htmlFor="quantity" className="text-sm font-medium shrink-0">Quantity:</Label>
               <div className="flex items-center border rounded-md">
@@ -260,36 +266,36 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
 
           <Separator />
 
-          {/* Product Details / Long Description */}
           <div className="space-y-3">
             <h2 className="text-xl font-semibold text-foreground font-headline">Product Details</h2>
             <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-              <p>{product.longDescription}</p>
+              <p>{product.longDescription || product.description}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Related Products Section */}
-      <div className="mt-16 md:mt-24">
-        <h2 className="text-2xl lg:text-3xl font-bold text-center text-foreground font-headline mb-8 md:mb-12">
-          You Might Also Like
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {relatedProductsData.map((relatedProduct) => (
-            <ProductCard
-              key={relatedProduct.id}
-              id={relatedProduct.id}
-              name={relatedProduct.name}
-              description={relatedProduct.description}
-              image={relatedProduct.image}
-              dataAiHint={relatedProduct.dataAiHint}
-              fixedOfferPrice={relatedProduct.fixedOfferPrice}
-              fixedOriginalPrice={relatedProduct.fixedOriginalPrice}
-            />
-          ))}
+      {relatedProducts.length > 0 && (
+        <div className="mt-16 md:mt-24">
+          <h2 className="text-2xl lg:text-3xl font-bold text-center text-foreground font-headline mb-8 md:mb-12">
+            You Might Also Like
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {relatedProducts.map((relatedProd) => (
+              <ProductCard
+                key={relatedProd.id}
+                id={relatedProd.id}
+                name={relatedProd.name}
+                description={relatedProd.description}
+                image={relatedProd.image}
+                dataAiHint={relatedProd.dataAiHint}
+                fixedOfferPrice={relatedProd.fixedOfferPrice}
+                fixedOriginalPrice={relatedProd.fixedOriginalPrice}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

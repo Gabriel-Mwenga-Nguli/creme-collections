@@ -2,11 +2,11 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-import ProductCard, { type ProductCardProps } from './product-card';
+import ProductCard, { type ProductCardProps } from './product-card'; // ProductCardProps ID is now string
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export interface DealProduct extends ProductCardProps {
+export interface DealProduct extends ProductCardProps { // id will be string from ProductCardProps
   fixedOfferPrice: number;
   fixedOriginalPrice: number;
 }
@@ -26,7 +26,7 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
       const { scrollWidth, offsetWidth } = scrollContainerRef.current;
       setCanScroll(scrollWidth > offsetWidth);
     }
-  }, [deals]); // Recalculate when deals change
+  }, [deals]); 
 
   const advanceSlide = useCallback(() => {
     if (scrollContainerRef.current) {
@@ -34,17 +34,15 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
       const { scrollLeft, scrollWidth, offsetWidth } = container;
       const maxScrollLeft = scrollWidth - offsetWidth;
 
-      if (maxScrollLeft <= 0) return; // Not scrollable
+      if (maxScrollLeft <= 0) return; 
 
-      let targetScrollLeft = scrollLeft + offsetWidth; // Scroll by one full "page"
+      let targetScrollLeft = scrollLeft + offsetWidth; 
 
       if (targetScrollLeft >= maxScrollLeft) {
-        // If current scroll is already at or past the max, or next scroll overshoots significantly
-        // and it's not already at 0 (to prevent immediate re-scroll to 0 if already there)
         if (scrollLeft >= maxScrollLeft -1 || scrollLeft === 0 && targetScrollLeft > maxScrollLeft) {
-          targetScrollLeft = 0; // Loop to beginning
+          targetScrollLeft = 0; 
         } else {
-          targetScrollLeft = maxScrollLeft; // Go to the very end
+          targetScrollLeft = maxScrollLeft; 
         }
       }
       
@@ -63,7 +61,7 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
       if (!isHovering) {
         advanceSlide();
       }
-    }, 5000); // Change slide every 5 seconds
+    }, 5000); 
   }, [isHovering, advanceSlide]);
 
   useEffect(() => {
@@ -88,7 +86,6 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
       });
-      // Reset interval on manual scroll to avoid immediate auto-scroll
       if (canScroll) {
         startAutoScroll();
       }
@@ -148,3 +145,5 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
 };
 
 export default WeeklyDealsSlider;
+
+    

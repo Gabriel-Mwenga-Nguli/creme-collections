@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 
 export interface ProductCardProps {
-  id: number;
+  id: string; // Changed from number to string
   name: string;
   description: string;
   image: string;
@@ -22,18 +22,20 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
   const [originalPrice, setOriginalPrice] = useState<string | null>(null);
 
   useEffect(() => {
-    if (fixedOfferPrice !== undefined && fixedOriginalPrice !== undefined) {
+    if (fixedOfferPrice !== undefined) { // Check only for offerPrice for display logic
       setOfferPrice(fixedOfferPrice.toLocaleString('en-US'));
-      setOriginalPrice(fixedOriginalPrice.toLocaleString('en-US'));
+      if (fixedOriginalPrice !== undefined && fixedOriginalPrice > fixedOfferPrice) {
+        setOriginalPrice(fixedOriginalPrice.toLocaleString('en-US'));
+      } else {
+        setOriginalPrice(null); // No discount or original price not higher
+      }
     } else {
-      // Generate prices on client-side to avoid hydration mismatch
-      const basePrice = Math.random() * 8000 + 2000; // Base price between KES 2000 and KES 10000
-      const discount = Math.random() * 0.3 + 0.1; // Discount between 10% and 40%
-      
+      // Fallback for products without explicit prices in props (e.g., from Firestore without these fields)
+      // This part might be less relevant if all data comes from Firestore with prices
+      const basePrice = Math.random() * 8000 + 2000; 
+      const discount = Math.random() * 0.3 + 0.1;
       const calculatedOfferPrice = basePrice * (1 - discount);
       const calculatedOriginalPrice = basePrice;
-
-      // Format with thousand separators
       setOfferPrice(Math.round(calculatedOfferPrice).toLocaleString('en-US'));
       setOriginalPrice(Math.round(calculatedOriginalPrice).toLocaleString('en-US'));
     }
@@ -41,7 +43,7 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
 
   return (
     <Card className="overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:border-primary h-full flex flex-col">
-      <Link href={`/products/item/product-${id}`} className="group block flex flex-col flex-grow">
+      <Link href={`/products/item/${id}`} className="group block flex flex-col flex-grow"> {/* Updated Link href */}
         <CardHeader className="p-0">
           <div className="aspect-square">
             <Image 
@@ -63,14 +65,14 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
                 <p className="text-lg font-bold text-primary">
                   KES {offerPrice}
                 </p>
-                {originalPrice !== null && offerPrice !== originalPrice && (
+                {originalPrice !== null && (
                   <p className="text-sm text-muted-foreground line-through">
                     KES {originalPrice}
                   </p>
                 )}
               </>
             ) : (
-              <p className="text-lg font-bold text-primary">Loading price...</p>
+              <p className="text-lg font-bold text-primary">Price not available</p>
             )}
           </div>
           <Button variant="outline" size="sm" className="w-full mt-auto">
@@ -81,3 +83,5 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
     </Card>
   );
 }
+
+    

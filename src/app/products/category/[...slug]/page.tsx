@@ -7,6 +7,7 @@ import ProductCard from '@/components/features/home/product-card';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Home } from 'lucide-react';
 import { CATEGORY_NAV_LINKS } from '@/lib/constants';
+import { getAllProducts, type Product } from '@/services/productService'; // Import Firestore service
 
 // Helper to format slug parts into readable titles
 function formatSlugPart(slugPart: string): string {
@@ -31,12 +32,14 @@ function getCategoryInfo(slug: string[]) {
 
   if (subCategorySlug) {
     const subCategory = category.subLinks?.find(sub => sub.href.endsWith(subCategorySlug));
-    if (!subCategory) return null;
+    if (!subCategory) return null; // Subcategory specified in URL but not found
     return {
       categoryName: formatSlugPart(categorySlug),
       categoryHref: category.href,
+      categorySlug: categorySlug,
       subCategoryName: formatSlugPart(subCategorySlug),
       subCategoryHref: subCategory.href,
+      subCategorySlug: subCategorySlug,
       pageTitle: `${formatSlugPart(subCategorySlug)} - ${formatSlugPart(categorySlug)}`,
       heading: `Shop ${formatSlugPart(subCategorySlug)} in ${formatSlugPart(categorySlug)}`,
       aiHint: `${formatSlugPart(categorySlug).toLowerCase()} ${formatSlugPart(subCategorySlug).toLowerCase()}`.substring(0,50).split(' ').slice(0,2).join(' ')
@@ -46,8 +49,10 @@ function getCategoryInfo(slug: string[]) {
   return {
     categoryName: formatSlugPart(categorySlug),
     categoryHref: category.href,
+    categorySlug: categorySlug,
     subCategoryName: null,
     subCategoryHref: null,
+    subCategorySlug: null,
     pageTitle: `${formatSlugPart(categorySlug)} Products`,
     heading: `Explore ${formatSlugPart(categorySlug)}`,
     aiHint: formatSlugPart(categorySlug).toLowerCase().split(' ').slice(0,2).join(' ')
@@ -71,31 +76,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-// Generate dummy product data
-function generateDummyProducts(count: number, baseName: string, baseDescription: string, baseAiHint: string) {
-  const products = [];
-  for (let i = 1; i <= count; i++) {
-    products.push({
-      id: parseInt(`${Date.now().toString().slice(-5)}${i}`), // Simple unique ID
-      name: `${baseName} ${i}`,
-      description: `${baseDescription} This is item number ${i} with unique features.`,
-      image: `https://placehold.co/400x400.png`,
-      dataAiHint: baseAiHint || "product item",
-    });
-  }
-  return products;
-}
 
 export default async function CategoryPage({ params }: PageProps) {
   const categoryInfo = getCategoryInfo(params.slug);
 
   if (!categoryInfo) {
-    notFound(); // Trigger 404 if category/subcategory is not valid
+    notFound(); 
   }
 
-  const baseProductName = categoryInfo.subCategoryName ? `${categoryInfo.subCategoryName}` : `${categoryInfo.categoryName} Product`;
-  const baseProductDescription = `Discover the best ${categoryInfo.subCategoryName ? categoryInfo.subCategoryName.toLowerCase() : categoryInfo.categoryName.toLowerCase()}.`;
-  const dummyProducts = generateDummyProducts(8, baseProductName, baseProductDescription, categoryInfo.aiHint);
+  // Fetch products from Firestore based on category/subcategory slugs
+  const products = await getAllProducts(categoryInfo.categorySlug, categoryInfo.subCategorySlug || undefined);
+
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -123,16 +114,18 @@ export default async function CategoryPage({ params }: PageProps) {
         Browse our curated selection of {categoryInfo.subCategoryName ? categoryInfo.subCategoryName.toLowerCase() : categoryInfo.categoryName.toLowerCase()} products.
       </p>
 
-      {dummyProducts.length > 0 ? (
+      {products.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-          {dummyProducts.map((product) => (
+          {products.map((product) => (
             <ProductCard
               key={product.id}
-              id={product.id}
+              id={product.id} // Already string from service
               name={product.name}
               description={product.description}
               image={product.image}
               dataAiHint={product.dataAiHint}
+              fixedOfferPrice={product.fixedOfferPrice}
+              fixedOriginalPrice={product.fixedOriginalPrice}
             />
           ))}
         </div>
@@ -141,10 +134,12 @@ export default async function CategoryPage({ params }: PageProps) {
           <p className="text-xl text-foreground">No products found in this category yet.</p>
           <p className="text-muted-foreground mt-2">Check back soon or explore other categories!</p>
           <Button asChild className="mt-6">
-            <Link href="/products/category/electronics">Explore Electronics</Link> {}
+            <Link href="/products/category/electronics">Explore Electronics</Link> 
           </Button>
         </div>
       )}
     </div>
   );
 }
+
+    

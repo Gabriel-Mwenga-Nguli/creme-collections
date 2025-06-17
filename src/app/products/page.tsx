@@ -4,33 +4,25 @@ import ProductCard from '@/components/features/home/product-card';
 import { Button } from '@/components/ui/button';
 import { Filter, List, Search } from 'lucide-react';
 import Link from 'next/link';
+import { getAllProducts, type Product } from '@/services/productService'; // Import Firestore service
 
 export const metadata: Metadata = {
   title: 'All Products - Creme Lite',
   description: 'Browse all products available on Creme Lite.',
 };
 
-// Dummy product data for the general products page
-const dummyProducts = [
-  { id: 501, name: "Generic Product A", description: "High-quality item with excellent features.", image: "https://placehold.co/400x400.png", dataAiHint: "general item" },
-  { id: 502, name: "Versatile Gadget B", description: "Useful for various everyday tasks.", image: "https://placehold.co/400x400.png", dataAiHint: "tech gadget" },
-  { id: 503, name: "Stylish Accessory C", description: "A perfect addition to your collection.", image: "https://placehold.co/400x400.png", dataAiHint: "fashion accessory" },
-  { id: 504, name: "Essential Home Good D", description: "Must-have for any modern home.", image: "https://placehold.co/400x400.png", dataAiHint: "home good" },
-  { id: 505, name: "Another Great Product E", description: "You'll love this amazing product.", image: "https://placehold.co/400x400.png", dataAiHint: "cool stuff" },
-  { id: 506, name: "Top Seller Item F", description: "Popular choice among our customers.", image: "https://placehold.co/400x400.png", dataAiHint: "best seller" },
-  { id: 507, name: "New Arrival G", description: "Freshly added to our catalog.", image: "https://placehold.co/400x400.png", dataAiHint: "new item" },
-  { id: 508, name: "Limited Edition H", description: "Get it before it's gone!", image: "https://placehold.co/400x400.png", dataAiHint: "limited stock" },
-];
-
-export default function AllProductsPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined }}) {
+export default async function AllProductsPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined }}) {
   const filter = searchParams?.filter || 'all';
+  const category = typeof searchParams?.category === 'string' ? searchParams.category : undefined;
   // In a real app, you would use this filter to fetch specific products.
-  // For now, we just display a title based on it.
   let pageTitle = "All Products";
   if (filter === 'sale') pageTitle = "Products on Sale";
   if (filter === 'new') pageTitle = "New Arrivals";
   if (filter === 'offers') pageTitle = "Special Offers";
-  if (typeof searchParams?.category === 'string') pageTitle = `${searchParams.category.charAt(0).toUpperCase() + searchParams.category.slice(1)} Products`;
+  if (category) pageTitle = `${category.charAt(0).toUpperCase() + category.slice(1)} Products`;
+
+  // Fetch all products from Firestore - implement filtering later if needed
+  const products = await getAllProducts(category);
 
 
   return (
@@ -52,16 +44,18 @@ export default function AllProductsPage({ searchParams }: { searchParams?: { [ke
         </div>
       </div>
 
-      {dummyProducts.length > 0 ? (
+      {products.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-          {dummyProducts.map((product) => (
+          {products.map((product) => (
             <ProductCard
               key={product.id}
-              id={product.id}
+              id={product.id} // Already string from service
               name={product.name}
               description={product.description}
               image={product.image}
               dataAiHint={product.dataAiHint}
+              fixedOfferPrice={product.fixedOfferPrice}
+              fixedOriginalPrice={product.fixedOriginalPrice}
             />
           ))}
         </div>
@@ -81,3 +75,5 @@ export default function AllProductsPage({ searchParams }: { searchParams?: { [ke
     </div>
   );
 }
+
+    

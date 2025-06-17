@@ -1,16 +1,17 @@
 
 import HeroSlider from '@/components/features/home/hero-slider';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card'; // CardDescription, CardHeader, CardTitle removed as not directly used for category
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag, Zap } from 'lucide-react';
 import ProductCard from '@/components/features/home/product-card';
-import WeeklyDealsSlider, { type DealProduct } from '@/components/features/home/weekly-deals-slider';
+import WeeklyDealsSlider from '@/components/features/home/weekly-deals-slider';
+import { getFeaturedProducts, getWeeklyDeals } from '@/services/productService'; // Import Firestore service
 
 const categoryHighlights = [
-  { name: "Electronics", image: "https://placehold.co/400x300.png", dataAiHint: "gadgets technology", href: "/products/electronics" },
-  { name: "Fashion", image: "https://placehold.co/400x300.png", dataAiHint: "apparel clothing", href: "/products/fashion" },
+  { name: "Electronics", image: "https://placehold.co/400x300.png", dataAiHint: "gadgets technology", href: "/products/category/electronics" },
+  { name: "Fashion", image: "https://placehold.co/400x300.png", dataAiHint: "apparel clothing", href: "/products/category/fashion" },
   { name: "Home Goods", image: "https://placehold.co/400x300.png", dataAiHint: "furniture decor", href: "/products/home" },
 ];
 
@@ -19,24 +20,11 @@ const promotionalBanners = [
   { title: "New Arrivals", description: "Check out the latest trends.", image: "https://placehold.co/600x400.png", dataAiHint: "new products", bgColor: "bg-accent/10", textColor: "text-accent-foreground", href: "/products?filter=new" },
 ];
 
-const featuredProductsData = [
-  { id: 1, name: "Product Name 1", description: "Brief description of product 1.", image: "https://placehold.co/400x400.png", dataAiHint: "fashion product" },
-  { id: 2, name: "Product Name 2", description: "Brief description of product 2.", image: "https://placehold.co/400x400.png", dataAiHint: "electronics gadget" },
-  { id: 3, name: "Product Name 3", description: "Brief description of product 3.", image: "https://placehold.co/400x400.png", dataAiHint: "home accessory" },
-  { id: 4, name: "Product Name 4", description: "Brief description of product 4.", image: "https://placehold.co/400x400.png", dataAiHint: "beauty item" },
-];
+// HomePage is now an async Server Component
+export default async function HomePage() {
+  const featuredProductsData = await getFeaturedProducts();
+  const weeklyDealsData = await getWeeklyDeals();
 
-const weeklyDealsData: DealProduct[] = [
-  { id: 201, name: "Smart Watch Pro", description: "Track your fitness in style, now at an unbeatable price!", image: "https://placehold.co/300x300.png", dataAiHint: "smartwatch fitness", fixedOriginalPrice: 15000, fixedOfferPrice: 9999 },
-  { id: 202, name: "Wireless Earbuds X", description: "Immersive sound, all day comfort. Limited time offer!", image: "https://placehold.co/300x300.png", dataAiHint: "audio earbuds", fixedOriginalPrice: 8000, fixedOfferPrice: 4999 },
-  { id: 203, name: "Pro Gaming Mouse", description: "Precision and speed for gamers. Grab it while it's hot!", image: "https://placehold.co/300x300.png", dataAiHint: "gaming mouse", fixedOriginalPrice: 6000, fixedOfferPrice: 3499 },
-  { id: 204, name: "Portable Blender", description: "Healthy smoothies on the go. Amazing discount!", image: "https://placehold.co/300x300.png", dataAiHint: "kitchen appliance", fixedOriginalPrice: 7500, fixedOfferPrice: 4899 },
-  { id: 205, name: "Yoga Mat Premium", description: "Comfort and grip for your practice. Don't miss out!", image: "https://placehold.co/300x300.png", dataAiHint: "fitness yoga", fixedOriginalPrice: 4000, fixedOfferPrice: 2799 },
-  { id: 206, name: "Bluetooth Speaker Max", description: "Room-filling sound, portable design. Huge savings!", image: "https://placehold.co/300x300.png", dataAiHint: "speaker audio", fixedOriginalPrice: 12000, fixedOfferPrice: 7999 },
-];
-
-
-export default function HomePage() {
   return (
     <div className="flex flex-col">
       <HeroSlider />
@@ -126,18 +114,24 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold tracking-tight text-center text-foreground sm:text-4xl font-headline mb-12">
             Featured Products
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {featuredProductsData.map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                description={product.description}
-                image={product.image}
-                dataAiHint={product.dataAiHint}
-              />
-            ))}
-          </div>
+          {featuredProductsData.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+              {featuredProductsData.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id} // Already string from service
+                  name={product.name}
+                  description={product.description}
+                  image={product.image}
+                  dataAiHint={product.dataAiHint}
+                  fixedOfferPrice={product.fixedOfferPrice}
+                  fixedOriginalPrice={product.fixedOriginalPrice}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground">No featured products available at the moment. Check back soon!</p>
+          )}
            <div className="text-center mt-12">
             <Button size="lg" asChild>
               <Link href="/products">Shop All Products <ShoppingBag className="ml-2 h-5 w-5" /></Link>
@@ -148,3 +142,4 @@ export default function HomePage() {
     </div>
   );
 }
+    

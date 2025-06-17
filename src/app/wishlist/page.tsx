@@ -10,13 +10,18 @@ export const metadata: Metadata = {
   description: 'Manage your favorite items on Creme Lite.',
 };
 
-// Dummy data for wishlist items
+// Dummy data for wishlist items - ID is now string
 const wishlistItems = [
-  { id: 301, name: "Stylish Smart Watch", description: "A beautiful watch you saved.", image: "https://placehold.co/400x400.png", dataAiHint: "smartwatch fashion" },
-  { id: 302, name: "Comfortable Sneakers", description: "Those shoes you liked.", image: "https://placehold.co/400x400.png", dataAiHint: "shoes footwear" },
+  { id: "ws301", name: "Stylish Smart Watch", description: "A beautiful watch you saved.", image: "https://placehold.co/400x400.png", dataAiHint: "smartwatch fashion", fixedOfferPrice: 12000, fixedOriginalPrice: 15000 },
+  { id: "ws302", name: "Comfortable Sneakers", description: "Those shoes you liked.", image: "https://placehold.co/400x400.png", dataAiHint: "shoes footwear", fixedOfferPrice: 4500, fixedOriginalPrice: 5000 },
 ];
+// In a real app, these would be fetched based on user's saved wishlist items from Firestore.
 
 export default function WishlistPage() {
+  // For now, using dummy data.
+  // TODO: Implement fetching wishlist items from user data in Firestore.
+  const currentWishlistItems = wishlistItems;
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
       <div className="text-center mb-10">
@@ -27,16 +32,18 @@ export default function WishlistPage() {
         </p>
       </div>
 
-      {wishlistItems.length > 0 ? (
+      {currentWishlistItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-          {wishlistItems.map((item) => (
+          {currentWishlistItems.map((item) => (
             <ProductCard
               key={item.id}
-              id={item.id}
+              id={item.id} // ID is string
               name={item.name}
               description={item.description}
               image={item.image}
               dataAiHint={item.dataAiHint}
+              fixedOfferPrice={item.fixedOfferPrice}
+              fixedOriginalPrice={item.fixedOriginalPrice}
             />
           ))}
         </div>
@@ -55,3 +62,5 @@ export default function WishlistPage() {
     </div>
   );
 }
+
+    

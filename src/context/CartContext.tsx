@@ -1,21 +1,21 @@
 
 "use client";
 
-import type { ProductCardProps } from '@/components/features/home/product-card';
+import type { ProductCardProps } from '@/components/features/home/product-card'; // ProductCardProps ID is now string
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
-export interface CartItem extends ProductCardProps {
+export interface CartItem extends ProductCardProps { // id will be string from ProductCardProps
   quantity: number;
 }
 
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (product: ProductCardProps, quantity: number) => void;
-  updateItemQuantity: (productId: number, quantity: number) => void;
-  removeItemFromCart: (productId: number) => void;
+  updateItemQuantity: (productId: string, quantity: number) => void; // productId is now string
+  removeItemFromCart: (productId: string) => void; // productId is now string
   clearCart: () => void;
   getCartTotal: () => number;
   getCartItemCount: () => number;
@@ -52,11 +52,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           <Link href="/cart">View Cart</Link>
         </Button>
       ),
-      duration: 5000, // Make toast persistent for 5 seconds
+      duration: 5000,
     });
   }, [toast, currentCartItemCount]);
 
-  const updateItemQuantity = useCallback((productId: number, quantity: number) => {
+  const updateItemQuantity = useCallback((productId: string, quantity: number) => { // productId is now string
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.id === productId ? { ...item, quantity: Math.max(0, quantity) } : item
@@ -64,7 +64,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
   }, []);
 
-  const removeItemFromCart = useCallback((productId: number) => {
+  const removeItemFromCart = useCallback((productId: string) => { // productId is now string
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
     toast({
       title: "Item removed",
@@ -102,4 +102,5 @@ export const useCart = (): CartContextType => {
   }
   return context;
 };
+    
     
