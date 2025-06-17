@@ -8,7 +8,7 @@ import { Star, ShoppingCart, Heart, Share2, MessageCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import ProductCard from '@/components/features/home/product-card'; 
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState, use } from 'react'; // Added 'use'
+import { useEffect, useState, use } from 'react';
 
 // Define a type for the product details
 interface ProductDetails {
@@ -65,7 +65,7 @@ const relatedProductsData = [
 ];
 
 export default function ProductDetailPage({ params: paramsPromise }: { params: Promise<{ productId: string }> }) {
-  const { productId } = use(paramsPromise); // Unwrap the params Promise
+  const { productId } = use(paramsPromise); 
   
   const { toast } = useToast();
   const [product, setProduct] = useState<ProductDetails | null>(null);
@@ -73,7 +73,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
 
   useEffect(() => {
     async function loadProduct() {
-      if (productId) { // Check if productId is available
+      if (productId) { 
         const productDetails = await fetchProductDetails(productId);
         setProduct(productDetails);
         setSelectedImage(productDetails.image); 
@@ -81,7 +81,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
       }
     }
     loadProduct();
-  }, [productId]); // Depend on the unwrapped productId
+  }, [productId]); 
 
   if (!product || selectedImage === null) {
     return (
@@ -132,6 +132,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
         <div className="space-y-4">
           <div className="aspect-square rounded-lg overflow-hidden shadow-lg bg-card">
             <Image
+              key={selectedImage} /* Add key here */
               src={selectedImage}
               alt={product.name}
               width={600}
@@ -250,4 +251,3 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
     </div>
   );
 }
-
