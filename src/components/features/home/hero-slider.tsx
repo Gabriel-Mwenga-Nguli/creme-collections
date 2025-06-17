@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -97,7 +98,7 @@ const HeroSlider = () => {
             layout="fill"
             objectFit="cover"
             priority={index === 0}
-            className="transition-transform duration-[7000ms] ease-linear group-hover:scale-105"
+            className="transition-transform duration-\[7000ms\] ease-linear group-hover:scale-105"
             data-ai-hint={slide.dataAiHint}
           />
           <div className={`absolute inset-0 ${slide.overlayColor || 'bg-black/30'}`} />
