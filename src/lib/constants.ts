@@ -1,5 +1,6 @@
+
 import type { NavLink as BaseNavLink } from '@/lib/types'; // Assuming NavLink type is in types.ts
-import { Smartphone, Shirt, Home, Tv, Laptop, Headphones, Heart, ShoppingCart, User, Search, Percent, Info, MessageSquare, Phone, Sparkles, Zap } from 'lucide-react';
+import { Smartphone, Shirt, Home as HomeIcon, Tv, Laptop, Headphones, Heart, ShoppingCart, User, Search, Percent, Info, MessageSquare, Phone, Sparkles, Zap, HelpCircle, Package, BookOpen, Users, ShieldCheck } from 'lucide-react';
 
 export const SITE_NAME = "Creme Lite";
 
@@ -48,7 +49,7 @@ export const CATEGORY_NAV_LINKS: NavLink[] = [
   {
     label: 'Home & Living',
     href: '/products/category/home-living',
-    icon: Home,
+    icon: HomeIcon,
     subLinks: [
       { label: 'Furniture', href: '/products/category/home-living/furniture' },
       { label: 'Home Decor', href: '/products/category/home-living/decor' },
@@ -60,7 +61,7 @@ export const CATEGORY_NAV_LINKS: NavLink[] = [
   {
     label: 'Beauty & Personal Care',
     href: '/products/category/beauty-personal-care',
-    icon: Heart, // Placeholder, consider a more specific icon
+    icon: Heart, 
     subLinks: [
       { label: 'Skincare', href: '/products/category/beauty/skincare' },
       { label: 'Makeup', href: '/products/category/beauty/makeup' },
@@ -80,17 +81,22 @@ export const CATEGORY_NAV_LINKS: NavLink[] = [
   },
 ];
 
-
-export const FOOTER_LINKS = [
-  { href: "/about", label: "About Us" },
-  { href: "/terms", label: "Terms & Conditions" },
-  { href: "/privacy", label: "Privacy Policy" },
+export const FOOTER_COMPANY_LINKS: NavLink[] = [
+  { href: "/about", label: "About Us", icon: Users },
+  { href: "/contact", label: "Contact Us", icon: Phone },
+  { href: "/terms", label: "Terms & Conditions", icon: BookOpen },
+  { href: "/privacy", label: "Privacy Policy", icon: ShieldCheck },
 ];
 
-// Original NAV_LINKS, might be repurposed or removed depending on new header structure
-// For example, some of these might go into a "More" category or footer
+export const FOOTER_SUPPORT_LINKS: NavLink[] = [
+  { href: "/chat-support", label: "Chat Support", icon: MessageSquare },
+  { href: "/faq", label: "FAQ", icon: HelpCircle },
+  { href: "/shipping", label: "Shipping & Returns", icon: Package },
+];
+
+
 export const LEGACY_NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/products", label: "All Products" },
-  { href: "/search-page", label: "Search Page Link", icon: Search }, // Kept for direct search page access if needed
+  { href: "/search-page", label: "Search Page Link", icon: Search }, 
 ];

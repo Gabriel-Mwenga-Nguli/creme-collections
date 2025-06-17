@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export default function TermsPage() {
         
         <div className="prose prose-lg dark:prose-invert max-w-none text-foreground space-y-6">
           <p className="lead">
-            Welcome to Creme Lite! These terms and conditions outline the rules and regulations for the use of Creme Lite's Website, located at [Your Website URL].
+            Welcome to Creme Lite! These terms and conditions outline the rules and regulations for the use of Creme Lite's Website, located at https://cremelite.com (or your actual domain).
           </p>
           <p>
             By accessing this website we assume you accept these terms and conditions. Do not continue to use Creme Lite if you do not agree to take all of the terms and conditions stated on this page.
@@ -21,12 +22,12 @@ export default function TermsPage() {
 
           <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">1. Definitions</h2>
           <p>
-            The following terminology applies to these Terms and Conditions, Privacy Statement and Disclaimer Notice and all Agreements: "Client", "You" and "Your" refers to you, the person log on this website and compliant to the Company’s terms and conditions. "The Company", "Ourselves", "We", "Our" and "Us", refers to our Company. "Party", "Parties", or "Us", refers to both the Client and ourselves. 
+            The following terminology applies to these Terms and Conditions, Privacy Statement and Disclaimer Notice and all Agreements: "Client", "You" and "Your" refers to you, the person log on this website and compliant to the Company’s terms and conditions. "The Company", "Ourselves", "We", "Our" and "Us", refers to our Company, Creme Lite. "Party", "Parties", or "Us", refers to both the Client and ourselves. 
           </p>
 
           <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">2. Cookies</h2>
           <p>
-            We employ the use of cookies. By accessing Creme Lite, you agreed to use cookies in agreement with the Creme Lite's Privacy Policy. Most interactive websites use cookies to let us retrieve the user’s details for each visit.
+            We employ the use of cookies. By accessing Creme Lite, you agreed to use cookies in agreement with the Creme Lite's Privacy Policy. Most interactive websites use cookies to let us retrieve the user’s details for each visit. Cookies are used by our website to enable the functionality of certain areas to make it easier for people visiting our website. Some of our affiliate/advertising partners may also use cookies.
           </p>
 
           <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">3. License</h2>
@@ -40,33 +41,50 @@ export default function TermsPage() {
             <li>Reproduce, duplicate or copy material from Creme Lite</li>
             <li>Redistribute content from Creme Lite</li>
           </ul>
+          <p>This Agreement shall begin on the date hereof.</p>
 
           <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">4. User Account</h2>
           <p>
-            If you create an account on Creme Lite, you are responsible for maintaining the security of your account and you are fully responsible for all activities that occur under the account and any other actions taken in connection with it. You must immediately notify us of any unauthorized uses of your account or any other breaches of security.
+            If you create an account on Creme Lite, you are responsible for maintaining the security of your account and you are fully responsible for all activities that occur under the account and any other actions taken in connection with it. You must immediately notify us of any unauthorized uses of your account or any other breaches of security. We will not be liable for any acts or omissions by You, including any damages of any kind incurred as a result of such acts or omissions.
           </p>
 
           <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">5. Product Information and Pricing</h2>
           <p>
-            We strive to ensure that all details, descriptions, and prices which appear on this Website are accurate, however, errors may occur. If we discover an error in the price of any goods which you have ordered, we will inform you of this as soon as possible and give you the option of reconfirming your order at the correct price or cancelling it.
+            We strive to ensure that all details, descriptions, and prices which appear on this Website are accurate, however, errors may occur. If we discover an error in the price of any goods which you have ordered, we will inform you of this as soon as possible and give you the option of reconfirming your order at the correct price or cancelling it. If we are unable to contact you we will treat the order as cancelled. If you cancel and you have already paid for the goods, you will receive a full refund.
+          </p>
+          <p>All prices are inclusive of VAT (where applicable) at the current rates and are correct at the time of entering the information onto the system. Shipping costs will be charged in addition; such additional charges are clearly displayed where applicable and included in the 'Total Cost'.</p>
+
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">6. Orders and Payment</h2>
+          <p>
+            All orders are subject to availability and confirmation of the order price. Dispatch times may vary according to availability and any guarantees or representations made as to delivery times are subject to any delays resulting from postal delays or force majeure for which we will not be responsible.
+          </p>
+          <p>
+            In order to contract with Creme Lite you must be over 18 years of age and possess a valid credit or debit card issued by a bank acceptable to us, or a valid mobile money account. Creme Lite retains the right to refuse any request made by you.
           </p>
 
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">6. Limitation of Liability</h2>
+
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">7. Limitation of Liability</h2>
           <p>
             In no event shall Creme Lite, nor any of its officers, directors and employees, be held liable for anything arising out of or in any way connected with your use of this Website whether such liability is under contract. Creme Lite, including its officers, directors and employees shall not be held liable for any indirect, consequential or special liability arising out of or in any way related to your use of this Website.
           </p>
 
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">7. Governing Law & Jurisdiction</h2>
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">8. Indemnification</h2>
+          <p>You hereby indemnify to the fullest extent Creme Lite from and against any and/or all liabilities, costs, demands, causes of action, damages and expenses arising in any way related to your breach of any of the provisions of these Terms.</p>
+          
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">9. Severability</h2>
+          <p>If any provision of these Terms is found to be invalid under any applicable law, such provisions shall be deleted without affecting the remaining provisions herein.</p>
+
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">10. Governing Law & Jurisdiction</h2>
           <p>
-            These Terms will be governed by and interpreted in accordance with the laws of the State of [Your State/Country], and you submit to the non-exclusive jurisdiction of the state and federal courts located in [Your State/Country] for the resolution of any disputes.
+            These Terms will be governed by and interpreted in accordance with the laws of Kenya, and you submit to the non-exclusive jurisdiction of the courts located in Kenya for the resolution of any disputes.
           </p>
 
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">8. Changes to Terms</h2>
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">11. Changes to Terms</h2>
           <p>
             Creme Lite reserves the right to revise these terms and conditions at any time as it sees fit, and by using this Website you are expected to review these terms on a regular basis.
           </p>
           
-          <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
+          <p className="text-sm text-muted-foreground pt-6">Last updated: {new Date().toLocaleDateString()}</p>
         </div>
       </div>
     </div>

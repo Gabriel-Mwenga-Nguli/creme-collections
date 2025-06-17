@@ -1,6 +1,7 @@
+
 import Link from 'next/link';
-import { SITE_NAME, FOOTER_LINKS } from '@/lib/constants';
-import Logo from '@/components/logo'; // Re-using Logo for consistency
+import { SITE_NAME, FOOTER_COMPANY_LINKS, FOOTER_SUPPORT_LINKS } from '@/lib/constants';
+import Logo from '@/components/logo'; 
 
 export default function Footer() {
   return (
@@ -25,7 +26,7 @@ export default function Footer() {
             <div>
               <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Company</h3>
               <ul role="list" className="mt-4 space-y-2">
-                {FOOTER_LINKS.map((link) => (
+                {FOOTER_COMPANY_LINKS.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
@@ -35,15 +36,21 @@ export default function Footer() {
                     </Link>
                   </li>
                 ))}
-                 <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Us</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Support</h3>
               <ul role="list" className="mt-4 space-y-2">
-                <li><Link href="/chat-support" className="text-sm text-muted-foreground hover:text-primary transition-colors">Chat Support</Link></li>
-                <li><Link href="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">FAQ</Link></li>
-                <li><Link href="/shipping" className="text-sm text-muted-foreground hover:text-primary transition-colors">Shipping & Returns</Link></li>
+                {FOOTER_SUPPORT_LINKS.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
