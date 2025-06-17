@@ -2,20 +2,12 @@
 import Link from 'next/link';
 import { SITE_NAME, FOOTER_COMPANY_LINKS, FOOTER_SUPPORT_LINKS } from '@/lib/constants';
 import Logo from '@/components/logo'; 
-import { MapPin } from 'lucide-react';
+import { MapPin, Mail, MessageSquare, Clock } from 'lucide-react';
 
 export default function Footer() {
-  // The user provided a direct iframe embed, so API key logic is not needed for this specific map.
-  // const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  // Default to a generic location if API key is not set, or use a placeholder view
-  // const mapEmbedSrc = mapsApiKey 
-  //   ? `https://www.google.com/maps/embed/v1/place?key=${mapsApiKey}&q=Nairobi,Kenya`
-  //   : `https://www.google.com/maps/embed/v1/view?zoom=12&center=-1.286389,36.817223`;
-
-
   return (
     <footer className="border-t border-slate-700 bg-slate-900 text-slate-200 shadow-inner">
-      <div className="container mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <div className="container mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           
           <div className="lg:col-span-1">
@@ -24,8 +16,10 @@ export default function Footer() {
               Your favorite products, delivered with care.
             </p>
             <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase">Our Location</h3>
-              <address className="mt-2 text-sm text-slate-400 not-italic">
+              <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase mb-2 flex items-center">
+                <MapPin className="w-4 h-4 mr-2 text-primary" /> Our Location
+              </h3>
+              <address className="text-sm text-slate-400 not-italic">
                 123 Creme Lite Street<br />
                 Commerce City, NBO 00100<br />
                 Kenya
@@ -33,7 +27,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:col-span-1 lg:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:col-span-2">
             <div>
               <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase">Shop</h3>
               <ul role="list" className="mt-4 space-y-2">
@@ -66,17 +60,47 @@ export default function Footer() {
                       href={link.href}
                       className="text-sm text-slate-300 hover:text-primary transition-colors"
                     >
+                      {link.icon && <link.icon className="inline h-4 w-4 mr-1.5 -mt-0.5" />}
                       {link.label}
                     </Link>
                   </li>
                 ))}
+                 <li className="mt-4 pt-2 border-t border-slate-700/50">
+                  <div className="flex items-center text-sm text-slate-300">
+                    <Mail className="w-4 h-4 mr-2 text-primary shrink-0" />
+                    <div className="flex flex-col">
+                        <a href="mailto:support@cremecollections.shop" className="hover:text-primary transition-colors">support@cremecollections.shop</a>
+                        <a href="mailto:creme.collectionlt@gmail.com" className="hover:text-primary transition-colors">creme.collectionlt@gmail.com</a>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <div className="flex items-center text-sm text-slate-300">
+                    <MessageSquare className="w-4 h-4 mr-2 text-primary shrink-0" />
+                    <div className="flex flex-col">
+                        <a href="https://wa.me/254742468070" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">+254 742 468070</a>
+                        <a href="https://wa.me/254743117211" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">+254 743 117211</a>
+                        <a href="https://wa.me/254717988700" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">+254 717 988700</a>
+                    </div>
+                  </div>
+                </li>
+                <li className="mt-2">
+                    <div className="flex items-start text-sm text-slate-400">
+                        <Clock className="w-4 h-4 mr-2 text-primary shrink-0 mt-0.5" />
+                        <div>
+                            <span>Mon – Fri: 9am – 5pm EAT</span><br/>
+                            <span>Saturday: 9am – 12pm EAT</span><br/>
+                            <span>Sun & Holidays: Closed</span>
+                        </div>
+                    </div>
+                </li>
               </ul>
             </div>
           </div>
           
           <div className="lg:col-span-1">
              <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase mb-4 flex items-center">
-                <MapPin className="w-4 h-4 mr-2 text-primary" /> Find Us
+                <MapPin className="w-4 h-4 mr-2 text-primary" /> Our Store
              </h3>
             <div className="aspect-video w-full overflow-hidden rounded-lg shadow-md border border-slate-700">
               <iframe 
