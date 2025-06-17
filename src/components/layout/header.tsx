@@ -2,17 +2,17 @@
 "use client";
 
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, Heart, ShoppingCart, User, ChevronDown, Briefcase } from 'lucide-react';
+import { Menu, X, Sun, Moon, Heart, ShoppingCart, User, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Logo from '@/components/logo';
-import { HEADER_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
+import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useTheme } from 'next-themes';
 import { useIsMobile } from '@/hooks/use-mobile';
-import CategoryDropdown from './CategoryDropdown'; // New component
-import AISearchBar from '@/components/features/search/AISearchBar'; // New component
+import AISearchBar from '@/components/features/search/AISearchBar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import MegaMenu from './MegaMenu'; // New component
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -43,6 +43,22 @@ const ThemeToggle = () => {
 
 export default function Header() {
   const isMobile = useIsMobile();
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (isMobile && isMegaMenuOpen) {
+      setIsMegaMenuOpen(false); // Close mega menu on mobile view
+    }
+  }, [isMobile, isMegaMenuOpen]);
+
+  const toggleMegaMenu = () => {
+    if (!isMobile) {
+      setIsMegaMenuOpen(!isMegaMenuOpen);
+    }
+  };
+  
+  const closeMegaMenu = () => setIsMegaMenuOpen(false);
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
@@ -79,7 +95,7 @@ export default function Header() {
              )}
             <ThemeToggle />
             {isMobile && (
-              <Sheet>
+              <Sheet onOpenChange={(open) => { if (!open) closeMegaMenu(); }}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" aria-label="Open menu" className="text-foreground hover:text-primary">
                     <Menu className="h-6 w-6" />
@@ -100,25 +116,42 @@ export default function Header() {
                       <AISearchBar />
                     </div>
 
+                    {/* Mobile Main Navigation (like blue bar) */}
+                    <nav className="flex flex-col gap-1 mb-4">
+                       {MAIN_NAV_LINKS.map((link) => (
+                         <SheetClose asChild key={link.label}>
+                            <Link
+                              href={link.href}
+                              className="flex items-center gap-2 py-2 px-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
+                            >
+                              {link.icon && <link.icon className="h-5 w-5 text-muted-foreground" />}
+                              {link.label}
+                            </Link>
+                         </SheetClose>
+                       ))}
+                    </nav>
+                    
+                    <hr className="my-3"/>
+                    <p className="px-2 text-sm font-semibold text-muted-foreground mb-2">Browse Categories</p>
                     <Accordion type="single" collapsible className="w-full">
                       {CATEGORY_NAV_LINKS.map((category) => (
                         <AccordionItem value={category.label} key={category.label}>
-                          <AccordionTrigger className="text-base font-medium hover:text-primary py-3">
+                          <AccordionTrigger className="text-base font-medium hover:text-primary py-3 px-2">
                             <div className="flex items-center gap-2">
                               {category.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
                               {category.label}
                             </div>
                           </AccordionTrigger>
-                          <AccordionContent className="pl-4">
-                            <nav className="flex flex-col gap-2 mt-1">
+                          <AccordionContent className="pl-6 pr-2">
+                            <nav className="flex flex-col gap-1.5 mt-1">
                               <SheetClose asChild>
-                                <Link href={category.href} className="text-sm text-muted-foreground hover:text-primary py-1">All {category.label}</Link>
+                                <Link href={category.href} className="text-sm text-muted-foreground hover:text-primary py-1.5 block">All {category.label}</Link>
                               </SheetClose>
                               {category.subLinks?.map((subLink) => (
                                 <SheetClose asChild key={subLink.label}>
                                   <Link
                                     href={subLink.href}
-                                    className="text-sm text-muted-foreground hover:text-primary py-1"
+                                    className="text-sm text-muted-foreground hover:text-primary py-1.5 block"
                                   >
                                     {subLink.label}
                                   </Link>
@@ -131,25 +164,11 @@ export default function Header() {
                     </Accordion>
 
                     <hr className="my-4" />
-
-                    <nav className="flex flex-col gap-3">
-                      {HEADER_NAV_LINKS.map((link) => (
-                        <SheetClose asChild key={link.label}>
-                          <Link
-                            href={link.href}
-                            className="text-base font-medium text-foreground hover:text-primary flex items-center gap-2 py-2"
-                          >
-                             {link.icon && <link.icon className="h-5 w-5 text-muted-foreground" />}
-                            {link.label}
-                          </Link>
-                        </SheetClose>
-                      ))}
-                       <SheetClose asChild>
-                           <Link href="/profile" className="text-base font-medium text-foreground hover:text-primary flex items-center gap-2 py-2">
-                               <User className="h-5 w-5 text-muted-foreground" /> Profile
-                           </Link>
-                       </SheetClose>
-                    </nav>
+                     <SheetClose asChild>
+                         <Link href="/profile" className="text-base font-medium text-foreground hover:text-primary flex items-center gap-2 py-2 px-2">
+                             <User className="h-5 w-5 text-muted-foreground" /> Profile
+                         </Link>
+                     </SheetClose>
                   </div>
 
                   <div className="p-4 border-t mt-auto">
@@ -174,25 +193,41 @@ export default function Header() {
 
         {/* Bottom Row - Desktop Only */}
         {!isMobile && (
-          <div className="flex h-12 items-center justify-between border-t border-border/20">
-            <div className="flex items-center gap-6">
-              <CategoryDropdown />
-              <nav className="flex gap-4">
-                {HEADER_NAV_LINKS.map((link) => (
-                  <Link
+          <div className="flex h-12 items-center justify-start border-t border-border/20 bg-primary/5 relative">
+            <nav className="flex gap-1 overflow-x-auto scrollbar-hide">
+              {MAIN_NAV_LINKS.map((link) => (
+                link.isMegaMenuTrigger ? (
+                  <Button
                     key={link.label}
-                    href={link.href}
-                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                    variant="ghost"
+                    onClick={toggleMegaMenu}
+                    className={`text-sm font-medium px-3 py-2 h-auto rounded-md hover:bg-primary/20 hover:text-primary ${isMegaMenuOpen ? 'bg-primary/15 text-primary' : 'text-foreground'}`}
                   >
-                    {link.icon && <link.icon className="h-4 w-4" />}
+                    {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
                     {link.label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
+                    <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${isMegaMenuOpen ? 'rotate-180' : ''}`} />
+                  </Button>
+                ) : (
+                  <Button
+                    key={link.label}
+                    variant="ghost"
+                    asChild
+                    className="text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary"
+                  >
+                    <Link href={link.href} onClick={closeMegaMenu}>
+                      {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
+                      {link.label}
+                    </Link>
+                  </Button>
+                )
+              ))}
+            </nav>
           </div>
         )}
       </div>
+      {!isMobile && isMegaMenuOpen && (
+        <MegaMenu categories={CATEGORY_NAV_LINKS} onClose={closeMegaMenu} />
+      )}
     </header>
   );
 }

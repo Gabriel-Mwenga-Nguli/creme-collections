@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown, Menu } from 'lucide-react';
 
+// This component might be deprecated or repurposed if MegaMenu handles all category display.
+// Keeping it for now in case it's used elsewhere or for a simpler fallback.
 export default function CategoryDropdown() {
   return (
     <DropdownMenu>
