@@ -232,7 +232,7 @@ export default function Header() {
         {/* Bottom Row - Desktop Only */}
         {!isMobile && (
           <div className="flex h-12 items-center justify-start border-t border-border/20 bg-primary/5 relative">
-            <nav className="flex gap-1 overflow-x-auto scrollbar-hide items-center">
+            <nav className="flex gap-1 items-center"> {/* Removed overflow-x-auto scrollbar-hide */}
               {MAIN_NAV_LINKS.find(link => link.isMegaMenuTrigger) && (() => {
                 const megaMenuTriggerLink = MAIN_NAV_LINKS.find(link => link.isMegaMenuTrigger)!;
                 return (
@@ -264,7 +264,7 @@ export default function Header() {
                             {link.label}
                           </NavigationMenuTrigger>
                           <NavigationMenuContent>
-                            <ul className="flex flex-col w-[250px] gap-1 p-2 md:w-[300px]">
+                            <ul className="flex flex-col w-[250px] gap-1 p-2 md:w-[300px] bg-popover border rounded-md shadow-lg">
                                <ListItem
                                   key={`all-${parentCategoryData.label}`}
                                   href={parentCategoryData.href}
@@ -315,3 +315,4 @@ export default function Header() {
     </header>
   );
 }
+
