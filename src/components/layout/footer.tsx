@@ -10,7 +10,7 @@ export default function Footer() {
       <div className="container mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 lg:border-r lg:border-slate-700 lg:pr-8">
             <Logo />
             <p className="mt-4 text-sm text-slate-400">
               Your favorite products, delivered with care.
@@ -27,7 +27,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:col-span-2 lg:border-r lg:border-slate-700 lg:pr-8">
             <div>
               <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase">Shop</h3>
               <ul role="list" className="mt-4 space-y-2">
@@ -127,3 +127,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+    
