@@ -128,7 +128,7 @@ export interface ProductDetailsPageData extends Product {
 
 export async function getProductDetailsById(productId: string): Promise<ProductDetailsPageData | null> {
   if (!db) {
-    console.error("Firestore 'db' object is not initialized. Cannot fetch product details.");
+    console.error("Firestore 'db' object is not initialized. Cannot fetch product details for ID:", productId);
     return null;
   }
   try {
@@ -156,7 +156,7 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
     const productsRef = collection(db, 'products');
     let q;
 
-    if (subCategorySlugParam) {
+    if (subCategorySlugParam && categorySlugParam) { // Ensure categorySlugParam exists for subCategorySlugParam
        q = query(productsRef, where('categorySlug', '==', categorySlugParam), where('subCategorySlug', '==', subCategorySlugParam));
     } else if (categorySlugParam) {
       q = query(productsRef, where('categorySlug', '==', categorySlugParam));
@@ -171,6 +171,8 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
     return products;
   } catch (error) {
     console.error("Error fetching products: ", error);
+    if (categorySlugParam) console.error("Category slug for error:", categorySlugParam);
+    if (subCategorySlugParam) console.error("Sub-category slug for error:", subCategorySlugParam);
     return [];
   }
 }
