@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingBag, Zap, Tag } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
+import ProductCard from '@/components/features/home/product-card';
 
 const categoryHighlights = [
   { name: "Electronics", image: "https://placehold.co/400x300.png", dataAiHint: "gadgets technology", href: "/products/electronics" },
@@ -14,6 +15,13 @@ const categoryHighlights = [
 const promotionalBanners = [
   { title: "Weekend Sale", description: "Up to 50% off on selected items!", image: "https://placehold.co/600x400.png", dataAiHint: "sale discount", bgColor: "bg-primary/10", textColor: "text-primary-foreground", href: "/products?filter=sale" },
   { title: "New Arrivals", description: "Check out the latest trends.", image: "https://placehold.co/600x400.png", dataAiHint: "new products", bgColor: "bg-accent/10", textColor: "text-accent-foreground", href: "/products?filter=new" },
+];
+
+const featuredProductsData = [
+  { id: 1, name: "Product Name 1", description: "Brief description of product 1.", image: "https://placehold.co/400x400.png", dataAiHint: "fashion product" },
+  { id: 2, name: "Product Name 2", description: "Brief description of product 2.", image: "https://placehold.co/400x400.png", dataAiHint: "electronics gadget" },
+  { id: 3, name: "Product Name 3", description: "Brief description of product 3.", image: "https://placehold.co/400x400.png", dataAiHint: "home accessory" },
+  { id: 4, name: "Product Name 4", description: "Brief description of product 4.", image: "https://placehold.co/400x400.png", dataAiHint: "beauty item" },
 ];
 
 export default function HomePage() {
@@ -94,24 +102,15 @@ export default function HomePage() {
             Featured Products
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {[1,2,3,4].map((i) => (
-              <Card key={i} className="overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:border-primary">
-                <Link href={`/products/item/product-${i}`} className="group block">
-                  <CardHeader className="p-0">
-                    <div className="aspect-square">
-                       <Image src={`https://placehold.co/400x400.png`} alt={`Product ${i}`} width={400} height={400} className="object-cover w-full h-full group-hover:opacity-90 transition-opacity" data-ai-hint="fashion product" />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors font-headline">Product Name {i}</CardTitle>
-                    <CardDescription className="text-sm mt-1">Brief description of product {i}.</CardDescription>
-                    <p className="text-lg font-bold text-primary mt-2">$ {(Math.random() * 100 + 20).toFixed(2)}</p>
-                    <Button variant="outline" size="sm" className="w-full mt-3">
-                      View Details
-                    </Button>
-                  </CardContent>
-                </Link>
-              </Card>
+            {featuredProductsData.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                description={product.description}
+                image={product.image}
+                dataAiHint={product.dataAiHint}
+              />
             ))}
           </div>
            <div className="text-center mt-12">
