@@ -5,7 +5,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
-import { CartProvider } from '@/context/CartContext'; // Import CartProvider
+import { CartProvider } from '@/context/CartContext';
+import ChatWidget from '@/components/features/chat/ChatWidget'; // Import the ChatWidget
 
 export const metadata: Metadata = {
   title: 'Creme Lite',
@@ -31,15 +32,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <CartProvider> {/* Wrap with CartProvider */}
+          <CartProvider>
             <Header />
             <main className="flex-grow">{children}</main>
             <Footer />
             <Toaster />
+            <ChatWidget /> {/* Add ChatWidget here */}
           </CartProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
-    

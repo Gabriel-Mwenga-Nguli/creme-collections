@@ -14,16 +14,15 @@ export default function Footer() {
           <div className="lg:col-span-1 lg:border-r lg:border-slate-700 lg:pr-8">
             <Logo />
             <p className="mt-4 text-sm text-slate-400">
-              Your favorite products, delivered with care.
+              All you want, all in one place. Shop smarter with Creme Collections — Kenya's most trusted online marketplace.
             </p>
             <div className="mt-6">
               <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase mb-2 flex items-center">
-                <MapPin className="w-4 h-4 mr-2 text-primary" /> Our Location
+                <MapPin className="w-4 h-4 mr-2 text-primary" /> Shop Location
               </h3>
               <address className="text-sm text-slate-400 not-italic">
-                123 Creme Lite Street<br />
-                Commerce City, NBO 00100<br />
-                Kenya
+                Kenya<br />
+                Taveta Rd, Nairobi.
               </address>
             </div>
           </div>
@@ -128,5 +127,3 @@ export default function Footer() {
     </footer>
   );
 }
-
-    
