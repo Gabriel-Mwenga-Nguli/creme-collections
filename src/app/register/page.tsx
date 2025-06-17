@@ -14,8 +14,12 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 flex items-center justify-center min-h-[calc(100vh-15rem)]">
-      <Card className="w-full max-w-md shadow-xl">
+    <div 
+      className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-10rem)] bg-cover bg-center"
+      style={{ backgroundImage: "url('https://placehold.co/1920x1080/EAE6E2/A0937D.png?text=Abstract+Pattern&font=raleway')" }}
+      data-ai-hint="abstract pattern"
+    >
+      <Card className="w-full max-w-md shadow-xl bg-card/90 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary font-headline">Create Account</CardTitle>
           <CardDescription>Join Creme Lite and start shopping today!</CardDescription>
@@ -24,23 +28,55 @@ export default function RegisterPage() {
           <form action="#" method="POST" className="space-y-4">
             <div>
               <Label htmlFor="fullName">Full Name</Label>
-              <Input type="text" name="fullName" id="fullName" autoComplete="name" required className="mt-1" />
+              <Input 
+                type="text" 
+                name="fullName" 
+                id="fullName" 
+                autoComplete="name" 
+                required 
+                className="mt-1" 
+                placeholder="Jane Doe"
+              />
             </div>
             <div>
               <Label htmlFor="email">Email Address</Label>
-              <Input type="email" name="email" id="email" autoComplete="email" required className="mt-1" />
+              <Input 
+                type="email" 
+                name="email" 
+                id="email" 
+                autoComplete="email" 
+                required 
+                className="mt-1" 
+                placeholder="you@example.com"
+              />
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input type="password" name="password" id="password" autoComplete="new-password" required className="mt-1" />
+              <Input 
+                type="password" 
+                name="password" 
+                id="password" 
+                autoComplete="new-password" 
+                required 
+                className="mt-1" 
+                placeholder="••••••••"
+              />
             </div>
              <div>
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input type="password" name="confirmPassword" id="confirmPassword" autoComplete="new-password" required className="mt-1" />
+              <Input 
+                type="password" 
+                name="confirmPassword" 
+                id="confirmPassword" 
+                autoComplete="new-password" 
+                required 
+                className="mt-1" 
+                placeholder="••••••••"
+              />
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 pt-2">
               <Checkbox id="terms" name="terms" required />
-              <Label htmlFor="terms" className="text-sm text-muted-foreground">
+              <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground leading-snug">
                 I agree to the{' '}
                 <Link href="/terms" className="underline hover:text-primary">
                   Terms & Conditions
