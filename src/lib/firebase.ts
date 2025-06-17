@@ -5,7 +5,7 @@ import { getAuth, type Auth } from 'firebase/auth';
 // import { getStorage } from 'firebase/storage'; // Uncomment if you need Firebase Storage
 // import { getAnalytics } from "firebase/analytics"; // Uncomment if you need Firebase Analytics
 
-const firebaseConfig: FirebaseOptions = {
+const firebaseConfigValues = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -15,27 +15,43 @@ const firebaseConfig: FirebaseOptions = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
 let app: FirebaseApp | undefined;
 let db: Firestore | null = null;
 let auth: Auth | null = null;
 
-// Critical Firebase configuration check
+// CRITICAL: Log the config values being read from environment variables
+console.log('[Firebase] Attempting to load Firebase Config from environment variables:', {
+  apiKeyExists: !!firebaseConfigValues.apiKey,
+  authDomain: firebaseConfigValues.authDomain,
+  projectId: firebaseConfigValues.projectId,
+  storageBucketExists: !!firebaseConfigValues.storageBucket,
+  messagingSenderIdExists: !!firebaseConfigValues.messagingSenderId,
+  appIdExists: !!firebaseConfigValues.appId,
+  measurementIdExists: !!firebaseConfigValues.measurementId,
+});
+
 if (
-  !firebaseConfig.apiKey ||
-  !firebaseConfig.authDomain ||
-  !firebaseConfig.projectId
+  !firebaseConfigValues.apiKey ||
+  !firebaseConfigValues.authDomain ||
+  !firebaseConfigValues.projectId
 ) {
   console.error(
-    'FIREBASE_CONFIG_ERROR: Critical Firebase configuration (apiKey, authDomain, or projectId) is missing. ' +
-    'Please ensure NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, ' +
-    'and NEXT_PUBLIC_FIREBASE_PROJECT_ID are correctly set in your .env.local file ' +
-    'and that the Next.js server has been restarted. Firebase will NOT be initialized.'
+    '[Firebase] CRITICAL_CONFIG_MISSING: One or more critical Firebase configuration values (apiKey, authDomain, projectId) are missing from environment variables. These are expected as NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, and NEXT_PUBLIC_FIREBASE_PROJECT_ID. Firebase services will NOT be initialized. Please verify your .env.local file and ensure the Next.js server has been restarted.'
   );
 } else {
+  const firebaseConfig: FirebaseOptions = {
+    apiKey: firebaseConfigValues.apiKey,
+    authDomain: firebaseConfigValues.authDomain,
+    projectId: firebaseConfigValues.projectId,
+    storageBucket: firebaseConfigValues.storageBucket,
+    messagingSenderId: firebaseConfigValues.messagingSenderId,
+    appId: firebaseConfigValues.appId,
+    measurementId: firebaseConfigValues.measurementId,
+  };
+
   if (!getApps().length) {
     try {
-      console.log('[Firebase] Attempting to initialize Firebase app...');
+      console.log('[Firebase] Attempting to initialize Firebase app with provided config...');
       app = initializeApp(firebaseConfig);
       console.log('[Firebase] Firebase app initialized successfully.');
     } catch (initError) {
@@ -69,7 +85,7 @@ if (
       auth = null; 
     }
   } else {
-     console.error("[Firebase] FIREBASE_APP_UNAVAILABLE: Firebase app object is not available (likely due to missing config or a prior initialization error). Firestore and Auth will not be available.");
+     console.error("[Firebase] FIREBASE_APP_UNAVAILABLE: Firebase app object is not available (likely due to missing or invalid config, or a prior initialization error). Firestore and Auth will not be available.");
   }
 }
 
@@ -80,4 +96,3 @@ if (
 // }
 
 export { db, auth /*, storage, analytics */ };
-
