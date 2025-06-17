@@ -27,7 +27,7 @@ export default function CartPage() {
   const { cartItems, updateItemQuantity, removeItemFromCart, getCartTotal } = useCart();
 
   useEffect(() => {
-    document.title = 'Shopping Cart - Creme Lite';
+    document.title = 'Shopping Cart - Creme Collections';
   }, []);
 
   const handleQuantityChange = (id: string, newQuantity: number) => { // id is now string
@@ -48,7 +48,7 @@ export default function CartPage() {
         `${item.name} (x${item.quantity}) - KES ${((item.fixedOfferPrice || 0) * item.quantity).toLocaleString()}`
       )
       .join('\n');
-    const message = `Hello Creme Lite! I'd like to place an order for the following items:\n\n${itemDetails}\n\nSubtotal: KES ${subtotal.toLocaleString()}\nShipping: KES ${shippingCost.toLocaleString()}\nTotal: KES ${total.toLocaleString()}\n\nPlease advise on payment and delivery.`;
+    const message = `Hello Creme Collections! I'd like to place an order for the following items:\n\n${itemDetails}\n\nSubtotal: KES ${subtotal.toLocaleString()}\nShipping: KES ${shippingCost.toLocaleString()}\nTotal: KES ${total.toLocaleString()}\n\nPlease advise on payment and delivery.`;
     
     const whatsappNumber = "254742468070"; // Updated to the first provided WhatsApp number
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;

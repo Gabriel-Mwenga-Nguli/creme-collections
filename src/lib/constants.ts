@@ -5,7 +5,7 @@ import {
   Bike, ToyBrick, Car, BookMarked, HeartPulse, Dumbbell, Tent, Gamepad2, PencilRuler, Stethoscope, Popcorn, Coffee
 } from 'lucide-react';
 
-export const SITE_NAME = "Creme Lite";
+export const SITE_NAME = "Creme Collections";
 
 export interface NavLink extends BaseNavLink {
   icon?: React.ElementType;

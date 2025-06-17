@@ -11,8 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata: Metadata = {
-  title: 'All Products - Creme Lite',
-  description: 'Browse all products available on Creme Lite, grouped by category and brand.',
+  title: 'All Products - Creme Collections',
+  description: 'Browse all products available on Creme Collections, grouped by category and brand.',
 };
 
 interface GroupedProducts {

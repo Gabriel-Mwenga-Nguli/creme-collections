@@ -6,8 +6,8 @@ import { Heart } from 'lucide-react';
 import ProductCard from '@/components/features/home/product-card';
 
 export const metadata: Metadata = {
-  title: 'Your Wishlist - Creme Lite',
-  description: 'Manage your favorite items on Creme Lite.',
+  title: 'Your Wishlist - Creme Collections',
+  description: 'Manage your favorite items on Creme Collections.',
 };
 
 // Dummy data for wishlist items - ID is now string
@@ -62,5 +62,4 @@ export default function WishlistPage() {
     </div>
   );
 }
-
     

@@ -83,7 +83,7 @@ export default function ChatWidget() {
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       setMessages([
-        { id: 'welcome-msg', role: 'model', content: "Hello! I'm CremeBot, your virtual assistant for Creme Lite. How can I help you today?" }
+        { id: 'welcome-msg', role: 'model', content: "Hello! I'm CremeBot, your virtual assistant for Creme Collections. How can I help you today?" }
       ]);
     }
   }, [isOpen, messages.length]);
@@ -106,7 +106,7 @@ export default function ChatWidget() {
           <Card className="w-full h-full flex flex-col bg-card border border-border">
             <CardHeader className="p-4 border-b flex-shrink-0">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <BotMessageSquare className="h-6 w-6 text-primary" /> Creme Lite Support
+                <BotMessageSquare className="h-6 w-6 text-primary" /> Creme Collections Support
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow p-0 overflow-hidden min-h-[200px]">

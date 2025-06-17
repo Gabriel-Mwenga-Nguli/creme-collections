@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect } from 'react';
 
 // Set title dynamically for client component
-const PageTitle = 'Contact Us - Creme Lite';
+const PageTitle = 'Contact Us - Creme Collections';
 
 export default function ContactPage() {
   const { toast } = useToast();
@@ -94,7 +94,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">Our Office</h3>
-                  <p className="text-muted-foreground">123 Creme Lite St, Suite 100<br />Commerce City, EC 54321</p>
+                  <p className="text-muted-foreground">123 Creme Collections St, Suite 100<br />Commerce City, EC 54321</p>
                 </div>
               </div>
             </div>

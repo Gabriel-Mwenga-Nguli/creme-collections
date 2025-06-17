@@ -5,15 +5,15 @@ import { Package, Undo } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 // export const metadata: Metadata = { // Cannot be used in client components this way
-//   title: 'Shipping & Returns - Creme Lite',
-//   description: 'Learn about Creme Lite\'s shipping policies, delivery times, and returns process.',
+//   title: 'Shipping & Returns - Creme Collections',
+//   description: 'Learn about Creme Collections\'s shipping policies, delivery times, and returns process.',
 // };
 
 export default function ShippingReturnsPage() {
   const [lastUpdatedDate, setLastUpdatedDate] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Shipping & Returns - Creme Lite';
+    document.title = 'Shipping & Returns - Creme Collections';
     setLastUpdatedDate(new Date().toLocaleDateString());
   }, []);
 
@@ -58,7 +58,7 @@ export default function ShippingReturnsPage() {
             </p>
             <h3 className="text-xl font-semibold text-foreground font-headline !mt-6 !mb-2">Damages</h3>
             <p>
-              Creme Lite is not liable for any products damaged or lost during shipping. If you received your order damaged, please contact the shipment carrier or our support team directly to file a claim. Please save all packaging material and damaged goods before filing a claim.
+              Creme Collections is not liable for any products damaged or lost during shipping. If you received your order damaged, please contact the shipment carrier or our support team directly to file a claim. Please save all packaging material and damaged goods before filing a claim.
             </p>
           </section>
 

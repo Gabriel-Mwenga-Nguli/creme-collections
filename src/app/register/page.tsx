@@ -12,8 +12,8 @@ import { Separator } from '@/components/ui/separator';
 
 // Metadata needs to be handled differently in client components, or set in layout/generateMetadata
 // export const metadata: Metadata = {
-//   title: 'Register - Creme Lite',
-//   description: 'Create a new Creme Lite account.',
+//   title: 'Register - Creme Collections',
+//   description: 'Create a new Creme Collections account.',
 // };
 
 // Google Icon SVG
@@ -39,7 +39,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md shadow-xl bg-card/90 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary font-headline">Create Account</CardTitle>
-          <CardDescription>Join Creme Lite and start shopping today!</CardDescription>
+          <CardDescription>Join Creme Collections and start shopping today!</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <form action="#" method="POST" className="space-y-4">

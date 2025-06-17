@@ -9,7 +9,7 @@ import { CartProvider } from '@/context/CartContext';
 import ChatWidget from '@/components/features/chat/ChatWidget'; // Import the ChatWidget
 
 export const metadata: Metadata = {
-  title: 'Creme Lite',
+  title: 'Creme Collections',
   description: 'Modern E-commerce Platform',
 };
 

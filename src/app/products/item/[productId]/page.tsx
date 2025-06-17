@@ -49,7 +49,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
           if (productDetails) {
             setProduct(productDetails as ProductDetailsComponentData); // Cast if ProductDetailsPageData is directly usable
             setSelectedImage(productDetails.image); 
-            document.title = `${productDetails.name} - Creme Lite`;
+            document.title = `${productDetails.name} - Creme Collections`;
 
             // Fetch related products (e.g., featured products as placeholders)
             const fetchedRelatedProducts = await getFeaturedProducts(); // Or a more specific "related products" logic
@@ -131,7 +131,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
     if (navigator.share) {
       navigator.share({
         title: product.name,
-        text: `Check out ${product.name} on Creme Lite!`,
+        text: `Check out ${product.name} on Creme Collections!`,
         url: window.location.href,
       }).catch(console.error);
     } else {

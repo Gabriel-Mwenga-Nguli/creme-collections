@@ -36,7 +36,7 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    document.title = 'Checkout - Creme Lite';
+    document.title = 'Checkout - Creme Collections';
   }, []);
 
   const handleInputChange = (section: string, field: string, value: string) => {

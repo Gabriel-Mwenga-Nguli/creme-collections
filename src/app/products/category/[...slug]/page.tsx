@@ -65,14 +65,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!categoryInfo) {
     return {
-      title: 'Category Not Found - Creme Lite',
+      title: 'Category Not Found - Creme Collections',
       description: 'The category you are looking for does not exist.',
     };
   }
   
   return {
-    title: `${categoryInfo.pageTitle} - Creme Lite`,
-    description: `Browse our selection of ${categoryInfo.pageTitle.toLowerCase()} at Creme Lite.`,
+    title: `${categoryInfo.pageTitle} - Creme Collections`,
+    description: `Browse our selection of ${categoryInfo.pageTitle.toLowerCase()} at Creme Collections.`,
   };
 }
 

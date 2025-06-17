@@ -4,15 +4,15 @@ import type { Metadata } from 'next';
 import { useState, useEffect } from 'react';
 
 // export const metadata: Metadata = { // Cannot be used in client components this way
-//   title: 'Privacy Policy - Creme Lite',
-//   description: 'Read the Creme Lite Privacy Policy to understand how we collect, use, and protect your personal information.',
+//   title: 'Privacy Policy - Creme Collections',
+//   description: 'Read the Creme Collections Privacy Policy to understand how we collect, use, and protect your personal information.',
 // };
 
 export default function PrivacyPage() {
   const [lastUpdatedDate, setLastUpdatedDate] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Privacy Policy - Creme Lite';
+    document.title = 'Privacy Policy - Creme Collections';
     setLastUpdatedDate(new Date().toLocaleDateString());
   }, []);
 
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         
         <div className="prose prose-lg dark:prose-invert max-w-none text-foreground space-y-6">
           <p className="lead">
-            At Creme Lite ("we", "us", "our"), we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website (https://cremelite.com or your actual domain) and use our services. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
+            At Creme Collections ("we", "us", "our"), we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website (https://cremelite.com or your actual domain) and use our services. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
           </p>
 
           <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">1. Information We Collect</h2>
@@ -105,7 +105,7 @@ export default function PrivacyPage() {
           </p>
           <p>
             Email: <a href="mailto:support@cremecollections.shop" className="text-primary hover:underline">support@cremecollections.shop</a><br />
-            Address: 123 Creme Lite St, Suite 100, Commerce City, EC 54321, Kenya
+            Address: 123 Creme Collections St, Suite 100, Commerce City, EC 54321, Kenya
           </p>
           
           {lastUpdatedDate && (

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { BotIcon as BotMessageSquare } from 'lucide-react'; // Renamed to avoid conflict if BotIcon is used differently
 
 export const metadata: Metadata = {
-  title: 'Chat Support - Creme Lite',
+  title: 'Chat Support - Creme Collections',
   description: 'Get instant help from our AI-powered chat support or connect with a shop manager.',
 };
 

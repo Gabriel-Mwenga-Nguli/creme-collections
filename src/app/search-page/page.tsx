@@ -14,7 +14,7 @@ import ProductCard from '@/components/features/home/product-card'; // Re-use pro
 
 
 // export const metadata: Metadata = { // Metadata cannot be used in client components directly this way
-//   title: 'Search Products - Creme Lite',
+//   title: 'Search Products - Creme Collections',
 //   description: 'Find exactly what you are looking for with our smart search.',
 // };
 

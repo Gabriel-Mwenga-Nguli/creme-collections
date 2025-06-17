@@ -11,8 +11,8 @@ import { Separator } from '@/components/ui/separator';
 
 // Metadata needs to be handled differently in client components, or set in layout/generateMetadata
 // export const metadata: Metadata = {
-//   title: 'Login - Creme Lite',
-//   description: 'Log in to your Creme Lite account.',
+//   title: 'Login - Creme Collections',
+//   description: 'Log in to your Creme Collections account.',
 // };
 
 // Google Icon SVG

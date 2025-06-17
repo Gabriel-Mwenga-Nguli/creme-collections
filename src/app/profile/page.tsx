@@ -10,8 +10,8 @@ import { User, ShoppingBag, Heart, MapPin, Edit3, LogOut } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'My Profile - Creme Lite',
-  description: 'Manage your Creme Lite account details, orders, and preferences.',
+  title: 'My Profile - Creme Collections',
+  description: 'Manage your Creme Collections account details, orders, and preferences.',
 };
 
 export default function ProfilePage() {
