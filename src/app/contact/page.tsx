@@ -1,16 +1,45 @@
-import type { Metadata } from 'next';
+
+"use client"; // Make it a client component for form handling and useToast
+
+import type { Metadata } from 'next'; // Metadata can't be used directly
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Contact Us - Creme Lite',
-  description: 'Get in touch with Creme Lite. We are here to help with any questions or inquiries.',
-};
+// Set title dynamically for client component
+const PageTitle = 'Contact Us - Creme Lite';
 
 export default function ContactPage() {
+  const { toast } = useToast();
+
+  useEffect(() => {
+    document.title = PageTitle;
+  }, []);
+
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // In a real app, you would handle form submission here (e.g., send data to an API)
+    console.log("Form submitted with data:", {
+        name: (event.currentTarget.elements.namedItem('name') as HTMLInputElement).value,
+        email: (event.currentTarget.elements.namedItem('email') as HTMLInputElement).value,
+        subject: (event.currentTarget.elements.namedItem('subject') as HTMLInputElement).value,
+        message: (event.currentTarget.elements.namedItem('message') as HTMLInputElement).value,
+    });
+    
+    toast({
+      title: "Message Sent!",
+      description: "Thank you for contacting us. We'll get back to you soon.",
+      variant: "default",
+    });
+    // Optionally, reset the form
+    event.currentTarget.reset();
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
       <div className="max-w-4xl mx-auto">
@@ -59,7 +88,7 @@ export default function ContactPage() {
           </div>
 
           <div>
-            <form action="#" method="POST" className="space-y-6 bg-card p-6 sm:p-8 rounded-lg shadow-lg">
+            <form onSubmit={handleSubmit} className="space-y-6 bg-card p-6 sm:p-8 rounded-lg shadow-lg">
               <div>
                 <Label htmlFor="name" className="font-medium">Full Name</Label>
                 <Input type="text" name="name" id="name" autoComplete="name" required className="mt-1" />
