@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquareText, Send, X, Loader2, User as UserIcon, BotIcon as BotMessageSquare } from 'lucide-react'; // Renamed BotIcon to avoid conflict
+import { BotIcon as BotMessageSquare, Send, X, Loader2, User as UserIcon } from 'lucide-react'; 
 import { comprehensiveChatSupport, type ComprehensiveChatSupportInput, type ComprehensiveChatSupportOutput } from '@/ai/flows/comprehensive-chat-support';
 
 interface ChatMessage {
@@ -57,14 +56,11 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
-      // Prepare chat history, excluding the latest user message which is passed as `message`
       const historyForFlow = messages.map(msg => ({ role: msg.role, content: msg.content }));
-      // If messages already contained the newUserMessage due to optimistic update, ensure it's not duplicated in history.
-      // The current newUserMessage is passed separately as `message`.
-
+      
       const input: ComprehensiveChatSupportInput = {
         message: userMessageContent,
-        chatHistory: historyForFlow, // Send history *before* the current user message
+        chatHistory: historyForFlow, 
       };
       const result: ComprehensiveChatSupportOutput = await comprehensiveChatSupport(input);
       
@@ -76,7 +72,7 @@ export default function ChatWidget() {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      setTimeout(() => inputRef.current?.focus(), 0); // Refocus after AI response
+      setTimeout(() => inputRef.current?.focus(), 0); 
     }
   }, [inputValue, messages]);
 
@@ -98,7 +94,7 @@ export default function ChatWidget() {
         onClick={toggleChat}
         aria-label={isOpen ? "Close chat support" : "Open chat support"}
       >
-        {isOpen ? <X className="h-7 w-7" /> : <MessageSquareText className="h-7 w-7" />}
+        {isOpen ? <X className="h-7 w-7" /> : <BotMessageSquare className="h-7 w-7" />}
       </Button>
 
       {isOpen && (
