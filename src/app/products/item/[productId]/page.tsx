@@ -4,11 +4,13 @@
 import type { Metadata } from 'next'; 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Star, ShoppingCart, Heart, Share2, MessageCircle } from 'lucide-react';
+import { Star, ShoppingCart, Heart, Share2, MessageCircle, Plus, Minus } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import ProductCard from '@/components/features/home/product-card'; 
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState, use } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 // Define a type for the product details
 interface ProductDetails {
@@ -70,6 +72,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
   const { toast } = useToast();
   const [product, setProduct] = useState<ProductDetails | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     async function loadProduct() {
@@ -93,10 +96,13 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
   
   const displayOriginalPrice = product.originalPrice && parseFloat(product.originalPrice) > parseFloat(product.price) ? product.originalPrice : (parseFloat(product.price) * 1.25).toFixed(0);
 
+  const incrementQuantity = () => setQuantity(prev => prev + 1);
+  const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+
   const handleAddToCart = () => {
     toast({
       title: "Added to Cart!",
-      description: `${product.name} has been successfully added to your cart.`,
+      description: `${quantity} x ${product.name} has been successfully added to your cart.`,
       variant: "default", 
     });
   };
@@ -199,14 +205,39 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
           <Separator />
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" className="flex-grow" onClick={handleAddToCart}>
-              <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-            </Button>
-            <Button size="lg" variant="outline" className="flex-grow" onClick={handleAddToWishlist}>
-              <Heart className="mr-2 h-5 w-5" /> Add to Wishlist
-            </Button>
+          <div className="space-y-4">
+            {/* Quantity Selector */}
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="quantity" className="text-sm font-medium shrink-0">Quantity:</Label>
+              <div className="flex items-center border rounded-md">
+                <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:bg-muted" onClick={decrementQuantity} aria-label="Decrease quantity">
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="text"
+                  id="quantity"
+                  name="quantity"
+                  value={quantity}
+                  readOnly
+                  className="h-10 w-12 text-center border-0 focus-visible:ring-0 bg-transparent font-medium"
+                  aria-label="Current quantity"
+                />
+                <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:bg-muted" onClick={incrementQuantity} aria-label="Increase quantity">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button size="lg" className="flex-grow" onClick={handleAddToCart}>
+                <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+              </Button>
+              <Button size="lg" variant="outline" className="flex-grow" onClick={handleAddToWishlist}>
+                <Heart className="mr-2 h-5 w-5" /> Add to Wishlist
+              </Button>
+            </div>
           </div>
+
            <div className="flex items-center justify-start space-x-2 pt-2">
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share
@@ -251,3 +282,4 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
     </div>
   );
 }
+
