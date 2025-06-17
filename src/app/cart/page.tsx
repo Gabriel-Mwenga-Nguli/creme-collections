@@ -43,7 +43,11 @@ export default function CartPage() {
   const total = subtotal + shippingCost;
 
   const handleWhatsAppCheckout = () => {
-    const itemDetails = cartItems.map(item => `${item.name} (x${item.quantity}) - KES ${(item.fixedOfferPrice! * item.quantity).toLocaleString()}`).join('\n');
+    const itemDetails = cartItems
+      .map(item => 
+        `${item.name} (x${item.quantity}) - KES ${((item.fixedOfferPrice || 0) * item.quantity).toLocaleString()}`
+      )
+      .join('\n');
     const message = `Hello Creme Lite! I'd like to place an order for the following items:\n\n${itemDetails}\n\nSubtotal: KES ${subtotal.toLocaleString()}\nShipping: KES ${shippingCost.toLocaleString()}\nTotal: KES ${total.toLocaleString()}\n\nPlease advise on payment and delivery.`;
     
     const whatsappNumber = "254743117211";
@@ -86,9 +90,6 @@ export default function CartPage() {
                     <Link href={`/products/item/product-${item.id}`}>
                         <h2 className="text-lg font-semibold text-foreground hover:text-primary transition-colors">{item.name}</h2>
                     </Link>
-                    {/* item.color and item.size might not exist on ProductCardProps, ensure they are optional or add to type */}
-                    {/* {item.color && <p className="text-sm text-muted-foreground">Color: {item.color}</p>} */}
-                    {/* {item.size && <p className="text-sm text-muted-foreground">Size: {item.size}</p>} */}
                     <p className="text-md font-medium text-primary mt-1">KES {(item.fixedOfferPrice || 0).toLocaleString()}</p>
                   </div>
                   <div className="flex flex-col items-end gap-3 mt-2 sm:mt-0 w-full sm:w-auto">
@@ -97,19 +98,19 @@ export default function CartPage() {
                         <Minus className="h-4 w-4" />
                       </Button>
                       <Input
-                        type="number" // Changed to text to allow direct value setting from state. Parsing will handle it.
+                        type="number"
                         value={item.quantity}
                         onChange={(e) => {
                             const newQuantity = parseInt(e.target.value);
-                            if (!isNaN(newQuantity) && newQuantity >= 0) { // Allow 0 for potential removal logic
+                            if (!isNaN(newQuantity) && newQuantity >= 0) {
                                 handleQuantityChange(item.id, newQuantity);
-                            } else if (e.target.value === "") { // Handle empty input if needed
-                                handleQuantityChange(item.id, 0); // Or some default like 1
+                            } else if (e.target.value === "") {
+                                handleQuantityChange(item.id, 0);
                             }
                         }}
                         className="h-8 w-12 text-center border-0 focus-visible:ring-0 bg-transparent font-medium"
                         aria-label="Quantity"
-                        min="0" // Allow 0 for removal
+                        min="0"
                       />
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => handleQuantityChange(item.id, item.quantity + 1)} aria-label="Increase quantity">
                         <Plus className="h-4 w-4" />
