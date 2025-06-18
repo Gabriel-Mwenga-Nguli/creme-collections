@@ -2,8 +2,8 @@
 import { initializeApp, getApps, getApp, type FirebaseApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getAuth, type Auth } from 'firebase/auth';
-// import { getStorage } from 'firebase/storage'; // Uncomment if you need Firebase Storage
-// import { getAnalytics } from "firebase/analytics"; // Uncomment if you need Firebase Analytics
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
+import { getAnalytics, type Analytics } from "firebase/analytics";
 
 // Log environment variables at the VERY START of the module execution
 console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_API_KEY:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'Exists' : 'MISSING');
@@ -28,6 +28,8 @@ const firebaseConfigValues = {
 let app: FirebaseApp | undefined;
 let db: Firestore | null = null;
 let auth: Auth | null = null;
+let storage: FirebaseStorage | null = null;
+let analytics: Analytics | null = null;
 
 // CRITICAL: Log the config values being read from environment variables
 console.log('[Firebase] Attempting to load Firebase Config from environment variables:', {
@@ -94,15 +96,32 @@ if (
       );
       auth = null; 
     }
+
+    try {
+      console.log('[Firebase] Attempting to initialize Firebase Storage...');
+      storage = getStorage(app);
+      console.log('[Firebase] Firebase Storage initialized successfully.');
+    } catch (storageError) {
+      console.error('[Firebase] FIREBASE_STORAGE_INIT_ERROR: Error initializing Firebase Storage:', storageError);
+      storage = null;
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        console.log('[Firebase] Attempting to initialize Firebase Analytics (client-side)...');
+        analytics = getAnalytics(app);
+        console.log('[Firebase] Firebase Analytics initialized successfully.');
+      } catch (analyticsError) {
+        console.error('[Firebase] FIREBASE_ANALYTICS_INIT_ERROR: Error initializing Firebase Analytics:', analyticsError);
+        analytics = null;
+      }
+    } else {
+      console.log('[Firebase] Firebase Analytics not initialized (server-side).');
+    }
+
   } else {
-     console.error("[Firebase] FIREBASE_APP_UNAVAILABLE: Firebase app object is not available (likely due to missing or invalid config, or a prior initialization error). Firestore and Auth will not be available.");
+     console.error("[Firebase] FIREBASE_APP_UNAVAILABLE: Firebase app object is not available (likely due to missing or invalid config, or a prior initialization error). Firestore, Auth, Storage, and Analytics will not be available.");
   }
 }
 
-// const storage = app ? getStorage(app) : null; // Uncomment if you need Firebase Storage
-// let analytics; // Uncomment if you need Firebase Analytics
-// if (typeof window !== 'undefined' && app) { // Ensure Analytics is only initialized on the client
-//   analytics = getAnalytics(app);
-// }
-
-export { db, auth /*, storage, analytics */ };
+export { db, auth, storage, analytics };
