@@ -1,4 +1,6 @@
 
+console.log('[Firebase Module Load] Attempting to load and initialize Firebase services...'); // Added log
+
 import { initializeApp, getApps, getApp, type FirebaseApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getAuth, type Auth } from 'firebase/auth';
