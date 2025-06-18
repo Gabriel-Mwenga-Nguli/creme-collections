@@ -7,9 +7,10 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 import { ToastAction as RadixToastAction } from "@/components/ui/toast"; 
+import Link from "next/link";
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 1000000 // Effectively infinite, toasts dismissed manually or by new ones
 
 type ToasterToast = ToastProps & {
   id: string
@@ -208,17 +209,18 @@ function useToast() {
   }
 }
 
-
 export const createViewCartToastAction = (): ToastActionElement => {
-    const actionProps = {
-        altText: "View Cart",
-        onClick: () => {
-            console.log("View Cart clicked from toast action.");
-        },
-        className: "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive"
-    };
     return (
-      <RadixToastAction {...actionProps}>
+      <RadixToastAction
+        altText="View Cart"
+        onClick={() => {
+            // For a real app, you'd use router.push('/cart') here.
+            // This requires this function to be a hook or have router passed in.
+            // For now, we'll just log to demonstrate the click.
+            console.log("View Cart clicked from toast");
+        }}
+        className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive"
+      >
         <span>View Cart</span>
       </RadixToastAction>
     );
