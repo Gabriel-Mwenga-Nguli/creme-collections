@@ -36,16 +36,31 @@ let analytics: Analytics | null = null;
 console.log('[Firebase Module Start] Initial value of db:', db === null ? 'null' : 'not null');
 console.log('[Firebase Module Start] Attempting to load Firebase Config from environment variables:', firebaseConfigValues);
 
+const projectIdIsInvalid = !firebaseConfigValues.projectId ||
+                           firebaseConfigValues.projectId === "YOUR_PROJECT_ID" ||
+                           firebaseConfigValues.projectId.includes("your-project-id") ||
+                           firebaseConfigValues.projectId.trim() === "";
 
 if (
   !firebaseConfigValues.apiKey ||
   !firebaseConfigValues.authDomain ||
-  !firebaseConfigValues.projectId ||
-  firebaseConfigValues.projectId === "YOUR_PROJECT_ID" || // Explicitly check for placeholder
-  firebaseConfigValues.projectId.includes("your-project-id") // Catch common placeholder variations
+  projectIdIsInvalid
 ) {
+  const apiKeyStatus = firebaseConfigValues.apiKey ? 'OK' : 'MISSING';
+  const authDomainStatus = firebaseConfigValues.authDomain ? 'OK' : 'MISSING';
+  let projectIdStatus = 'OK';
+  if (!firebaseConfigValues.projectId || firebaseConfigValues.projectId.trim() === "") {
+    projectIdStatus = 'MISSING (empty or not set)';
+  } else if (firebaseConfigValues.projectId === "YOUR_PROJECT_ID" || firebaseConfigValues.projectId.includes("your-project-id")) {
+    projectIdStatus = `PLACEHOLDER ('${firebaseConfigValues.projectId}')`;
+  } else {
+    projectIdStatus = firebaseConfigValues.projectId; // Actual value if valid but other configs are missing
+  }
+
   console.error(
-    '[Firebase] CRITICAL_CONFIG_MISSING: One or more critical Firebase configuration values (apiKey, authDomain, projectId) are missing or set to placeholder values. Checked values -> apiKey: [', firebaseConfigValues.apiKey ? 'OK' : 'MISSING', '], authDomain: [', firebaseConfigValues.authDomain ? 'OK' : 'MISSING', '], projectId: [', firebaseConfigValues.projectId && !firebaseConfigValues.projectId.includes('YOUR_PROJECT_ID') && !firebaseConfigValues.projectId.includes('your-project-id') ? firebaseConfigValues.projectId : 'MISSING/PLACEHOLDER', ']. Firebase services will NOT be initialized. Please verify your .env.local file and ensure the Next.js server has been restarted.'
+    `[Firebase] CRITICAL_CONFIG_MISSING: One or more critical Firebase configuration values (apiKey, authDomain, projectId) are missing or set to placeholder values. ` +
+    `Checked values -> apiKey: [ ${apiKeyStatus} ], authDomain: [ ${authDomainStatus} ], projectId: [ ${projectIdStatus} ]. ` +
+    `Firebase services will NOT be initialized. Please verify your .env.local file, ensure it contains the correct NEXT_PUBLIC_FIREBASE_PROJECT_ID and other Firebase variables, and that the Next.js server has been restarted.`
   );
   // Ensure all services remain null if config is critically missing
   app = undefined;
@@ -140,3 +155,4 @@ if (
 
 console.log('[Firebase Module End] Exporting db with value:', db === null ? 'null (Firestore NOT initialized or failed)' : 'VALID INSTANCE (Firestore SHOULD be working)');
 export { db, auth, storage, analytics };
+
