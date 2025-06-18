@@ -37,7 +37,7 @@ let analytics: Analytics | null = null;
 console.log('[Firebase] Attempting to load Firebase Config from environment variables:', {
   apiKeyExists: !!firebaseConfigValues.apiKey,
   authDomain: firebaseConfigValues.authDomain,
-  projectId: firebaseConfigValues.projectId,
+  projectId: firebaseConfigValues.projectId, // This will show "YOUR_PROJECT_ID" if not set correctly
   storageBucketExists: !!firebaseConfigValues.storageBucket,
   messagingSenderIdExists: !!firebaseConfigValues.messagingSenderId,
   appIdExists: !!firebaseConfigValues.appId,
@@ -47,10 +47,12 @@ console.log('[Firebase] Attempting to load Firebase Config from environment vari
 if (
   !firebaseConfigValues.apiKey ||
   !firebaseConfigValues.authDomain ||
-  !firebaseConfigValues.projectId
+  !firebaseConfigValues.projectId ||
+  firebaseConfigValues.projectId === "YOUR_PROJECT_ID" || // Explicitly check for placeholder
+  firebaseConfigValues.projectId.includes("your-project-id") // Catch common placeholder variations
 ) {
   console.error(
-    '[Firebase] CRITICAL_CONFIG_MISSING: One or more critical Firebase configuration values (apiKey, authDomain, projectId) are missing from environment variables. These are expected as NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, and NEXT_PUBLIC_FIREBASE_PROJECT_ID. Firebase services will NOT be initialized. Please verify your .env.local file and ensure the Next.js server has been restarted.'
+    '[Firebase] CRITICAL_CONFIG_MISSING: One or more critical Firebase configuration values (apiKey, authDomain, projectId) are missing or set to placeholder values in environment variables. These are expected as NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, and NEXT_PUBLIC_FIREBASE_PROJECT_ID. Firebase services will NOT be initialized. Please verify your .env.local file and ensure the Next.js server has been restarted.'
   );
 } else {
   const firebaseConfig: FirebaseOptions = {
