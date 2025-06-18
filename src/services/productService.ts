@@ -11,27 +11,27 @@ console.log('[ProductService Module Load] Value of db imported from firebase.ts:
 
 
 export interface Product {
-  id: string; 
+  id: string;
   name: string;
-  description: string; 
-  longDescription?: string; 
-  image: string; 
-  images?: string[]; 
+  description: string;
+  longDescription?: string;
+  image: string;
+  images?: string[];
   dataAiHint: string;
   offerPrice: number;
   originalPrice?: number;
   rating?: string | number;
   reviewsCount?: number;
   availability?: string;
-  category?: string; 
-  categorySlug?: string; 
-  subCategory?: string; 
-  subCategorySlug?: string; 
+  category?: string;
+  categorySlug?: string;
+  subCategory?: string;
+  subCategorySlug?: string;
   brand?: string;
   stock?: number;
   isFeatured?: boolean;
   isWeeklyDeal?: boolean;
-  createdAt?: Timestamp; 
+  createdAt?: Timestamp;
 }
 
 
@@ -41,18 +41,18 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
     throw new Error(`Document data is undefined for document ID: ${document.id}`);
   }
   return {
-    id: document.id, 
+    id: document.id,
     name: data.name || 'Unnamed Product',
     description: data.description || '',
-    longDescription: data.longDescription || data.description || 'No detailed description available for this product.', 
+    longDescription: data.longDescription || data.description || 'No detailed description available for this product.',
     image: data.image || 'https://placehold.co/400x400.png',
-    images: data.images && Array.isArray(data.images) && data.images.length > 0 
-            ? data.images 
+    images: data.images && Array.isArray(data.images) && data.images.length > 0
+            ? data.images
             : (data.image ? [data.image] : ['https://placehold.co/400x400.png']),
     dataAiHint: data.dataAiHint || 'product',
     offerPrice: typeof data.offerPrice === 'number' ? data.offerPrice : 0,
     originalPrice: typeof data.originalPrice === 'number' ? data.originalPrice : undefined,
-    rating: data.rating !== undefined ? String(data.rating) : '0', 
+    rating: data.rating !== undefined ? String(data.rating) : '0',
     reviewsCount: typeof data.reviewsCount === 'number' ? data.reviewsCount : 0,
     availability: data.availability || 'Availability Unknown',
     category: data.category || 'Uncategorized',
@@ -76,9 +76,9 @@ export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
   }
   try {
     const productsRef = collection(db, 'products');
-    const q = query(productsRef, where('isFeatured', '==', true), orderBy('createdAt', 'desc'), limit(8)); // Fetch more for variety
+    const q = query(productsRef, where('isFeatured', '==', true), orderBy('createdAt', 'desc'), limit(8));
     const querySnapshot = await getDocs(q);
-    
+
     const products = querySnapshot.docs.map(doc => {
       const productData = mapDocToProduct(doc);
       return {
@@ -87,8 +87,8 @@ export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
         description: productData.description,
         image: productData.image,
         dataAiHint: productData.dataAiHint,
-        fixedOfferPrice: productData.offerPrice, // Ensured this is number
-        fixedOriginalPrice: productData.originalPrice, // Ensured this is number | undefined
+        fixedOfferPrice: productData.offerPrice,
+        fixedOriginalPrice: productData.originalPrice,
       };
     });
     return products;
@@ -106,7 +106,7 @@ export async function getWeeklyDeals(): Promise<DealProduct[]> {
   }
   try {
     const productsRef = collection(db, 'products');
-    const q = query(productsRef, where('isWeeklyDeal', '==', true), orderBy('createdAt', 'desc'), limit(8)); // Fetch more for variety
+    const q = query(productsRef, where('isWeeklyDeal', '==', true), orderBy('createdAt', 'desc'), limit(8));
     const querySnapshot = await getDocs(q);
 
     const deals = querySnapshot.docs.map(doc => {
@@ -117,8 +117,8 @@ export async function getWeeklyDeals(): Promise<DealProduct[]> {
         description: productData.description,
         image: productData.image,
         dataAiHint: productData.dataAiHint,
-        fixedOfferPrice: productData.offerPrice,  // Ensured this is number
-        fixedOriginalPrice: productData.originalPrice || productData.offerPrice * 1.2, // Ensured this is number
+        fixedOfferPrice: productData.offerPrice,
+        fixedOriginalPrice: productData.originalPrice || productData.offerPrice * 1.2,
       };
     });
     return deals;
@@ -158,7 +158,9 @@ export async function getProductDetailsById(productId: string): Promise<ProductD
 }
 
 export async function getAllProducts(categorySlugParam?: string, subCategorySlugParam?: string): Promise<Product[]> {
-  console.log('[getAllProducts Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
+  console.log('[getAllProducts Call] Value of db:', db === null ? 'null (ERROR)' : 'VALID');
+  console.log(`[getAllProducts Call] Received params: categorySlugParam='${categorySlugParam}', subCategorySlugParam='${subCategorySlugParam}'`);
+
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch products.");
     return [];
@@ -166,23 +168,32 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
   try {
     const productsRef = collection(db, 'products');
     let q;
+    let queryDescription = "all products";
 
     if (categorySlugParam && subCategorySlugParam) {
+       queryDescription = `products with categorySlug='${categorySlugParam}' AND subCategorySlug='${subCategorySlugParam}'`;
        q = query(productsRef, where('categorySlug', '==', categorySlugParam), where('subCategorySlug', '==', subCategorySlugParam), orderBy('name', 'asc'));
     } else if (categorySlugParam) {
+      queryDescription = `products with categorySlug='${categorySlugParam}'`;
       q = query(productsRef, where('categorySlug', '==', categorySlugParam), orderBy('name', 'asc'));
     } else {
-      q = query(productsRef, orderBy('name', 'asc')); 
+      q = query(productsRef, orderBy('name', 'asc'));
     }
-    
+    console.log(`[getAllProducts Call] Constructed query for: ${queryDescription}`);
+
     const querySnapshot = await getDocs(q);
-    
+    console.log(`[getAllProducts Call] Query returned ${querySnapshot.docs.length} documents.`);
+
     const products = querySnapshot.docs.map(docSn => mapDocToProduct(docSn));
+    if (products.length === 0) {
+        console.warn(`[getAllProducts Call] No products found for query: ${queryDescription}. Check Firestore data and slugs.`);
+    }
     return products;
   } catch (error) {
-    console.error("Error fetching products: ", error);
+    console.error("[getAllProducts Call] Error fetching products: ", error);
     if (categorySlugParam) console.error("Category slug for error:", categorySlugParam);
     if (subCategorySlugParam) console.error("Sub-category slug for error:", subCategorySlugParam);
+    console.error("If this error mentions missing indexes, please check your Firebase console for a link to create the required composite index.");
     return [];
   }
 }
@@ -198,7 +209,7 @@ export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>)
         const newProductData = {
             ...productData,
             offerPrice: Number(productData.offerPrice) || 0,
-            originalPrice: productData.originalPrice ? Number(productData.originalPrice) : undefined, // Keep undefined if not set
+            originalPrice: productData.originalPrice ? Number(productData.originalPrice) : undefined,
             stock: Number(productData.stock) || 0,
             reviewsCount: Number(productData.reviewsCount) || 0,
             rating: productData.rating ? String(productData.rating) : '0',
@@ -221,8 +232,7 @@ export async function updateProduct(productId: string, productData: Partial<Omit
     try {
         const productRef = doc(db, 'products', productId);
         const updateData: { [key: string]: any } = { ...productData };
-        
-        // Ensure numeric fields are numbers, or null/undefined if intended to be unset
+
         if (productData.offerPrice !== undefined) updateData.offerPrice = Number(productData.offerPrice);
         if (productData.originalPrice !== undefined) {
           updateData.originalPrice = productData.originalPrice === null || productData.originalPrice === undefined ? null : Number(productData.originalPrice);
@@ -230,7 +240,7 @@ export async function updateProduct(productId: string, productData: Partial<Omit
         if (productData.stock !== undefined) updateData.stock = Number(productData.stock);
         if (productData.reviewsCount !== undefined) updateData.reviewsCount = Number(productData.reviewsCount);
         if (productData.rating !== undefined) updateData.rating = String(productData.rating);
-        
+
         await updateDoc(productRef, updateData);
         return true;
     } catch (error) {
