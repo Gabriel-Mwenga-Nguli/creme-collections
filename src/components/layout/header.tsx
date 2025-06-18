@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, Heart, ShoppingCart, User as UserIconLucide, ChevronDown, type LucideIcon } from 'lucide-react'; 
+import { Menu, X, Sun, Moon, Heart, ShoppingCart, User as UserIconLucide, ChevronDown, type LucideIcon, BarChart3 } from 'lucide-react'; 
 import { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef } from 'react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
@@ -92,16 +92,23 @@ export default function Header() {
   const cartItemCount = getCartItemCount();
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null); 
   const [authLoading, setAuthLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!auth) {
       console.warn("[Header] Firebase auth is not initialized. User state won't be tracked.");
       setAuthLoading(false);
       setCurrentUser(null);
+      setIsAdmin(false);
       return;
     }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      if (user && user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
       setAuthLoading(false);
     });
     return () => unsubscribe(); 
@@ -139,6 +146,11 @@ export default function Header() {
             </div>
           )}
           <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
+            {isAdmin && !isMobile && (
+              <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm px-2 md:px-3 mr-2 border-primary text-primary hover:bg-primary/10">
+                <Link href="/admin/dashboard"><BarChart3 className="mr-1.5 h-3.5 w-3.5"/>Admin</Link>
+              </Button>
+            )}
             {!isMobile && !authLoading && !currentUser && (
                 <>
                     <Button variant="outline" size="sm" asChild>
@@ -202,6 +214,17 @@ export default function Header() {
                             </Link>
                          </SheetClose>
                        ))}
+                       {isAdmin && (
+                         <SheetClose asChild>
+                            <Link
+                              href="/admin/dashboard"
+                              className="flex items-center gap-2 py-2 px-2 rounded-md text-base font-medium text-primary hover:bg-primary/10"
+                            >
+                              <BarChart3 className="h-5 w-5 text-primary" />
+                              Admin Dashboard
+                            </Link>
+                         </SheetClose>
+                       )}
                     </nav>
                     
                     <hr className="my-3"/>
