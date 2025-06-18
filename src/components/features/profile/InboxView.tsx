@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, type FormEvent } from 'react';
@@ -42,7 +41,7 @@ export default function InboxView({ userId, userEmail }: InboxViewProps) {
   const [activeTab, setActiveTab] = useState("compose");
 
   useEffect(() => {
-    if (activeTab === "sent" && userId) {
+    if (activeTab === "sent" && userId && db) {
       setIsLoadingSent(true);
       const messagesRef = collection(db, 'users', userId, 'messages');
       const q = query(messagesRef, where('direction', '==', 'outgoing'), orderBy('timestamp', 'desc'));
@@ -61,6 +60,10 @@ export default function InboxView({ userId, userEmail }: InboxViewProps) {
       });
 
       return () => unsubscribe();
+    } else if (activeTab === "sent" && !db) {
+        console.error("Firestore (db) is not initialized. Cannot fetch sent messages.");
+        toast({ title: "Error", description: "Database not available. Cannot fetch sent messages.", variant: "destructive" });
+        setIsLoadingSent(false);
     }
   }, [activeTab, userId, toast]);
 
@@ -71,7 +74,7 @@ export default function InboxView({ userId, userEmail }: InboxViewProps) {
     }
     setIsDrafting(true);
     try {
-      const input: DraftSupportMessageInput = { topic: composeTopic, userEmail: userEmail || "User" };
+      const input: DraftSupportMessageInput = { topic: composeTopic, userEmail: userEmail || undefined };
       const result: DraftSupportMessageOutput = await draftSupportMessage(input);
       setComposeBody(result.draftMessage);
       if (!composeSubject && result.suggestedSubject) {
@@ -88,8 +91,8 @@ export default function InboxView({ userId, userEmail }: InboxViewProps) {
 
   const handleSendMessage = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!userId) {
-      toast({ title: "Error", description: "User not identified. Cannot send message.", variant: "destructive" });
+    if (!userId || !db) {
+      toast({ title: "Error", description: "User not identified or database unavailable. Cannot send message.", variant: "destructive" });
       return;
     }
     if (!composeSubject.trim() || !composeBody.trim()) {
