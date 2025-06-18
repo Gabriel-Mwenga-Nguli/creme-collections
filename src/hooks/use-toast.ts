@@ -6,8 +6,7 @@ import type {
   ToastActionElement,
   ToastProps,
 } from "@/components/ui/toast"
-import { ToastAction as RadixToastAction } from "@/components/ui/toast"
-// Link import is removed as it's no longer directly used in createViewCartToastAction for this test
+import { ToastAction as RadixToastAction } from "@/components/ui/toast"; 
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
@@ -61,12 +60,12 @@ const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
-    clearTimeout(toastTimeouts.get(toastId));
+    clearTimeout(toastTimeouts.get(toastId)!); 
   }
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
-    dispatch({
+    dispatch({ 
       type: "REMOVE_TOAST",
       toastId: toastId,
     })
@@ -78,15 +77,20 @@ const addToRemoveQueue = (toastId: string) => {
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
+      
       state.toasts.forEach(t => {
         if (toastTimeouts.has(t.id)) {
-          clearTimeout(toastTimeouts.get(t.id));
+          clearTimeout(toastTimeouts.get(t.id)!);
           toastTimeouts.delete(t.id);
         }
+        t.open = false; 
       });
       return {
         ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT).map(t =>
+          
+          t.id === action.toast.id ? { ...t, open: true } : { ...t, open: false }
+        ),
       }
 
     case "UPDATE_TOAST":
@@ -100,9 +104,11 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
+      
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
+        
         state.toasts.forEach((toast) => {
           addToRemoveQueue(toast.id)
         })
@@ -145,22 +151,22 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
+type Toast = Omit<ToasterToast, "id">;
+
 
 function toast(props: Toast & { action?: React.ReactElement<React.ComponentProps<typeof RadixToastAction>> }): {
   id: string;
   dismiss: () => void;
-  update: (props: ToasterToast) => void;
-}
-function toast({ ...props }: Toast) {
-  const id = genId()
+  update: (props: Partial<ToasterToast>) => void;
+} {
+  const id = genId();
 
-  const update = (props: ToasterToast) =>
+  const update = (props: Partial<ToasterToast>) =>
     dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },
-    })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+    });
+  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
 
   dispatch({
     type: "ADD_TOAST",
@@ -168,18 +174,19 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss()
+      onOpenChange: (open: boolean) => {
+        if (!open) dismiss();
       },
-    } as ToasterToast,
-  })
+    } as ToasterToast, 
+  });
 
   return {
     id: id,
     dismiss,
     update,
-  }
+  };
 }
+
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
@@ -201,20 +208,17 @@ function useToast() {
   }
 }
 
-// Simplified version for testing: ToastAction is a regular button.
+
 export const createViewCartToastAction = (): ToastActionElement => {
+    const actionProps = {
+        altText: "View Cart",
+        onClick: () => {
+            console.log("View Cart clicked from toast action.");
+        },
+        className: "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive"
+    };
     return (
-      <RadixToastAction
-        altText="View Cart"
-        onClick={() => {
-            // For a real app, you'd use router.push('/cart') here.
-            // This requires this function to be a hook or have router passed in.
-            // For now, just logging to test if the Slot error is resolved.
-            console.log("View Cart toast action clicked");
-        }}
-        // Apply button styling if needed, though RadixToastAction should have its own
-        className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive"
-      >
+      <RadixToastAction {...actionProps}>
         <span>View Cart</span>
       </RadixToastAction>
     );
