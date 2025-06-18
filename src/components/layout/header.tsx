@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, Heart, ShoppingCart, User, ChevronDown, type LucideIcon } from 'lucide-react';
+import { Menu, X, Sun, Moon, Heart, ShoppingCart, User as UserIconLucide, ChevronDown, type LucideIcon } from 'lucide-react'; // Renamed User to UserIconLucide
 import { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef } from 'react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
@@ -23,8 +23,10 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from '@/lib/utils';
-import { useCart } from '@/context/CartContext'; // Import useCart
-import { Badge } from '@/components/ui/badge'; // Import Badge
+import { useCart } from '@/context/CartContext';
+import { Badge } from '@/components/ui/badge';
+import { auth } from '@/lib/firebase'; // Import Firebase auth
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth'; // Import Firebase User type
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -88,6 +90,23 @@ export default function Header() {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const { getCartItemCount } = useCart(); 
   const cartItemCount = getCartItemCount();
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null); // Store Firebase user object
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    if (!auth) {
+      console.warn("[Header] Firebase auth is not initialized. User state won't be tracked.");
+      setAuthLoading(false);
+      setCurrentUser(null);
+      return;
+    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe(); // Cleanup subscription on unmount
+  }, []);
+
 
   useEffect(() => {
     if (isMobile && isMegaMenuOpen) {
@@ -103,6 +122,8 @@ export default function Header() {
   
   const closeMegaMenu = () => setIsMegaMenuOpen(false);
 
+  const accountLink = currentUser ? "/profile" : "/login";
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
@@ -116,7 +137,7 @@ export default function Header() {
             </div>
           )}
           <div className="flex items-center gap-1 sm:gap-2">
-            {!isMobile && (
+            {!isMobile && !authLoading && !currentUser && (
                 <>
                     <Button variant="outline" size="sm" asChild>
                         <Link href="/login" className="text-xs sm:text-sm">Login</Link>
@@ -140,8 +161,8 @@ export default function Header() {
               </Link>
             </Button>
              {!isMobile && (
-                 <Button variant="ghost" size="icon" asChild aria-label="User Account" className="text-foreground hover:text-primary">
-                    <Link href="/login"><User className="h-5 w-5" /></Link>
+                 <Button variant="ghost" size="icon" asChild aria-label="User Account" className="text-foreground hover:text-primary" disabled={authLoading}>
+                    <Link href={accountLink}><UserIconLucide className="h-5 w-5" /></Link>
                  </Button>
              )}
             <ThemeToggle />
@@ -215,25 +236,33 @@ export default function Header() {
 
                     <hr className="my-4" />
                      <SheetClose asChild>
-                         <Link href="/profile" className="text-base font-medium text-foreground hover:text-primary flex items-center gap-2 py-2 px-2">
-                             <User className="h-5 w-5 text-muted-foreground" /> Profile
+                         <Link href={authLoading ? "/login" : accountLink} className="text-base font-medium text-foreground hover:text-primary flex items-center gap-2 py-2 px-2">
+                             <UserIconLucide className="h-5 w-5 text-muted-foreground" /> {currentUser ? "My Account" : "Login / Profile"}
                          </Link>
                      </SheetClose>
                   </div>
 
                   <div className="p-4 border-t mt-auto">
-                     <div className="flex flex-col gap-2">
-                        <SheetClose asChild>
-                         <Button variant="outline" className="w-full" asChild>
-                            <Link href="/login">Login</Link>
-                         </Button>
-                        </SheetClose>
-                        <SheetClose asChild>
-                         <Button className="w-full" asChild>
-                            <Link href="/register">Register</Link>
-                         </Button>
-                        </SheetClose>
-                     </div>
+                     {authLoading ? (
+                        <p className="text-sm text-muted-foreground text-center">Loading user...</p>
+                     ) : currentUser ? (
+                       <SheetClose asChild>
+                           <Button variant="outline" className="w-full" onClick={() => auth?.signOut()}>Logout</Button>
+                       </SheetClose>
+                     ) : (
+                       <div className="flex flex-col gap-2">
+                          <SheetClose asChild>
+                           <Button variant="outline" className="w-full" asChild>
+                              <Link href="/login">Login</Link>
+                           </Button>
+                          </SheetClose>
+                          <SheetClose asChild>
+                           <Button className="w-full" asChild>
+                              <Link href="/register">Register</Link>
+                           </Button>
+                          </SheetClose>
+                       </div>
+                     )}
                   </div>
                 </SheetContent>
               </Sheet>

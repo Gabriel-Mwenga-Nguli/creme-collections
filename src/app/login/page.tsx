@@ -1,19 +1,18 @@
 
-"use client"; // Add this directive
+"use client"; 
 
-import type { Metadata } from 'next';
+import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-
-// Metadata needs to be handled differently in client components, or set in layout/generateMetadata
-// export const metadata: Metadata = {
-//   title: 'Login - Creme Collections',
-//   description: 'Log in to your Creme Collections account.',
-// };
+import { auth } from '@/lib/firebase'; // Import Firebase auth
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 // Google Icon SVG
 const GoogleIcon = () => (
@@ -22,18 +21,94 @@ const GoogleIcon = () => (
   </svg>
 );
 
-
 export default function LoginPage() {
-  const handleGoogleLogin = () => {
-    // Placeholder for Google login logic
-    console.log("Login with Google clicked");
-    // In a real app, this would initiate the OAuth flow
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsLoading(true);
+
+    if (!auth) {
+      toast({
+        title: 'Error',
+        description: 'Firebase authentication is not initialized. Please try again later.',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: 'Login Successful!',
+        description: 'Welcome back to Creme Collections!',
+      });
+      router.push('/profile'); // Redirect to profile page or dashboard
+    } catch (error: any) {
+      let errorMessage = 'Failed to login. Please check your credentials.';
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      }
+      console.error("Firebase login error:", error);
+      toast({
+        title: 'Login Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    if (!auth) {
+      toast({
+        title: 'Error',
+        description: 'Firebase authentication is not initialized. Please try again later.',
+        variant: 'destructive',
+      });
+      setIsGoogleLoading(false);
+      return;
+    }
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      toast({
+        title: 'Login Successful!',
+        description: 'Welcome to Creme Collections!',
+      });
+      router.push('/profile'); // Redirect to profile page or dashboard
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      let errorMessage = 'Failed to login with Google. Please try again.';
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Google login was cancelled.';
+      } else if (error.code === 'auth/account-exists-with-different-credential') {
+        errorMessage = 'An account already exists with this email address using a different sign-in method.';
+      }
+      toast({
+        title: 'Google Login Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   return (
     <div 
       className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-10rem)] bg-cover bg-center"
-      style={{ backgroundImage: "url('https://placehold.co/1920x1080/EAE6E2/A0937D.png?text=Abstract+Pattern&font=raleway')" }}
+      style={{ backgroundImage: "url('https://placehold.co/1920x1080.png')" }}
       data-ai-hint="abstract pattern"
     >
       <Card className="w-full max-w-md shadow-xl bg-card/90 backdrop-blur-sm">
@@ -42,7 +117,7 @@ export default function LoginPage() {
           <CardDescription>Sign in to continue to your account.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <form action="#" method="POST" className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Label htmlFor="email">Email Address</Label>
               <Input 
@@ -53,6 +128,9 @@ export default function LoginPage() {
                 required 
                 className="mt-1" 
                 placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading || isGoogleLoading}
               />
             </div>
             <div>
@@ -70,10 +148,14 @@ export default function LoginPage() {
                 required 
                 className="mt-1"
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading || isGoogleLoading}
               />
             </div>
             <div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Login
               </Button>
             </div>
@@ -91,8 +173,8 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
-              <GoogleIcon />
+            <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading || isGoogleLoading}>
+              {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
               Login with Google
             </Button>
           </div>
