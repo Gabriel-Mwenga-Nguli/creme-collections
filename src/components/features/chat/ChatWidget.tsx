@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BotIcon as BotMessageSquare, Send, X, Loader2, User as UserIcon } from 'lucide-react';
+import { BotIcon as BotMessageSquareIconInChat, Send, X, Loader2, User as UserIcon, Headphones } from 'lucide-react'; // Added Headphones, renamed BotMessageSquare for chat messages
 import { comprehensiveChatSupport, type ComprehensiveChatSupportInput, type ComprehensiveChatSupportOutput } from '@/ai/flows/comprehensive-chat-support';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { ToastAction } from '@/components/ui/toast'; // Radix ToastAction
+import { ToastAction } from '@/components/ui/toast';
 
 interface ChatMessage {
   id: string;
@@ -35,8 +35,6 @@ export default function ChatWidget() {
 
   const handleOpenChatRequest = useCallback(() => {
     if (authLoading) {
-      // Optionally, show a spinner on the button or disable it
-      // For now, just prevent opening if auth state is loading
       return;
     }
     if (!user) {
@@ -46,7 +44,7 @@ export default function ChatWidget() {
         action: (
           <ToastAction
             altText="Login"
-            onClick={() => router.push('/login?redirect=.')} // Redirect to login, then back to current page
+            onClick={() => router.push('/login?redirect=.')}
           >
             Login
           </ToastAction>
@@ -118,14 +116,14 @@ export default function ChatWidget() {
   }, [inputValue, messages]);
 
   useEffect(() => {
-    if (isOpen && user && messages.length === 0) { // Only show welcome if user is logged in and chat opens
+    if (isOpen && user && messages.length === 0) {
       setMessages([
         { id: 'welcome-msg', role: 'model', content: `Hello ${user.displayName || 'there'}! I'm CremeBot, your virtual assistant for Creme Collections. How can I help you today?` }
       ]);
     }
-    if (isOpen && !user && !authLoading) { // If chat was somehow opened without user, reset (e.g., user logs out)
-        setIsOpen(false); // Close it
-        setMessages([]); // Clear messages
+    if (isOpen && !user && !authLoading) { 
+        setIsOpen(false); 
+        setMessages([]);
     }
   }, [isOpen, user, messages.length, authLoading]);
 
@@ -138,17 +136,17 @@ export default function ChatWidget() {
         className="fixed bottom-6 right-6 rounded-full shadow-xl w-16 h-16 p-0 z-[60] flex items-center justify-center"
         onClick={toggleChat}
         aria-label={isOpen ? "Close chat support" : "Open chat support"}
-        disabled={authLoading && !isOpen} // Disable if auth is loading and trying to open
+        disabled={authLoading && !isOpen}
       >
-        {authLoading && !isOpen ? <Loader2 className="h-7 w-7 animate-spin" /> : isOpen ? <X className="h-7 w-7" /> : <BotMessageSquare className="h-7 w-7" />}
+        {authLoading && !isOpen ? <Loader2 className="h-7 w-7 animate-spin" /> : isOpen ? <X className="h-7 w-7" /> : <Headphones className="h-7 w-7" strokeWidth={2.5} />}
       </Button>
 
-      {isOpen && user && ( // Only render the chat window if open AND user is logged in
+      {isOpen && user && (
         <div className="fixed bottom-24 right-6 w-full max-w-sm h-auto max-h-[calc(100vh-11rem)] shadow-2xl z-[60] flex flex-col rounded-lg overflow-hidden animate-in fade-in-0 slide-in-from-bottom-5 duration-300">
           <Card className="w-full h-full flex flex-col bg-card border border-border">
             <CardHeader className="p-4 border-b flex-shrink-0">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <BotMessageSquare className="h-6 w-6 text-primary" /> Creme Collections Support
+                <BotMessageSquareIconInChat className="h-6 w-6 text-primary" /> Creme Collections Support
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow p-0 overflow-hidden min-h-[200px]">
@@ -161,7 +159,7 @@ export default function ChatWidget() {
                         message.role === 'user' ? 'justify-end' : 'justify-start'
                       }`}
                     >
-                      {message.role === 'model' && <BotMessageSquare className="h-6 w-6 text-muted-foreground self-start shrink-0 mt-1" />}
+                      {message.role === 'model' && <BotMessageSquareIconInChat className="h-6 w-6 text-muted-foreground self-start shrink-0 mt-1" />}
                       <div
                         className={`max-w-[80%] rounded-lg px-3 py-2 text-sm shadow-sm ${
                           message.role === 'user'
@@ -178,7 +176,7 @@ export default function ChatWidget() {
                   ))}
                   {isLoading && (
                     <div className="flex justify-start items-center gap-2.5">
-                       <BotMessageSquare className="h-6 w-6 text-muted-foreground self-start shrink-0 mt-1" />
+                       <BotMessageSquareIconInChat className="h-6 w-6 text-muted-foreground self-start shrink-0 mt-1" />
                       <div className="bg-muted text-muted-foreground rounded-lg px-3 py-2 text-sm flex items-center shadow-sm rounded-bl-none">
                         <Loader2 className="h-4 w-4 animate-spin mr-2" /> Typing...
                       </div>
