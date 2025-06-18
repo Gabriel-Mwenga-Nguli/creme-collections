@@ -1,11 +1,12 @@
+
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
-import {firebase} from '@genkit-ai/firebase'; // Import the firebase plugin
+import { enableFirebaseTelemetry } from '@genkit-ai/firebase'; // Changed import path and name
 
 export const ai = genkit({
   plugins: [
     googleAI(),
-    firebase(), // Add the firebase plugin here
+    enableFirebaseTelemetry, // Use the imported reference directly
   ],
   model: 'googleai/gemini-2.0-flash',
   telemetry: {
@@ -22,3 +23,4 @@ export const ai = genkit({
   flowStateStore: 'firebase', // Optional: Store flow states in Firestore
   traceStore: 'firebase', // Optional: Store traces in Firestore (can also use Google Cloud Tracing)
 });
+
