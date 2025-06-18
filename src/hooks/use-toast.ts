@@ -3,11 +3,11 @@
 
 import * as React from "react"
 import type {
-  ToastActionElement,
+  ToastActionElement, // This is React.ReactElement<typeof ToastAction>
   ToastProps,
 } from "@/components/ui/toast"
-import { ToastAction as RadixToastAction } from "@/components/ui/toast"; 
-import Link from "next/link";
+// Import ToastAction directly, not aliased, to be used in createViewCartToastAction
+import { ToastAction } from "@/components/ui/toast"; 
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000 // Effectively infinite, toasts dismissed manually or by new ones
@@ -16,7 +16,7 @@ type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
-  action?: ToastActionElement
+  action?: ToastActionElement // This should be React.ReactElement<typeof ToastAction>
 }
 
 const actionTypes = {
@@ -59,14 +59,24 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
+let memoryState: State = { toasts: [] }
+const listeners: Array<(state: State) => void> = []
+
+function dispatch(action: Action) {
+  memoryState = reducer(memoryState, action)
+  listeners.forEach((listener) => {
+    listener(memoryState)
+  })
+}
+
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
-    clearTimeout(toastTimeouts.get(toastId)!); 
+    clearTimeout(toastTimeouts.get(toastId)!);
   }
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
-    dispatch({ 
+    dispatch({
       type: "REMOVE_TOAST",
       toastId: toastId,
     })
@@ -75,23 +85,22 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
+
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
-      
       state.toasts.forEach(t => {
         if (toastTimeouts.has(t.id)) {
           clearTimeout(toastTimeouts.get(t.id)!);
           toastTimeouts.delete(t.id);
         }
-        t.open = false; 
       });
       return {
         ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT).map(t =>
-          
-          t.id === action.toast.id ? { ...t, open: true } : { ...t, open: false }
-        ),
+        toasts: [
+          { ...action.toast, open: true },
+          ...state.toasts.map(t => ({ ...t, open: false })),
+        ].slice(0, TOAST_LIMIT),
       }
 
     case "UPDATE_TOAST":
@@ -104,12 +113,9 @@ export const reducer = (state: State, action: Action): State => {
 
     case "DISMISS_TOAST": {
       const { toastId } = action
-
-      
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
-        
         state.toasts.forEach((toast) => {
           addToRemoveQueue(toast.id)
         })
@@ -141,21 +147,10 @@ export const reducer = (state: State, action: Action): State => {
   }
 }
 
-const listeners: Array<(state: State) => void> = []
-
-let memoryState: State = { toasts: [] }
-
-function dispatch(action: Action) {
-  memoryState = reducer(memoryState, action)
-  listeners.forEach((listener) => {
-    listener(memoryState)
-  })
-}
-
 type Toast = Omit<ToasterToast, "id">;
 
-
-function toast(props: Toast & { action?: React.ReactElement<React.ComponentProps<typeof RadixToastAction>> }): {
+// The `action` prop in the `Toast` type for `toast` function must match ToastActionElement
+function toast(props: Toast & { action?: ToastActionElement }): {
   id: string;
   dismiss: () => void;
   update: (props: Partial<ToasterToast>) => void;
@@ -174,11 +169,10 @@ function toast(props: Toast & { action?: React.ReactElement<React.ComponentProps
     toast: {
       ...props,
       id,
-      open: true,
       onOpenChange: (open: boolean) => {
         if (!open) dismiss();
       },
-    } as ToasterToast, 
+    } as ToasterToast,
   });
 
   return {
@@ -187,7 +181,6 @@ function toast(props: Toast & { action?: React.ReactElement<React.ComponentProps
     update,
   };
 }
-
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
@@ -210,22 +203,21 @@ function useToast() {
 }
 
 export const createViewCartToastAction = (): ToastActionElement => {
+    // Using ToastAction directly (it's imported from @/components/ui/toast)
+    // Meticulously formatted to ensure no syntax errors.
     return (
-      <RadixToastAction
+      <ToastAction
         altText="View Cart"
         onClick={() => {
-            // For a real app, you'd use router.push('/cart') here.
-            // This requires this function to be a hook or have router passed in.
-            // For now, we'll just log to demonstrate the click.
-            console.log("View Cart clicked from toast");
+            // For a real app, you'd use router.push('/cart') here if this function
+            // becomes a hook or router is passed in.
+            console.log('View Cart clicked from toast action (placeholder)');
         }}
         className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive"
       >
-        <span>View Cart</span>
-      </RadixToastAction>
+        View Cart
+      </ToastAction>
     );
 };
 
-
-export { useToast, toast, RadixToastAction as ToastAction };
-
+export { useToast, toast, ToastAction }; // Exporting ToastAction for use elsewhere if needed
