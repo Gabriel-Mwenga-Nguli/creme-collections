@@ -1,7 +1,6 @@
 
 "use client"; 
 
-import { use } from 'react'; 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, Share2, MessageCircle, Plus, Minus, Loader2, Info } from 'lucide-react';
@@ -23,8 +22,8 @@ import Link from 'next/link';
 
 interface ProductDetailsComponentData extends ProductDetailsPageData {}
 
-export default function ProductDetailPage({ params: paramsPromise }: { params: Promise<{ productId: string }> }) {
-  const { productId } = use(paramsPromise); 
+export default function ProductDetailPage({ params }: { params: { productId: string } }) {
+  const { productId } = params; // Corrected: Direct access to productId
   const router = useRouter();
   const { toast } = useToast();
   const { addToCart } = useCart(); 
