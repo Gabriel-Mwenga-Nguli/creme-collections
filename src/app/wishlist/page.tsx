@@ -105,9 +105,9 @@ export default function WishlistPage() {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-center">
         <p className="text-destructive">Error loading your profile: {authError.message}</p>
-        <Link href="/login" passHref legacyBehavior>
-          <Button as="a" className="mt-4">Login</Button>
-        </Link>
+        <Button asChild className="mt-4">
+          <Link href="/login">Login</Link>
+        </Button>
       </div>
     );
   }
@@ -120,9 +120,9 @@ export default function WishlistPage() {
         <p className="text-muted-foreground mb-6">
           Please <Link href="/login" className="text-primary hover:underline">log in</Link> to view or add items to your wishlist.
         </p>
-        <Link href="/login" passHref legacyBehavior>
-          <Button as="a" size="lg">Login to View Wishlist</Button>
-        </Link>
+        <Button asChild size="lg">
+          <Link href="/login">Login to View Wishlist</Link>
+        </Button>
       </div>
     );
   }
@@ -169,9 +169,9 @@ export default function WishlistPage() {
           <p className="text-muted-foreground mb-6">
             Add items you love to your wishlist by clicking the heart icon on product pages.
           </p>
-          <Link href="/products" passHref legacyBehavior>
-            <Button as="a" size="lg">Start Shopping</Button>
-          </Link>
+          <Button asChild size="lg">
+            <Link href="/products">Start Shopping</Link>
+          </Button>
         </div>
       )}
     </div>

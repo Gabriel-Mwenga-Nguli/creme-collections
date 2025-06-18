@@ -75,9 +75,9 @@ export default function AdminDashboardPage() {
           </h1>
           <p className="text-muted-foreground text-sm">Overview of your shop's performance and activity.</p>
         </div>
-        <Link href="/admin/products/add" passHref legacyBehavior>
-          <Button as="a">Add New Product</Button>
-        </Link>
+        <Button asChild>
+          <Link href="/admin/products/add">Add New Product</Link>
+        </Button>
       </div>
       
       <Separator />
@@ -117,9 +117,9 @@ export default function AdminDashboardPage() {
               <CardTitle>Recent Orders</CardTitle>
               <CardDescription>Last 5 orders placed on the website.</CardDescription>
             </div>
-            <Link href="/admin/orders" passHref legacyBehavior>
-              <Button as="a" variant="outline" size="sm">View All Orders</Button>
-            </Link>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/admin/orders">View All Orders</Link>
+            </Button>
           </CardHeader>
           <CardContent>
             {loadingOrders ? <p className="text-muted-foreground text-sm">Loading recent orders...</p> :

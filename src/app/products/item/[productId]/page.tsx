@@ -23,7 +23,7 @@ import Link from 'next/link';
 interface ProductDetailsComponentData extends ProductDetailsPageData {}
 
 export default function ProductDetailPage({ params }: { params: { productId: string } }) {
-  const { productId } = params; // Corrected: Direct access to productId
+  const { productId } = params; 
   const router = useRouter();
   const { toast } = useToast();
   const { addToCart } = useCart(); 
@@ -49,7 +49,6 @@ export default function ProductDetailPage({ params }: { params: { productId: str
             setSelectedImage(productDetails.image); 
             document.title = `${productDetails.name} - Creme Collections`;
 
-            // Fetch related products (e.g., featured products)
             const fetchedRelatedProductsData = await getFeaturedProducts(); 
             const mappedRelatedProducts = fetchedRelatedProductsData.map(p => ({
               id: p.id,
@@ -62,16 +61,12 @@ export default function ProductDetailPage({ params }: { params: { productId: str
             }));
             setRelatedProducts(mappedRelatedProducts.filter(p => p.id !== productId).slice(0, 4));
 
-            // Fetch products on offer (e.g., weekly deals)
             const fetchedOfferProductsData = await getWeeklyDeals();
             setOfferProducts(fetchedOfferProductsData.filter(p => p.id !== productId).slice(0, 6));
 
 
           } else {
             console.warn("Product not found on client side after fetch for ID:", productId);
-            // Client-side notFound or redirect
-            // notFound(); // This might not behave as expected client-side after initial load.
-            // router.push('/404'); // Alternative
           }
         } catch (error) {
           console.error("Error loading product data:", error);
@@ -81,7 +76,6 @@ export default function ProductDetailPage({ params }: { params: { productId: str
       } else {
         console.warn("Invalid or missing productId for Product Detail Page:", productId);
         setIsLoading(false);
-        // Optionally redirect or show an error message
       }
     }
     loadProductData();
@@ -112,7 +106,9 @@ export default function ProductDetailPage({ params }: { params: { productId: str
 
   const handleToggleWishlist = async () => {
     if (!user) {
-      toast({ title: "Login Required", description: "Please log in to manage your wishlist.", variant: "destructive", action: <Button asChild><Link href="/login">Login</Link></Button> });
+      toast({ title: "Login Required", description: "Please log in to manage your wishlist.", variant: "destructive", 
+        action: <Button asChild><Link href="/login">Login</Link></Button> 
+      });
       return;
     }
     if (!product || !db || typeof product.id !== 'string') {
@@ -324,16 +320,15 @@ export default function ProductDetailPage({ params }: { params: { productId: str
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share
             </Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary" asChild>
-             <a href={`/contact?subject=Question about ${product.name}`}>
+            <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+             <Link href={`/contact?subject=Question about ${product.name}`}>
                 <MessageCircle className="mr-2 h-4 w-4" /> Ask a question
-             </a>
+             </Link>
             </Button>
           </div>
         </div>
       </div>
       
-      {/* Detailed Description Section */}
       <div className="mt-12 md:mt-16 py-8 border-t">
         <h2 className="text-2xl lg:text-3xl font-bold text-foreground font-headline mb-6 flex items-center">
           <Info className="mr-3 h-7 w-7 text-primary" />
@@ -348,7 +343,6 @@ export default function ProductDetailPage({ params }: { params: { productId: str
         </div>
       </div>
 
-      {/* Related Products Section */}
       {relatedProducts.length > 0 && (
         <div className="mt-12 md:mt-16 py-8 border-t">
           <h2 className="text-2xl lg:text-3xl font-bold text-foreground font-headline mb-8 text-center">
@@ -371,7 +365,6 @@ export default function ProductDetailPage({ params }: { params: { productId: str
         </div>
       )}
 
-      {/* Products on Offer Section */}
       {offerProducts.length > 0 && (
         <div className="mt-12 md:mt-16 py-8 border-t bg-primary/5 px-4 sm:px-6 lg:px-8 rounded-lg">
           <h2 className="text-2xl lg:text-3xl font-bold text-primary font-headline mb-8 text-center">
@@ -383,4 +376,3 @@ export default function ProductDetailPage({ params }: { params: { productId: str
     </div>
   );
 }
-

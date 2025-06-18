@@ -72,13 +72,11 @@ export default function OrderDetailPage() {
         <AlertCircle className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-destructive mb-3 sm:mb-4" />
         <h1 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">Order Not Found</h1>
         <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base">We couldn't find the details for this order.</p>
-        <Link href="/profile?section=orders" passHref legacyBehavior>
-          <Button as="a" variant="outline">
-            <span>
+        <Button asChild variant="outline">
+          <Link href="/profile?section=orders">
              <ChevronLeft className="mr-2 h-4 w-4 inline-block" /> Back to My Orders
-            </span>
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     );
   }
@@ -97,14 +95,12 @@ export default function OrderDetailPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       <div className="mb-6 md:mb-8">
-        <Link href="/profile?section=orders" passHref legacyBehavior>
-          <Button as="a" variant="outline" size="sm">
-            <span>
-              <ChevronLeft className="mr-2 h-4 w-4 inline-block" />
-              Back to My Orders
-            </span>
-          </Button>
-        </Link>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/profile?section=orders">
+            <ChevronLeft className="mr-2 h-4 w-4 inline-block" />
+            Back to My Orders
+          </Link>
+        </Button>
       </div>
 
       <Card className="shadow-lg">
@@ -192,9 +188,9 @@ export default function OrderDetailPage() {
           <div className="text-center space-x-2">
              <Button variant="outline" size="sm" disabled>Track Package (Coming Soon)</Button>
              {order.status === 'Delivered' && <Button variant="secondary" size="sm" disabled>Request Return (Coming Soon)</Button>}
-             <Link href={`/contact?subject=Regarding Order #${order.orderId || order.id.substring(0,8)}`} passHref legacyBehavior>
-                <Button as="a" variant="default" size="sm">Contact Support</Button>
-             </Link>
+             <Button asChild variant="default" size="sm">
+                <Link href={`/contact?subject=Regarding Order #${order.orderId || order.id.substring(0,8)}`}>Contact Support</Link>
+             </Button>
           </div>
 
         </CardContent>

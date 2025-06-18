@@ -5,6 +5,7 @@ import type { ProductCardProps } from '@/components/features/home/product-card';
 import { useToast } from '@/hooks/use-toast'; 
 import Link from 'next/link';
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
+import { Button } from '@/components/ui/button'; // Added import
 
 export interface CartItem extends ProductCardProps { 
   quantity: number;
@@ -30,6 +31,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   }, [cartItems]);
 
+  const createViewCartToastAction = () => (
+    <Button asChild variant="outline" size="sm">
+      <Link href="/cart">View Cart</Link>
+    </Button>
+  );
+
   const addToCart = useCallback((product: ProductCardProps, quantity: number) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
@@ -46,7 +53,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     toast({
       title: `${product.name} added to cart!`,
       description: `Quantity: ${quantity}. Total items: ${currentCartItemCount + quantity}`,
-      // action: createViewCartToastAction(), // Removed action temporarily
+      action: createViewCartToastAction(), 
       duration: 5000,
     });
   }, [toast, currentCartItemCount]);

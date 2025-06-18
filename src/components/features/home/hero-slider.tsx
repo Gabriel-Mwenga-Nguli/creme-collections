@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -120,11 +121,11 @@ const HeroSlider = () => {
             <p className="mt-4 text-lg sm:text-xl md:text-2xl max-w-xl drop-shadow-md">
               {slide.subtitle}
             </p>
-            <Link href={slide.buttonLink} passHref legacyBehavior>
-              <Button as="a" size="lg" className="mt-8 w-fit">
-                <span>{slide.buttonText}</span>
-              </Button>
-            </Link>
+            <Button asChild size="lg" className="mt-8 w-fit">
+              <Link href={slide.buttonLink}>
+                {slide.buttonText}
+              </Link>
+            </Button>
           </div>
         </div>
       ))}

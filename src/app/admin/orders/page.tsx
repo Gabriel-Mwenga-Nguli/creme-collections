@@ -125,13 +125,11 @@ export default function AdminOrdersPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link href={`/admin/orders/${order.id}`} passHref legacyBehavior>
-                          <Button as="a" variant="outline" size="sm">
-                            <span>
-                              <Eye className="mr-1 h-3.5 w-3.5 inline-block" /> View
-                            </span>
-                          </Button>
-                        </Link>
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/admin/orders/${order.id}`}>
+                            <Eye className="mr-1 h-3.5 w-3.5 inline-block" /> View
+                          </Link>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

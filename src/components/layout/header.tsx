@@ -72,7 +72,7 @@ const ListItem = forwardRef<
           onClick={onClick}
           {...props}
         >
-          <> {/* Wrap children of Link in a React.Fragment */}
+          <> 
             <div className="text-sm font-medium leading-none text-slate-100 group-hover/listitem:text-primary">{title}</div>
             {children && (
               <p className="line-clamp-2 text-sm leading-snug text-slate-400">
@@ -150,43 +150,45 @@ export default function Header() {
           )}
           <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
             {isAdmin && !isMobile && (
-              <Link href="/admin/dashboard" passHref legacyBehavior>
-                <Button as="a" variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3 mr-2 border-primary text-primary hover:bg-primary/10">
-                  <span><BarChart3 className="mr-1.5 h-3.5 w-3.5"/>Admin</span>
-                </Button>
-              </Link>
+              <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3 mr-2 border-primary text-primary hover:bg-primary/10">
+                <Link href="/admin/dashboard">
+                  <BarChart3 className="mr-1.5 h-3.5 w-3.5"/>Admin
+                </Link>
+              </Button>
             )}
             {!isMobile && !authLoading && !currentUser && (
                 <>
-                    <Link href="/login" passHref legacyBehavior>
-                        <Button as="a" variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3">Login</Button>
-                    </Link>
-                    <Link href="/register" passHref legacyBehavior>
-                        <Button as="a" variant="default" size="sm" className="text-xs sm:text-sm px-2 md:px-3">Register</Button>
-                    </Link>
+                    <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3">
+                      <Link href="/login">Login</Link>
+                    </Button>
+                    <Button asChild variant="default" size="sm" className="text-xs sm:text-sm px-2 md:px-3">
+                      <Link href="/register">Register</Link>
+                    </Button>
                 </>
             )}
-            <Link href="/wishlist" passHref legacyBehavior>
-              <Button as="a" variant="ghost" size="icon" aria-label="Wishlist" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
+            <Button asChild variant="ghost" size="icon" aria-label="Wishlist" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
+              <Link href="/wishlist">
                 <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
-              </Button>
-            </Link>
-            <Link href="/cart" passHref legacyBehavior>
-              <Button as="a" variant="ghost" size="icon" aria-label="Shopping Cart" className="relative text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
-                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-                {cartItemCount > 0 && (
-                  <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 min-w-[0.75rem] p-[2px] text-[10px] flex items-center justify-center leading-none">
-                    {cartItemCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="icon" aria-label="Shopping Cart" className="relative text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
+              <Link href="/cart">
+                <>
+                  <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+                  {cartItemCount > 0 && (
+                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 min-w-[0.75rem] p-[2px] text-[10px] flex items-center justify-center leading-none">
+                      {cartItemCount}
+                    </Badge>
+                  )}
+                </>
+              </Link>
+            </Button>
              {!isMobile && (
-                <Link href={accountLink} passHref legacyBehavior>
-                 <Button as="a" variant="ghost" size="icon" aria-label="User Account" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9" disabled={authLoading}>
+                <Button asChild variant="ghost" size="icon" aria-label="User Account" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9" disabled={authLoading}>
+                  <Link href={accountLink}>
                     <UserIconLucide className="h-4 w-4 sm:h-5 sm:w-5" />
-                 </Button>
-                </Link>
+                  </Link>
+                </Button>
              )}
             <ThemeToggle />
             {isMobile && (
@@ -288,14 +290,14 @@ export default function Header() {
                      ) : (
                        <div className="flex flex-col gap-2">
                           <SheetClose asChild>
-                            <Link href="/login" passHref legacyBehavior>
-                              <Button as="a" variant="outline" className="w-full">Login</Button>
-                            </Link>
+                            <Button asChild variant="outline" className="w-full">
+                               <Link href="/login">Login</Link>
+                            </Button>
                           </SheetClose>
                           <SheetClose asChild>
-                            <Link href="/register" passHref legacyBehavior>
-                              <Button as="a" className="w-full">Register</Button>
-                            </Link>
+                            <Button asChild className="w-full">
+                                <Link href="/register">Register</Link>
+                            </Button>
                           </SheetClose>
                        </div>
                      )}
@@ -339,7 +341,6 @@ export default function Header() {
                           <NavigationMenuTrigger 
                             className={cn(navigationMenuTriggerStyle(),"text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 data-[state=open]:bg-slate-800 data-[state=open]:text-slate-100 group")}
                           >
-                            {/* Link content directly in Trigger for asChild-like behavior with styling */}
                              <Link href={link.href} onClick={closeMegaMenu}>
                                 <span>
                                 {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-hover:text-primary transition-colors inline-block" />}
@@ -392,4 +393,3 @@ export default function Header() {
     </header>
   );
 }
-

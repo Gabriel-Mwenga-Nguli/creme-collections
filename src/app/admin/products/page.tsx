@@ -50,13 +50,11 @@ export default function AdminProductsPage() {
           </h1>
           <p className="text-muted-foreground text-sm">View, add, and edit products in your store.</p>
         </div>
-        <Link href="/admin/products/add" passHref legacyBehavior>
-          <Button as="a">
-            <span>
-              <PlusCircle className="mr-2 h-5 w-5 inline-block" /> Add New Product
-            </span>
-          </Button>
-        </Link>
+        <Button asChild>
+          <Link href="/admin/products/add">
+            <PlusCircle className="mr-2 h-5 w-5 inline-block" /> Add New Product
+          </Link>
+        </Button>
       </div>
 
       <Card>
@@ -120,13 +118,11 @@ export default function AdminProductsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link href={`/admin/products/edit/${product.id}`} passHref legacyBehavior>
-                          <Button as="a" variant="outline" size="sm">
-                            <span>
-                              <Edit3 className="mr-1 h-3.5 w-3.5 inline-block" /> Edit
-                            </span>
-                          </Button>
-                        </Link>
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/admin/products/edit/${product.id}`}>
+                            <Edit3 className="mr-1 h-3.5 w-3.5 inline-block" /> Edit
+                          </Link>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -59,14 +59,12 @@ export default function CartPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-8 md:mb-10 gap-4">
-        <Link href="/products" passHref legacyBehavior>
-          <Button as="a" variant="outline" size="sm" className="w-full sm:w-auto">
-            <span>
-              <ChevronLeft className="mr-2 h-4 w-4 inline-block" />
-              Continue Shopping
-            </span>
-          </Button>
-        </Link>
+        <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+          <Link href="/products">
+            <ChevronLeft className="mr-2 h-4 w-4 inline-block" />
+            Continue Shopping
+          </Link>
+        </Button>
         <div className="text-center">
           <ShoppingCart className="mx-auto h-8 w-8 sm:h-10 sm:w-10 text-primary mb-1 sm:mb-2" />
           <h1 className="text-2xl sm:text-3xl font-bold text-primary font-headline">Your Cart</h1>
@@ -148,11 +146,11 @@ export default function CartPage() {
                   <span>Total</span>
                   <span>KES {total.toLocaleString()}</span>
                 </div>
-                <Link href="/checkout" passHref legacyBehavior>
-                  <Button as="a" size="lg" className="w-full">
+                <Button asChild size="lg" className="w-full">
+                  <Link href="/checkout">
                     Proceed to Checkout
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
                 <Button 
                   size="lg" 
                   className="w-full bg-green-600 hover:bg-green-700 text-white" 
@@ -175,9 +173,9 @@ export default function CartPage() {
           <p className="text-muted-foreground mb-4 sm:mb-6">
             Looks like you haven't added anything to your cart yet.
           </p>
-          <Link href="/products" passHref legacyBehavior>
-            <Button as="a" size="lg">Start Shopping</Button>
-          </Link>
+          <Button asChild size="lg">
+            <Link href="/products">Start Shopping</Link>
+          </Button>
         </div>
       )}
     </div>

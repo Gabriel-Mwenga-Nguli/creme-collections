@@ -104,19 +104,17 @@ export default async function HomePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
             {promotionalBanners.map((banner) => (
-              <div key={banner.title} className="group block"> {/* Changed Link to div as Card now handles navigation via Button */}
+              <div key={banner.title} className="group block"> 
                 <Card className={`overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-xl hover:border-primary ${banner.bgColor}`}>
                   <div className="flex flex-col sm:flex-row">
                     <div className="sm:w-1/2 p-4 md:p-6 lg:p-8 flex flex-col justify-center">
                       <h3 className={`text-xl md:text-2xl font-semibold ${banner.textColor === 'text-primary-foreground' ? 'text-primary' : 'text-accent'} font-headline`}>{banner.title}</h3>
                       <p className={`mt-1.5 md:mt-2 text-sm ${banner.textColor === 'text-primary-foreground' ? 'text-primary/80' : 'text-accent/80'}`}>{banner.description}</p>
-                      <Link href={banner.href} passHref legacyBehavior>
-                        <Button as="a" variant={banner.bgColor === 'bg-primary/10' ? 'default' : 'outline'} size="sm" className="mt-3 md:mt-4 w-fit">
-                          <span>
-                            Shop Now <ShoppingBag className="ml-2 h-4 w-4 inline" />
-                          </span>
-                        </Button>
-                      </Link>
+                      <Button asChild variant={banner.bgColor === 'bg-primary/10' ? 'default' : 'outline'} size="sm" className="mt-3 md:mt-4 w-fit">
+                        <Link href={banner.href}>
+                          Shop Now <ShoppingBag className="ml-2 h-4 w-4 inline" />
+                        </Link>
+                      </Button>
                     </div>
                     <div className="sm:w-1/2 aspect-video sm:aspect-auto">
                        <Image
@@ -185,17 +183,14 @@ export default async function HomePage() {
             <p className="text-center text-muted-foreground">No featured products available at the moment. Check back soon!</p>
           )}
            <div className="text-center mt-8 md:mt-12">
-            <Link href="/products" passHref legacyBehavior>
-              <Button as="a" size="lg">
-                <span>
-                  Shop All Products <ShoppingBag className="ml-2 h-5 w-5 inline" />
-                </span>
-              </Button>
-            </Link>
+            <Button asChild size="lg">
+              <Link href="/products">
+                Shop All Products <ShoppingBag className="ml-2 h-5 w-5 inline" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
     </div>
   );
 }
-

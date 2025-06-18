@@ -26,7 +26,7 @@ export interface ProductCardProps {
 export default function ProductCard({ id, name, description, image, dataAiHint, fixedOfferPrice, fixedOriginalPrice }: ProductCardProps) {
   const [offerPrice, setOfferPrice] = useState<string | null>(null);
   const [originalPrice, setOriginalPrice] = useState<string | null>(null);
-  const { addToCart, getCartItemCount } = useCart(); // Added getCartItemCount
+  const { addToCart, getCartItemCount } = useCart(); 
   const { toast } = useToast();
   const [user, authLoading] = useAuthState(auth);
 
@@ -42,7 +42,6 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
         setOriginalPrice(null);
       }
     } else {
-      // Fallback dynamic pricing - this might be removed if all products have fixed prices
       const basePrice = Math.random() * 8000 + 2000;
       const discount = Math.random() * 0.3 + 0.1;
       const calculatedOfferPrice = basePrice * (1 - discount);
@@ -54,7 +53,7 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
 
   useEffect(() => {
     if (!user || !id || !db || authLoading) {
-      if(!authLoading && user) setIsWishlistProcessing(false); // Ensure processing stops if user is present but other conditions fail early
+      if(!authLoading && user) setIsWishlistProcessing(false); 
       return;
     }
     setIsWishlistProcessing(true);
@@ -64,16 +63,16 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
       setIsWishlistProcessing(false);
     }, (error) => {
       console.error("Error checking wishlist status for product card:", error);
-      setIsWishlistProcessing(false); // Ensure processing stops on error
+      setIsWishlistProcessing(false); 
     });
     return () => unsubscribe();
-  }, [user, id, authLoading, db]); // Added db to dependency array
+  }, [user, id, authLoading, db]); 
 
   const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault(); 
     event.stopPropagation(); 
     const productToAdd = { id, name, description, image, dataAiHint, fixedOfferPrice, fixedOriginalPrice };
-    addToCart(productToAdd, 1); // addToCart in CartContext will handle the toast
+    addToCart(productToAdd, 1); 
   };
 
   const handleToggleWishlist = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -86,14 +85,14 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
         description: "Please log in to manage your wishlist.", 
         variant: "destructive", 
         action: ( 
-          <Link href="/login" passHref legacyBehavior>
-            <Button variant="outline" size="sm" as="a">Login</Button> 
-          </Link>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/login">Login</Link>
+          </Button>
         ) 
       });
       return;
     }
-    if (!id || !db) { // Check db initialization
+    if (!id || !db) { 
       toast({ title: "Error", description: "Product data missing or database unavailable.", variant: "destructive" });
       return;
     }
@@ -109,17 +108,16 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
         await setDoc(wishlistItemRef, {
           productId: id,
           addedAt: serverTimestamp(),
-          name: name, // Store product name for easier display in wishlist
-          image: image, // Store image for easier display
-          offerPrice: fixedOfferPrice, // Store price
+          name: name, 
+          image: image, 
+          offerPrice: fixedOfferPrice, 
         });
         toast({ title: "Added to Wishlist!", description: `${name} added to your wishlist.` });
       }
-      // The onSnapshot listener will update isInWishlist and isWishlistProcessing
     } catch (error) {
       console.error("Error toggling wishlist from product card:", error);
       toast({ title: "Error", description: "Could not update your wishlist. Please try again.", variant: "destructive" });
-      setIsWishlistProcessing(false); // Explicitly set to false on error
+      setIsWishlistProcessing(false); 
     }
   };
 
@@ -179,17 +177,15 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
                 size="sm" 
                 className="w-full h-9 text-xs sm:text-sm" 
                 onClick={handleAddToCart}
-                disabled={fixedOfferPrice === undefined} // Disable if price is not set
+                disabled={fixedOfferPrice === undefined} 
             >
               <ShoppingCart className="mr-1.5 h-4 w-4" /> Add to Cart
             </Button>
-            <Link href={`/products/item/${id}`} passHref legacyBehavior>
-              <Button as="a" variant="outline" size="sm" className="w-full h-9 text-xs sm:text-sm">
-                <span>
-                  <Eye className="mr-1.5 h-4 w-4 inline" />View Details
-                </span>
-              </Button>
-            </Link>
+            <Button asChild variant="outline" size="sm" className="w-full h-9 text-xs sm:text-sm">
+              <Link href={`/products/item/${id}`}>
+                <Eye className="mr-1.5 h-4 w-4 inline" />View Details
+              </Link>
+            </Button>
         </div>
       </CardContent>
     </Card>
