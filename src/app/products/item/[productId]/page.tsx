@@ -1,44 +1,41 @@
 
 "use client"; 
 
-import { use } from 'react'; // Keep React.use for params
+import { use } from 'react'; 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, Share2, MessageCircle, Plus, Minus, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import ProductCard, { type ProductCardProps } from '@/components/features/home/product-card'; 
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState } from 'react'; // Removed 'use' from here
+import { useEffect, useState, useCallback } from 'react'; 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCart } from '@/context/CartContext';
-import { getProductDetailsById, type ProductDetailsPageData, getFeaturedProducts } from '@/services/productService'; // Import Firestore service
-import { notFound } from 'next/navigation';
+import { getProductDetailsById, type ProductDetailsPageData, getFeaturedProducts } from '@/services/productService'; 
+import { notFound, useRouter } from 'next/navigation';
+import { auth, db } from '@/lib/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { doc, setDoc, deleteDoc, getDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import Link from 'next/link';
 
 
-// This interface can be simplified if ProductDetailsPageData covers everything
-interface ProductDetailsComponentData extends ProductDetailsPageData {
-  // Already includes id as string from Product (extended by ProductDetailsPageData)
-}
-
-// Mock related products data - will be replaced by actual fetching or removed
-// const relatedProductsData = [
-//   { id: "rp1", name: "Related Product 1", description: "Description for related product 1.", image: "https://placehold.co/300x300.png", dataAiHint: "tech accessory", fixedOfferPrice: 2500, fixedOriginalPrice: 3000 },
-//   { id: "rp2", name: "Related Product 2", description: "Description for related product 2.", image: "https://placehold.co/300x300.png", dataAiHint: "smart device", fixedOfferPrice: 4500, fixedOriginalPrice: 5500 },
-//   { id: "rp3", name: "Related Product 3", description: "Description for related product 3.", image: "https://placehold.co/300x300.png", dataAiHint: "office gadget", fixedOfferPrice: 1800, fixedOriginalPrice: 2200 },
-//   { id: "rp4", name: "Related Product 4", description: "Description for related product 4.", image: "https://placehold.co/300x300.png", dataAiHint: "home electronics", fixedOfferPrice: 6000, fixedOriginalPrice: 7500 },
-// ];
+interface ProductDetailsComponentData extends ProductDetailsPageData {}
 
 export default function ProductDetailPage({ params: paramsPromise }: { params: Promise<{ productId: string }> }) {
   const { productId } = use(paramsPromise); 
-  
+  const router = useRouter();
   const { toast } = useToast();
   const { addToCart } = useCart(); 
+  const [user, authLoading] = useAuthState(auth);
+
   const [product, setProduct] = useState<ProductDetailsComponentData | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<ProductCardProps[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [isWishlistProcessing, setIsWishlistProcessing] = useState(false);
 
   useEffect(() => {
     async function loadProductData() {
@@ -47,19 +44,18 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
         try {
           const productDetails = await getProductDetailsById(productId);
           if (productDetails) {
-            setProduct(productDetails as ProductDetailsComponentData); // Cast if ProductDetailsPageData is directly usable
+            setProduct(productDetails as ProductDetailsComponentData); 
             setSelectedImage(productDetails.image); 
             document.title = `${productDetails.name} - Creme Collections`;
 
-            // Fetch related products (e.g., featured products as placeholders)
-            const fetchedRelatedProducts = await getFeaturedProducts(); // Or a more specific "related products" logic
+            const fetchedRelatedProducts = await getFeaturedProducts(); 
             setRelatedProducts(fetchedRelatedProducts.filter(p => p.id !== productId).slice(0, 4));
 
           } else {
-            // Handle product not found (though notFound() from next/navigation is for server components)
-            // For client components, you might redirect or show a "not found" message
             console.error("Product not found on client side after fetch");
-            // Potentially set a "notFound" state to render a message
+            // This notFound() might not work as expected in a fully client-rendered scenario post-initial load.
+            // A redirect or client-side "not found" state is more reliable here.
+            // router.push('/404'); // Example client-side redirect
           }
         } catch (error) {
           console.error("Error loading product data:", error);
@@ -69,9 +65,60 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
       }
     }
     loadProductData();
-  }, [productId]); 
+  }, [productId, router]); 
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!user || !productId || !db || authLoading) {
+        if(!authLoading && user) setIsWishlistProcessing(false);
+        return;
+    }
+    setIsWishlistProcessing(true);
+    const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', productId);
+    const unsubscribe = onSnapshot(wishlistItemRef, (docSnap) => {
+        setIsInWishlist(docSnap.exists());
+        setIsWishlistProcessing(false);
+    }, (error) => {
+        console.error("Error checking wishlist status:", error);
+        setIsWishlistProcessing(false);
+    });
+    return () => unsubscribe();
+  }, [user, productId, authLoading]);
+
+
+  const handleToggleWishlist = async () => {
+    if (!user) {
+      toast({ title: "Login Required", description: "Please log in to manage your wishlist.", variant: "destructive", action: <Button asChild><Link href="/login">Login</Link></Button> });
+      return;
+    }
+    if (!product || !db) return;
+
+    setIsWishlistProcessing(true);
+    const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', product.id);
+
+    try {
+      if (isInWishlist) {
+        await deleteDoc(wishlistItemRef);
+        toast({ title: "Removed from Wishlist", description: `${product.name} removed from your wishlist.` });
+      } else {
+        await setDoc(wishlistItemRef, { 
+          productId: product.id, 
+          addedAt: serverTimestamp(),
+          name: product.name, // Store some basic info for quick reference if needed
+          image: product.image
+        });
+        toast({ title: "Added to Wishlist!", description: `${product.name} added to your wishlist.` });
+      }
+      // State update (isInWishlist) will be handled by the onSnapshot listener
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      toast({ title: "Error", description: "Could not update your wishlist. Please try again.", variant: "destructive" });
+    } finally {
+      // setIsWishlistProcessing(false); // Snapshot listener will set this
+    }
+  };
+
+
+  if (isLoading || authLoading) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 text-center min-h-[60vh] flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -80,51 +127,30 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
   }
 
   if (!product) {
-    // This state could be set if productDetails was null from fetch
-    // For robust "not found", server-side check or redirect is better
-    // but this handles client-side fetch failure.
-    notFound(); // This will only work if this component can be server-rendered with this path.
-                 // For pure client-side not found, you'd render a message.
-    return (
-         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 text-center">
-            <p className="text-2xl font-semibold">Product Not Found</p>
-            <p className="text-muted-foreground mt-2">The product you are looking for does not exist or could not be loaded.</p>
-            <Button asChild className="mt-6">
-                <Link href="/">Go to Homepage</Link>
-            </Button>
-        </div>
-    )
+    notFound(); 
+    return null; // Should be unreachable due to notFound()
   }
   
   const displayOriginalPrice = product.originalPrice && product.offerPrice && product.originalPrice > product.offerPrice 
     ? product.originalPrice 
-    : (product.offerPrice || 0) * 1.25; // Fallback if originalPrice is not significantly higher
+    : (product.offerPrice || 0) * 1.25; 
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
   const handleAddToCart = () => {
     if (product) {
-      // Ensure ProductCardProps structure matches what addToCart expects
       const productToAdd: ProductCardProps = {
-        id: product.id, // string
+        id: product.id, 
         name: product.name,
         description: product.description, 
         image: product.image,
         dataAiHint: product.dataAiHint,
-        fixedOfferPrice: product.offerPrice, // Use offerPrice from ProductDetails
+        fixedOfferPrice: product.offerPrice, 
         fixedOriginalPrice: product.originalPrice,
       };
       addToCart(productToAdd, quantity);
     }
-  };
-
-  const handleAddToWishlist = () => {
-    toast({
-      title: "Added to Wishlist!",
-      description: `${product.name} has been added to your wishlist.`,
-      variant: "default",
-    });
   };
   
   const handleShare = () => {
@@ -145,16 +171,14 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
 
   const currentGalleryImages = product.images && product.images.length > 0 ? product.images : [product.image];
 
-
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
-        {/* Image Gallery */}
         <div className="space-y-4">
           <div className="aspect-square rounded-lg overflow-hidden shadow-lg bg-card">
             {selectedImage && (
               <Image
-                key={selectedImage} // Add key here
+                key={selectedImage} 
                 src={selectedImage}
                 alt={product.name}
                 width={600}
@@ -179,14 +203,13 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
                   width={100}
                   height={100}
                   className="object-cover w-full h-full"
-                  data-ai-hint="product detail" // This might be the source of hydration if product.dataAiHint differs for thumbnails
+                  data-ai-hint="product detail" 
                 />
               </button>
             ))}
           </div>
         </div>
 
-        {/* Product Information */}
         <div className="space-y-6">
           <div>
             <span className="text-sm text-muted-foreground">{product.category || 'N/A'} / {product.brand || 'N/A'}</span>
@@ -247,8 +270,19 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
               <Button size="lg" className="flex-grow" onClick={handleAddToCart} disabled={product.availability !== 'In Stock'}>
                 <ShoppingCart className="mr-2 h-5 w-5" /> {product.availability === 'In Stock' ? 'Add to Cart' : 'Out of Stock'}
               </Button>
-              <Button size="lg" variant="outline" className="flex-grow" onClick={handleAddToWishlist}>
-                <Heart className="mr-2 h-5 w-5" /> Add to Wishlist
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="flex-grow" 
+                onClick={handleToggleWishlist}
+                disabled={isWishlistProcessing}
+              >
+                {isWishlistProcessing ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <Heart className={`mr-2 h-5 w-5 ${isInWishlist ? 'fill-destructive text-destructive' : ''}`} />
+                )}
+                {isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
               </Button>
             </div>
           </div>
@@ -299,4 +333,3 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
     </div>
   );
 }
-    
