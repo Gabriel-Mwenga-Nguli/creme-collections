@@ -4,15 +4,16 @@
 import { use } from 'react'; 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Star, ShoppingCart, Heart, Share2, MessageCircle, Plus, Minus, Loader2 } from 'lucide-react';
+import { Star, ShoppingCart, Heart, Share2, MessageCircle, Plus, Minus, Loader2, Info } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import ProductCard, { type ProductCardProps } from '@/components/features/home/product-card'; 
+import WeeklyDealsSlider, { type DealProduct } from '@/components/features/home/weekly-deals-slider';
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState, useCallback } from 'react'; 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCart } from '@/context/CartContext';
-import { getProductDetailsById, type ProductDetailsPageData, getFeaturedProducts } from '@/services/productService'; 
+import { getProductDetailsById, type ProductDetailsPageData, getFeaturedProducts, getWeeklyDeals } from '@/services/productService'; 
 import { notFound, useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -31,6 +32,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
 
   const [product, setProduct] = useState<ProductDetailsComponentData | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<ProductCardProps[]>([]);
+  const [offerProducts, setOfferProducts] = useState<DealProduct[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,8 +50,9 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
             setSelectedImage(productDetails.image); 
             document.title = `${productDetails.name} - Creme Collections`;
 
+            // Fetch related products (e.g., featured products)
             const fetchedRelatedProductsData = await getFeaturedProducts(); 
-             const mappedRelatedProducts = fetchedRelatedProductsData.map(p => ({
+            const mappedRelatedProducts = fetchedRelatedProductsData.map(p => ({
               id: p.id,
               name: p.name,
               description: p.description,
@@ -59,6 +62,11 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
               fixedOriginalPrice: p.fixedOriginalPrice
             }));
             setRelatedProducts(mappedRelatedProducts.filter(p => p.id !== productId).slice(0, 4));
+
+            // Fetch products on offer (e.g., weekly deals)
+            const fetchedOfferProductsData = await getWeeklyDeals();
+            setOfferProducts(fetchedOfferProductsData.filter(p => p.id !== productId).slice(0, 6));
+
 
           } else {
             console.warn("Product not found on client side after fetch for ID:", productId);
@@ -124,21 +132,20 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
         toast({ title: "Removed from Wishlist", description: `${product.name} removed from your wishlist.` });
       } else {
         await setDoc(wishlistItemRef, { 
-          productId: product.id, // Ensure this is just the ID, not the whole object
+          productId: product.id, 
           addedAt: serverTimestamp(),
           name: product.name, 
           image: product.image,
-          categorySlug: product.categorySlug || null, // For potential filtering in wishlist
+          categorySlug: product.categorySlug || null, 
           offerPrice: product.offerPrice
         });
         toast({ title: "Added to Wishlist!", description: `${product.name} added to your wishlist.` });
       }
-      // State update (isInWishlist) will be handled by the onSnapshot listener
     } catch (error) {
       console.error("Error toggling wishlist:", error);
       toast({ title: "Error", description: "Could not update your wishlist. Please try again.", variant: "destructive" });
     } finally {
-      // setIsWishlistProcessing(false); // Snapshot listener will set this, or set it if there's an error
+      // Snapshot listener will update isWishlistProcessing
     }
   };
 
@@ -152,9 +159,6 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
   }
 
   if (!product) {
-    // For client-side navigation, notFound() might not work as expected if called after initial render.
-    // Consider a more explicit "Not Found" UI or redirect.
-    // For initial server render, this should work.
     notFound(); 
     return null; 
   }
@@ -327,25 +331,29 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
              </a>
             </Button>
           </div>
-
-          <Separator />
-
-          <div className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground font-headline">Product Details</h2>
-            <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-              <p>{product.longDescription || product.description}</p>
-              {/* You can add more structured details here if available in product data */}
-              {/* e.g., <p><strong>Brand:</strong> {product.brand}</p> */}
-              {/* <p><strong>Category:</strong> {product.category}</p> */}
-            </div>
-          </div>
+        </div>
+      </div>
+      
+      {/* Detailed Description Section */}
+      <div className="mt-12 md:mt-16 py-8 border-t">
+        <h2 className="text-2xl lg:text-3xl font-bold text-foreground font-headline mb-6 flex items-center">
+          <Info className="mr-3 h-7 w-7 text-primary" />
+          Product Description
+        </h2>
+        <div className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground">
+          {product.longDescription ? (
+            <p>{product.longDescription}</p>
+          ) : (
+            <p>No detailed description available for this product.</p>
+          )}
         </div>
       </div>
 
+      {/* Related Products Section */}
       {relatedProducts.length > 0 && (
-        <div className="mt-16 md:mt-24">
-          <h2 className="text-2xl lg:text-3xl font-bold text-center text-foreground font-headline mb-8 md:mb-12">
-            You Might Also Like
+        <div className="mt-12 md:mt-16 py-8 border-t">
+          <h2 className="text-2xl lg:text-3xl font-bold text-foreground font-headline mb-8 text-center">
+            Related Products
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {relatedProducts.map((relatedProd) => (
@@ -361,6 +369,16 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Products on Offer Section */}
+      {offerProducts.length > 0 && (
+        <div className="mt-12 md:mt-16 py-8 border-t bg-primary/5 px-4 sm:px-6 lg:px-8 rounded-lg">
+          <h2 className="text-2xl lg:text-3xl font-bold text-primary font-headline mb-8 text-center">
+            Special Offers
+          </h2>
+          <WeeklyDealsSlider deals={offerProducts} />
         </div>
       )}
     </div>
