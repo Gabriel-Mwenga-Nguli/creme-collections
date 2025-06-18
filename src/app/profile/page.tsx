@@ -9,19 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { User, ShoppingBag, Heart, MapPin, Edit3, LogOut, Loader2 } from 'lucide-react';
+import { User, ShoppingBag, Heart, MapPin, Edit3, LogOut, Loader2, Award } from 'lucide-react'; // Added Award icon
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { auth, db } from '@/lib/firebase'; // Import db for Firestore
+import { auth, db } from '@/lib/firebase'; 
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { signOut, updateProfile, type User as FirebaseUser } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore'; // Import Firestore functions
+import { doc, setDoc, getDoc } from 'firebase/firestore'; 
 import { useToast } from '@/hooks/use-toast';
-
-// export const metadata: Metadata = { // Metadata can't be directly used in client components this way
-//   title: 'My Profile - Creme Collections',
-//   description: 'Manage your Creme Collections account details, orders, and preferences.',
-// };
 
 export default function ProfilePage() {
   const [user, loading, error] = useAuthState(auth);
@@ -32,9 +27,9 @@ export default function ProfilePage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0); // State for loyalty points
   const [isSaving, setIsSaving] = useState(false);
   
-  // States for password fields - not used for update in this version
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -43,7 +38,7 @@ export default function ProfilePage() {
     if (!loading && !user) {
       router.push('/login');
     }
-    if (user && db) { // Ensure db is available
+    if (user && db) { 
       document.title = `${user.displayName || 'My Profile'} - Creme Collections`;
 
       const nameParts = user.displayName?.split(' ') || [''];
@@ -58,7 +53,7 @@ export default function ProfilePage() {
           if (docSnap.exists()) {
             const userData = docSnap.data();
             setPhone(userData.phone || '');
-            // Pre-fill names from Firestore if they are more up-to-date or specific
+            setLoyaltyPoints(userData.loyaltyPoints || 0); // Fetch loyalty points
             if (userData.firstName) setFirstName(userData.firstName);
             if (userData.lastName) setLastName(userData.lastName);
           }
@@ -73,7 +68,7 @@ export default function ProfilePage() {
       };
       fetchUserFirestoreData();
     }
-  }, [user, loading, router, toast]); // Removed db from deps as it's constant after init
+  }, [user, loading, router, toast]); 
 
   const handleLogout = async () => {
     try {
@@ -96,21 +91,20 @@ export default function ProfilePage() {
     try {
       const newDisplayName = `${firstName} ${lastName}`.trim();
       
-      // Update Firebase Auth profile
-      if (auth.currentUser) { // Ensure currentUser is available
+      if (auth.currentUser) { 
         await updateProfile(auth.currentUser, { displayName: newDisplayName });
       } else {
         throw new Error("Current user not found in auth object.");
       }
 
-      // Update Firestore document
       const userDocRef = doc(db, 'users', user.uid);
       await setDoc(userDocRef, {
         firstName: firstName,
         lastName: lastName,
         phone: phone,
-        email: user.email, // Keep email in sync, though not editable via this form
-        displayName: newDisplayName, // Optionally store displayName too
+        email: user.email, 
+        displayName: newDisplayName, 
+        // loyaltyPoints are managed by the AI flow, not directly by this form
       }, { merge: true }); 
 
       toast({ title: "Profile Updated", description: "Your profile has been successfully updated." });
@@ -140,7 +134,7 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return null; // Redirect is handled in useEffect
+    return null; 
   }
 
   const getInitials = (name: string | null | undefined) => {
@@ -182,6 +176,13 @@ export default function ProfilePage() {
               <CardTitle className="text-2xl">{currentDisplayName}</CardTitle>
               <CardDescription>{email || 'No email provided'}</CardDescription>
               <CardDescription className="text-xs">Joined {creationDate}</CardDescription>
+              <div className="mt-3 pt-3 border-t w-full">
+                <div className="flex items-center justify-center text-lg font-semibold text-primary">
+                  <Award className="mr-2 h-5 w-5" />
+                  <span>{loyaltyPoints.toLocaleString()} Loyalty Points</span>
+                </div>
+                 <CardDescription className="text-xs mt-1">Earn points with purchases & reviews!</CardDescription>
+              </div>
             </CardHeader>
             <Separator />
             <CardContent className="p-4 space-y-2">
@@ -260,5 +261,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-    
-    
