@@ -73,7 +73,7 @@ export default function ProfilePage() {
       };
       fetchUserFirestoreData();
     }
-  }, [user, loading, router, db, toast]);
+  }, [user, loading, router, toast]); // Removed db from deps as it's constant after init
 
   const handleLogout = async () => {
     try {
@@ -162,7 +162,7 @@ export default function ProfilePage() {
     ? new Date(user.metadata.creationTime).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : 'N/A';
   
-  const currentDisplayName = `${firstName} ${lastName}`.trim() || 'User';
+  const currentDisplayName = `${firstName} ${lastName}`.trim() || user.displayName || 'User';
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -177,7 +177,7 @@ export default function ProfilePage() {
             <CardHeader className="items-center text-center">
               <Avatar className="w-24 h-24 mb-4 border-2 border-primary">
                 <AvatarImage src={user.photoURL || undefined} alt={currentDisplayName} data-ai-hint="profile avatar" />
-                <AvatarFallback className="text-2xl bg-muted">{getInitials(user.displayName)}</AvatarFallback>
+                <AvatarFallback className="text-2xl bg-muted">{getInitials(currentDisplayName)}</AvatarFallback>
               </Avatar>
               <CardTitle className="text-2xl">{currentDisplayName}</CardTitle>
               <CardDescription>{email || 'No email provided'}</CardDescription>
@@ -260,6 +260,5 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-
+    
     
