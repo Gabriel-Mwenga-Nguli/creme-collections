@@ -49,16 +49,15 @@ export default function AdminChatPage() {
 
   useEffect(() => {
     document.title = "Support Chat - Admin";
-    // Placeholder: In a real application, fetch conversations from your backend/Firestore
-    // For demonstration, we'll use static examples.
-    // This would be replaced by an actual call to a service like `getAdminConversations()`
     setIsFetchingConversations(true);
     setTimeout(() => {
       setConversations([
         { id: 'user123_convo', userName: 'Alice Wonder', userEmail: 'alice@example.com', lastMessageSnippet: 'My order is late and I need help tracking it please.', lastMessageAt: new Date(Date.now() - 3600000), unreadCount: 2 },
-        { id: 'user456_convo', userName: 'Bob The Builder', userEmail: 'bob@example.com', lastMessageSnippet: 'Can I return this item? It does not fit as expected.', lastMessageAt: new Date(Date.now() - 86400000) },
-        { id: 'user789_convo', userName: 'Carol Danvers', userEmail: 'carol@example.com', lastMessageSnippet: 'Inquiry about bulk purchase discounts for my company.', lastMessageAt: new Date(Date.now() - 172800000), unreadCount: 0 },
-      ]);
+        { id: 'user456_convo', userName: 'Bob The Builder', userEmail: 'bob@example.com', lastMessageSnippet: 'Can I return this item? It does not fit as expected.', lastMessageAt: new Date(Date.now() - 86400000), unreadCount: 0 },
+        { id: 'user789_convo', userName: 'Carol Danvers', userEmail: 'carol@example.com', lastMessageSnippet: 'Inquiry about bulk purchase discounts for my company.', lastMessageAt: new Date(Date.now() - 172800000), unreadCount: 1 },
+        { id: 'userABC_convo', userName: 'David Copperfield', userEmail: 'david@example.com', lastMessageSnippet: 'What are your international shipping options?', lastMessageAt: new Date(Date.now() - 2 * 86400000), unreadCount: 0 },
+        { id: 'userXYZ_convo', userName: 'Eve Adams', userEmail: 'eve@example.com', lastMessageSnippet: 'I have a question about product XYZ specifications.', lastMessageAt: new Date(Date.now() - 5 * 3600000), unreadCount: 5 },
+      ].sort((a, b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime()));
       setIsFetchingConversations(false);
     }, 1000);
   }, []);
@@ -72,20 +71,37 @@ export default function AdminChatPage() {
     setIsFetchingMessages(true);
     setReplyText('');
     setAiTopic('');
-    // Placeholder: Fetch messages for selected conversation
-    // This would be replaced by an actual call: `getMessagesForConversation(conversation.id)`
+    
     setTimeout(() => {
-      // Simulate messages based on who is selected
-      const sampleMessages: AdminMessage[] = [
-        { id: 'msg1', sender: 'user', content: conversation.lastMessageSnippet, timestamp: conversation.lastMessageAt },
-      ];
-      if (conversation.id === 'user123_convo') {
-        sampleMessages.push({ id: 'msg2', sender: 'admin', content: 'Hi Alice, I can help with that. Could you provide your order number?', timestamp: new Date(conversation.lastMessageAt.getTime() + 60000) });
-        sampleMessages.push({ id: 'msg3', sender: 'user', content: 'Yes, it is ORD-987654.', timestamp: new Date(conversation.lastMessageAt.getTime() + 120000) });
-      } else if (conversation.id === 'user456_convo') {
-         sampleMessages.push({ id: 'msg4', sender: 'admin', content: 'Hello Bob, please tell me more about the item you wish to return.', timestamp: new Date(conversation.lastMessageAt.getTime() + 70000) });
+      const sampleMessages: AdminMessage[] = [];
+      const baseTime = conversation.lastMessageAt;
+
+      switch (conversation.id) {
+        case 'user123_convo':
+          sampleMessages.push({ id: 'msg1', sender: 'user', content: conversation.lastMessageSnippet, timestamp: baseTime });
+          sampleMessages.push({ id: 'msg2', sender: 'admin', content: 'Hi Alice, I can help with that. Could you provide your order number?', timestamp: new Date(baseTime.getTime() + 60000) });
+          sampleMessages.push({ id: 'msg3', sender: 'user', content: 'Yes, it is ORD-987654. I placed it last week.', timestamp: new Date(baseTime.getTime() + 120000) });
+          break;
+        case 'user456_convo':
+          sampleMessages.push({ id: 'msg4', sender: 'user', content: conversation.lastMessageSnippet, timestamp: baseTime });
+          sampleMessages.push({ id: 'msg5', sender: 'admin', content: 'Hello Bob, please tell me more about the item you wish to return and your order ID.', timestamp: new Date(baseTime.getTime() + 70000) });
+          break;
+        case 'user789_convo':
+          sampleMessages.push({ id: 'msg6', sender: 'user', content: conversation.lastMessageSnippet, timestamp: baseTime });
+          break;
+        case 'userABC_convo':
+          sampleMessages.push({ id: 'msg7', sender: 'user', content: conversation.lastMessageSnippet, timestamp: baseTime });
+          sampleMessages.push({ id: 'msg8', sender: 'admin', content: 'Hello David, currently we primarily ship within Kenya. Could you let me know the destination country?', timestamp: new Date(baseTime.getTime() + 90000) });
+          sampleMessages.push({ id: 'msg9', sender: 'user', content: 'I was hoping to ship to Uganda.', timestamp: new Date(baseTime.getTime() + 150000) });
+          break;
+        case 'userXYZ_convo':
+           sampleMessages.push({ id: 'msg10', sender: 'user', content: "I'm interested in the 'Wireless Pro Headphones'.", timestamp: new Date(baseTime.getTime() - 300000) });
+           sampleMessages.push({ id: 'msg11', sender: 'user', content: "Could you tell me about the battery life and noise cancellation features?", timestamp: baseTime });
+          break;
+        default:
+          sampleMessages.push({ id: `default-${Date.now()}`, sender: 'user', content: conversation.lastMessageSnippet, timestamp: baseTime });
       }
-      setMessages(sampleMessages);
+      setMessages(sampleMessages.sort((a,b) => a.timestamp.getTime() - b.timestamp.getTime()));
       setIsFetchingMessages(false);
     }, 500);
   };
@@ -101,33 +117,30 @@ export default function AdminChatPage() {
       timestamp: new Date()
     };
     
-    // Placeholder: In a real app, this would call `sendAdminReply(selectedConversation.id, replyText)`
     console.log("Sending reply:", replyText, "to conversation:", selectedConversation.id);
     
-    // Simulate API call delay
     setTimeout(() => {
       setMessages(prev => [...prev, newMessage]);
       setReplyText('');
       toast({ title: "Reply Sent (Simulated)" });
       setIsSendingReply(false);
 
-      // Update last message snippet for the conversation list (simulated)
-      setConversations(prevConvos => prevConvos.map(c => 
-        c.id === selectedConversation.id 
-          ? {...c, lastMessageSnippet: replyText, lastMessageAt: new Date(), unreadCount: 0 } 
-          : c
-      ));
-
+      setConversations(prevConvos => 
+        prevConvos.map(c => 
+          c.id === selectedConversation.id 
+            ? {...c, lastMessageSnippet: `Admin: ${newMessage.content.substring(0,30)}...`, lastMessageAt: new Date(), unreadCount: 0 } 
+            : c
+        ).sort((a, b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime())
+      );
     }, 1000);
   };
 
   const handleGetAIDraft = async () => {
     let topicForAI = aiTopic.trim();
     if (!topicForAI && selectedConversation && messages.length > 0) {
-      // Try to infer topic from last user message
       const lastUserMessage = [...messages].reverse().find(m => m.sender === 'user');
       if (lastUserMessage) {
-        topicForAI = `Responding to user "${selectedConversation.userName}" about: "${lastUserMessage.content.substring(0, 50)}..."`;
+        topicForAI = `Respond to user "${selectedConversation.userName}" (email: ${selectedConversation.userEmail || 'N/A'}) about their message: "${lastUserMessage.content.substring(0, 100)}..."`;
       }
     }
 
@@ -165,7 +178,7 @@ export default function AdminChatPage() {
           ) : conversations.length > 0 ? (
             <ScrollArea className="h-full">
               <div className="p-2 md:p-3 space-y-1">
-              {conversations.sort((a,b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime()).map(convo => (
+              {conversations.map(convo => (
                 <Button
                   key={convo.id}
                   variant={selectedConversation?.id === convo.id ? 'secondary' : 'ghost'}
@@ -208,10 +221,10 @@ export default function AdminChatPage() {
                   <div className="space-y-3 md:space-y-4">
                     {messages.map(msg => (
                       <div key={msg.id} className={`flex items-end gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        {msg.sender === 'admin' && <BotMessageSquareIcon className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground shrink-0 mb-1" />}
+                        {msg.sender !== 'user' && <BotMessageSquareIcon className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground shrink-0 mb-1" />}
                         <div className={`max-w-[75%] p-2 md:p-2.5 rounded-lg text-xs md:text-sm shadow-sm ${msg.sender === 'user' ? 'bg-muted text-muted-foreground rounded-br-none' : msg.sender === 'admin' ? 'bg-primary text-primary-foreground rounded-bl-none' : 'bg-secondary text-secondary-foreground rounded-bl-none'}`}>
                           <p className="whitespace-pre-wrap">{msg.content}</p>
-                          <p className={`text-xs mt-1 ${msg.sender === 'admin' ? 'text-primary-foreground/70 text-right' : 'text-muted-foreground/70 text-left'}`}>{msg.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                          <p className={`text-xs mt-1 ${msg.sender !== 'user' ? 'text-primary-foreground/70 text-right' : 'text-muted-foreground/70 text-left'}`}>{msg.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                         </div>
                         {msg.sender === 'user' && <UserMessageIcon className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground shrink-0 mb-1" />}
                       </div>
@@ -257,3 +270,5 @@ export default function AdminChatPage() {
   );
 }
 
+
+    
