@@ -15,7 +15,7 @@ import { z } from 'genkit';
 
 const LoyaltyPointsInputSchema = z.object({
   userId: z.string().describe('The unique identifier of the user.'),
-  activityType: z.enum(['purchase', 'review', 'signup', 'referral', 'milestone', 'manual_adjustment'])
+  activityType: z.enum(['purchase', 'review', 'signup', 'referral', 'milestone', 'manual_adjustment', 'profile_update']) // Added 'profile_update'
     .describe('The type of activity for which points are being awarded or deducted.'),
   activityValue: z.number().optional().describe('A value associated with the activity, e.g., purchase amount, review rating. Not always required.'),
   reason: z.string().optional().describe('A specific reason for manual adjustments or special point awards.'),
@@ -35,8 +35,6 @@ export async function manageLoyaltyPoints(input: LoyaltyPointsInput): Promise<Lo
   return loyaltyPointsFlow(input);
 }
 
-// This prompt is a placeholder and can be expanded significantly for more complex AI logic.
-// For example, it could take user's entire purchase history, review quality, etc.
 const loyaltyPointsPrompt = ai.definePrompt({
   name: 'loyaltyPointsPrompt',
   input: { schema: z.object({
@@ -63,10 +61,12 @@ Based on the activity, calculate the points to be awarded or deducted.
 - Signup: Award 100 points for new user signup.
 - Referral: Award 200 points for successful referral.
 - Milestone: (e.g., 1 year anniversary, 10th purchase) - Award 150 points.
+- Profile Update: Award 2 points for updating profile information.
 - Manual Adjustment: Use the activityValue directly as pointsToAwardOrDeduct if reason is provided.
 
-Prioritize 'manual_adjustment' if reason is present.
-If activityValue is not applicable for the activity type (e.g. review, signup), use a default point value for that activity.
+Prioritize 'manual_adjustment' if reason is present and a specific 'activityValue' is provided for it.
+If 'activityType' is 'profile_update', award exactly 2 points. The 'activityValue' for 'profile_update' can be ignored.
+If activityValue is not applicable for other activity types (e.g. review, signup), use a default point value for that activity.
 Provide a brief reasoning for your calculation.
 `,
 });
@@ -91,7 +91,7 @@ const loyaltyPointsFlow = ai.defineFlow(
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
         currentPoints = userData.loyaltyPoints || 0;
-        userSegment = userData.segment || 'regular'; // Example: User segment could be stored
+        userSegment = userData.segment || 'regular'; 
       }
     } catch (error) {
       console.error(`Error fetching user ${input.userId} for loyalty points:`, error);
@@ -118,11 +118,14 @@ const loyaltyPointsFlow = ai.defineFlow(
       await setDoc(userDocRef, {
         loyaltyPoints: newTotalPoints,
         lastLoyaltyUpdate: serverTimestamp(),
-        loyaltyHistory: { // Example of adding to a history (would need more robust array/subcollection handling)
+        // Optionally log this specific transaction if a more detailed history is needed
+        // This might be better in a subcollection if history grows large
+        loyaltyHistory: { 
             timestamp: serverTimestamp(),
             activity: input.activityType,
             pointsChange: pointsChange,
             reason: aiDecision.calculationReasoning,
+            value: input.activityValue,
         }
       }, { merge: true });
     } catch (error) {

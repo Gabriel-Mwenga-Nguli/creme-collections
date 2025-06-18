@@ -16,7 +16,8 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { signOut, updateProfile, type User as FirebaseUser } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore'; 
 import { useToast } from '@/hooks/use-toast';
-import InboxView from '@/components/features/profile/InboxView'; // Import InboxView
+import InboxView from '@/components/features/profile/InboxView';
+import { manageLoyaltyPoints } from '@/ai/flows/loyalty-points-flow'; // Import the loyalty points flow
 
 type ProfileSection = "personal" | "orders" | "wishlist" | "addresses" | "inbox";
 
@@ -32,8 +33,8 @@ export default function ProfilePage() {
   const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
   const [isSaving, setIsSaving] = useState(false);
   
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState(''); // Kept for UI, functionality not implemented
+  const [newPassword, setNewPassword] = useState(''); // Kept for UI, functionality not implemented
   const [activeSection, setActiveSection] = useState<ProfileSection>("personal");
 
 
@@ -109,7 +110,29 @@ export default function ProfilePage() {
         displayName: newDisplayName,
       }, { merge: true }); 
 
-      toast({ title: "Profile Updated", description: "Your profile has been successfully updated." });
+      toast({ title: "Profile Updated", description: "Your profile information has been successfully updated." });
+
+      // Award loyalty points for profile update
+      try {
+        const loyaltyResult = await manageLoyaltyPoints({
+          userId: user.uid,
+          activityType: 'profile_update',
+          // activityValue can be omitted as the AI flow will award 2 points for this type
+        });
+        setLoyaltyPoints(loyaltyResult.newTotalPoints); // Update local state immediately
+        toast({
+          title: "Points Awarded!",
+          description: `You've earned ${loyaltyResult.pointsChange} loyalty points for updating your profile! New total: ${loyaltyResult.newTotalPoints}.`,
+        });
+      } catch (loyaltyError: any) {
+        console.error("Error awarding loyalty points:", loyaltyError);
+        toast({
+          title: "Loyalty Points Error",
+          description: loyaltyError.message || "Could not award loyalty points for profile update.",
+          variant: "destructive",
+        });
+      }
+
     } catch (updateError: any) {
       console.error("Error updating profile:", updateError);
       toast({ title: "Update Failed", description: updateError.message || "Could not update your profile.", variant: "destructive" });
