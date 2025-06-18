@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, type FormEvent, useCallback } from 'react';
+import React, { useState, useEffect, type FormEvent, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,12 +90,14 @@ export default function ProfilePage() {
             if (userData.firstName) setFirstName(userData.firstName);
             if (userData.lastName) setLastName(userData.lastName);
           } else {
-            const newDisplayName = `${firstName} ${lastName}`.trim() || user.displayName;
+            const currentFirstName = nameParts[0] || '';
+            const currentLastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+            const newDisplayName = `${currentFirstName} ${currentLastName}`.trim() || user.displayName;
             await setDoc(userDocRef, {
               email: user.email,
               displayName: newDisplayName,
-              firstName: firstName,
-              lastName: lastName,
+              firstName: currentFirstName,
+              lastName: currentLastName,
               loyaltyPoints: 0,
               createdAt: serverTimestamp(),
               photoURL: user.photoURL || null,
@@ -371,7 +373,11 @@ export default function ProfilePage() {
                   <div><Label htmlFor="firstName">First Name</Label><Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="mt-1" /></div>
                   <div><Label htmlFor="lastName">Last Name</Label><Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} className="mt-1" /></div>
                 </div>
-                <div><Label htmlFor="email">Email Address</Label><Input id="email" type="email" value={email} className="mt-1 bg-muted/50" readOnly disabled /><p className="text-xs text-muted-foreground mt-1">Email address cannot be changed.</p></div>
+                <div>
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input id="email" type="email" value={email} className="mt-1 bg-muted/50 cursor-not-allowed" readOnly disabled />
+                    <p className="text-xs text-muted-foreground mt-1">Email address cannot be changed here. Please contact support for assistance.</p>
+                </div>
                 <div><Label htmlFor="phone">Phone Number</Label><Input id="phone" type="tel" placeholder="+254 7XX XXX XXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1" /></div>
                 <div className="pt-2"><Button type="submit" disabled={isSaving}>{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save Changes</Button></div>
               </form>
@@ -390,7 +396,7 @@ export default function ProfilePage() {
                   <ul className="space-y-4">
                     {userOrders.map(order => (
                       <li key={order.id} className="p-4 border rounded-md hover:shadow-md transition-shadow">
-                        <Link href={`/profile/orders/${order.id}`}>
+                        <Link href={`/profile/orders/${order.orderId || order.id}`}>
                           <div className="flex justify-between items-center">
                             <div>
                               <p className="font-semibold text-primary">Order ID: {order.orderId || order.id}</p>
@@ -522,3 +528,4 @@ export default function ProfilePage() {
   );
 }
     
+
