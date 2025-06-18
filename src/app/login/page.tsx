@@ -51,13 +51,17 @@ export default function LoginPage() {
       });
       router.push('/profile'); // Redirect to profile page or dashboard
     } catch (error: any) {
-      let errorMessage = 'Failed to login. Please check your credentials.';
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      let errorMessage = 'Failed to login. Please check your credentials and try again.';
+      
+      if (error.code === 'auth/invalid-credential') {
         errorMessage = 'Invalid email or password. Please try again.';
       } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
+        errorMessage = 'The email address you entered is not valid. Please check and try again.';
+      } else if (error.code === 'auth/user-disabled') {
+        errorMessage = 'This account has been disabled. Please contact support.';
       }
-      console.error("Firebase login error:", error);
+      // It's helpful to log the specific Firebase error code and message for debugging.
+      console.error("Firebase login error:", error.code, error.message);
       toast({
         title: 'Login Failed',
         description: errorMessage,
@@ -190,3 +194,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
