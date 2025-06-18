@@ -11,14 +11,14 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const DraftSupportMessageInputSchema = z.object({
+const DraftSupportMessageInputSchema = z.object({
   topic: z.string().describe('The user main topic or issue they want to write about.'),
   userEmail: z.string().optional().describe('The email of the user writing the message, if available.'),
   // You could add more context here, like order ID, product name, if relevant
 });
 export type DraftSupportMessageInput = z.infer<typeof DraftSupportMessageInputSchema>;
 
-export const DraftSupportMessageOutputSchema = z.object({
+const DraftSupportMessageOutputSchema = z.object({
   draftMessage: z.string().describe('The AI-generated draft message for the user to send to support.'),
   suggestedSubject: z.string().optional().describe('An AI-suggested subject line for the email.'),
 });
