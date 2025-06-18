@@ -3,7 +3,7 @@
 
 import type { ProductCardProps } from '@/components/features/home/product-card';
 import type { DealProduct } from '@/components/features/home/weekly-deals-slider';
-import type { CartItem } from '@/context/CartContext'; // For ProductDetails extension
+// import type { CartItem } from '@/context/CartContext'; // Not directly used here for extension
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, limit, doc, getDoc, type DocumentSnapshot, type QueryDocumentSnapshot } from 'firebase/firestore';
 
@@ -21,7 +21,7 @@ export interface Product {
   rating?: string | number;
   reviewsCount?: number;
   availability?: string;
-  category?: string; // Main category name/slug
+  category?: string; // Main category name
   categorySlug?: string; // Slug for main category
   subCategory?: string; // Sub-category name
   subCategorySlug?: string; // Slug for sub-category
@@ -40,22 +40,24 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
     throw new Error(`Document data is undefined for document ID: ${document.id}`);
   }
   return {
-    id: document.id,
+    id: document.id, // Crucial: Ensure the document ID is captured
     name: data.name || 'Unnamed Product',
     description: data.description || '',
-    longDescription: data.longDescription || data.description || '',
+    longDescription: data.longDescription || data.description || '', // Fallback to short description
     image: data.image || 'https://placehold.co/400x400.png',
-    images: data.images || (data.image ? [data.image] : ['https://placehold.co/100x100.png']),
+    images: data.images && Array.isArray(data.images) && data.images.length > 0 
+            ? data.images 
+            : (data.image ? [data.image] : ['https://placehold.co/100x100.png']),
     dataAiHint: data.dataAiHint || 'product',
     offerPrice: typeof data.offerPrice === 'number' ? data.offerPrice : 0,
     originalPrice: typeof data.originalPrice === 'number' ? data.originalPrice : undefined,
-    rating: data.rating,
+    rating: data.rating !== undefined ? String(data.rating) : '0', // Ensure rating is string
     reviewsCount: typeof data.reviewsCount === 'number' ? data.reviewsCount : 0,
     availability: data.availability || 'N/A',
     category: data.category || 'Uncategorized',
-    categorySlug: data.categorySlug,
+    categorySlug: data.categorySlug || (data.category ? data.category.toLowerCase().replace(/\s+/g, '-') : 'uncategorized'),
     subCategory: data.subCategory,
-    subCategorySlug: data.subCategorySlug,
+    subCategorySlug: data.subCategorySlug || (data.subCategory ? data.subCategory.toLowerCase().replace(/\s+/g, '-') : undefined),
     brand: data.brand || 'Unbranded',
     stock: typeof data.stock === 'number' ? data.stock : 0,
     isFeatured: typeof data.isFeatured === 'boolean' ? data.isFeatured : false,
@@ -131,6 +133,10 @@ export async function getProductDetailsById(productId: string): Promise<ProductD
     console.error("Firestore 'db' object is not initialized. Cannot fetch product details for ID:", productId);
     return null;
   }
+  if (!productId || typeof productId !== 'string') {
+    console.error("Invalid productId provided to getProductDetailsById:", productId);
+    return null;
+  }
   try {
     const productDocRef = doc(db, 'products', productId);
     const productSnap = await getDoc(productDocRef);
@@ -156,12 +162,11 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
     const productsRef = collection(db, 'products');
     let q;
 
-    if (subCategorySlugParam && categorySlugParam) { // Ensure categorySlugParam exists for subCategorySlugParam
+    if (categorySlugParam && subCategorySlugParam) {
        q = query(productsRef, where('categorySlug', '==', categorySlugParam), where('subCategorySlug', '==', subCategorySlugParam));
     } else if (categorySlugParam) {
       q = query(productsRef, where('categorySlug', '==', categorySlugParam));
     } else {
-      // Fetch all products if no category/subcategory is specified
       q = query(productsRef); 
     }
     

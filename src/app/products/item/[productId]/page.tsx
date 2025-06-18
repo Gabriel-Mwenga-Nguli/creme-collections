@@ -39,7 +39,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
 
   useEffect(() => {
     async function loadProductData() {
-      if (productId) { 
+      if (productId && typeof productId === 'string') { 
         setIsLoading(true);
         try {
           const productDetails = await getProductDetailsById(productId);
@@ -48,20 +48,33 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
             setSelectedImage(productDetails.image); 
             document.title = `${productDetails.name} - Creme Collections`;
 
-            const fetchedRelatedProducts = await getFeaturedProducts(); 
-            setRelatedProducts(fetchedRelatedProducts.filter(p => p.id !== productId).slice(0, 4));
+            const fetchedRelatedProductsData = await getFeaturedProducts(); 
+             const mappedRelatedProducts = fetchedRelatedProductsData.map(p => ({
+              id: p.id,
+              name: p.name,
+              description: p.description,
+              image: p.image,
+              dataAiHint: p.dataAiHint,
+              fixedOfferPrice: p.fixedOfferPrice,
+              fixedOriginalPrice: p.fixedOriginalPrice
+            }));
+            setRelatedProducts(mappedRelatedProducts.filter(p => p.id !== productId).slice(0, 4));
 
           } else {
-            console.error("Product not found on client side after fetch");
-            // This notFound() might not work as expected in a fully client-rendered scenario post-initial load.
-            // A redirect or client-side "not found" state is more reliable here.
-            // router.push('/404'); // Example client-side redirect
+            console.warn("Product not found on client side after fetch for ID:", productId);
+            // Client-side notFound or redirect
+            // notFound(); // This might not behave as expected client-side after initial load.
+            // router.push('/404'); // Alternative
           }
         } catch (error) {
           console.error("Error loading product data:", error);
         } finally {
           setIsLoading(false);
         }
+      } else {
+        console.warn("Invalid or missing productId for Product Detail Page:", productId);
+        setIsLoading(false);
+        // Optionally redirect or show an error message
       }
     }
     loadProductData();
@@ -70,6 +83,11 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
   useEffect(() => {
     if (!user || !productId || !db || authLoading) {
         if(!authLoading && user) setIsWishlistProcessing(false);
+        return;
+    }
+    if (typeof productId !== 'string') {
+        console.warn("Wishlist check skipped due to invalid productId:", productId);
+        setIsWishlistProcessing(false);
         return;
     }
     setIsWishlistProcessing(true);
@@ -90,7 +108,12 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
       toast({ title: "Login Required", description: "Please log in to manage your wishlist.", variant: "destructive", action: <Button asChild><Link href="/login">Login</Link></Button> });
       return;
     }
-    if (!product || !db) return;
+    if (!product || !db || typeof product.id !== 'string') {
+        console.error("Product data or DB not available for wishlist action, or product ID is invalid.");
+        toast({ title: "Error", description: "Could not update wishlist. Product data missing.", variant: "destructive" });
+        return;
+    }
+
 
     setIsWishlistProcessing(true);
     const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', product.id);
@@ -101,10 +124,12 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
         toast({ title: "Removed from Wishlist", description: `${product.name} removed from your wishlist.` });
       } else {
         await setDoc(wishlistItemRef, { 
-          productId: product.id, 
+          productId: product.id, // Ensure this is just the ID, not the whole object
           addedAt: serverTimestamp(),
-          name: product.name, // Store some basic info for quick reference if needed
-          image: product.image
+          name: product.name, 
+          image: product.image,
+          categorySlug: product.categorySlug || null, // For potential filtering in wishlist
+          offerPrice: product.offerPrice
         });
         toast({ title: "Added to Wishlist!", description: `${product.name} added to your wishlist.` });
       }
@@ -113,7 +138,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
       console.error("Error toggling wishlist:", error);
       toast({ title: "Error", description: "Could not update your wishlist. Please try again.", variant: "destructive" });
     } finally {
-      // setIsWishlistProcessing(false); // Snapshot listener will set this
+      // setIsWishlistProcessing(false); // Snapshot listener will set this, or set it if there's an error
     }
   };
 
@@ -127,8 +152,11 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
   }
 
   if (!product) {
+    // For client-side navigation, notFound() might not work as expected if called after initial render.
+    // Consider a more explicit "Not Found" UI or redirect.
+    // For initial server render, this should work.
     notFound(); 
-    return null; // Should be unreachable due to notFound()
+    return null; 
   }
   
   const displayOriginalPrice = product.originalPrice && product.offerPrice && product.originalPrice > product.offerPrice 
@@ -139,7 +167,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
   const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
   const handleAddToCart = () => {
-    if (product) {
+    if (product && typeof product.id === 'string') {
       const productToAdd: ProductCardProps = {
         id: product.id, 
         name: product.name,
@@ -150,6 +178,8 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
         fixedOriginalPrice: product.originalPrice,
       };
       addToCart(productToAdd, quantity);
+    } else {
+        toast({title: "Error", description: "Could not add product to cart. Product ID missing or invalid.", variant: "destructive"});
     }
   };
   
@@ -169,7 +199,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
     }
   };
 
-  const currentGalleryImages = product.images && product.images.length > 0 ? product.images : [product.image];
+  const currentGalleryImages = product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -222,7 +252,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
                 <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(String(product.rating || 0))) ? 'text-accent fill-accent' : 'text-muted-foreground/50'}`} />
               ))}
             </div>
-            <span className="text-sm text-muted-foreground">({product.rating || 'N/A'} based on {product.reviewsCount || 0} reviews)</span>
+            <span className="text-sm text-muted-foreground">({product.rating || '0'} based on {product.reviewsCount || 0} reviews)</span>
           </div>
 
           <p className="text-lg text-muted-foreground">{product.description}</p>
@@ -239,7 +269,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
           </div>
           
           <p className={`text-sm font-semibold ${product.availability === 'In Stock' ? 'text-green-600' : 'text-red-600'}`}>
-            {product.availability || "N/A"}
+            {product.availability || "N/A"} {product.stock !== undefined && product.availability === 'In Stock' ? `(${product.stock} left)` : ''}
           </p>
 
           <Separator />
@@ -304,6 +334,9 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
             <h2 className="text-xl font-semibold text-foreground font-headline">Product Details</h2>
             <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
               <p>{product.longDescription || product.description}</p>
+              {/* You can add more structured details here if available in product data */}
+              {/* e.g., <p><strong>Brand:</strong> {product.brand}</p> */}
+              {/* <p><strong>Category:</strong> {product.category}</p> */}
             </div>
           </div>
         </div>
@@ -333,3 +366,4 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
     </div>
   );
 }
+

@@ -19,9 +19,15 @@ export default function WishlistPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchWishlistProducts = useCallback(async (productIds: string[]) => {
+    if (!db) {
+      console.error("Firestore (db) is not initialized. Cannot fetch wishlist products.");
+      setIsLoading(false);
+      toast({ title: "Error", description: "Database not available. Cannot load wishlist.", variant: "destructive" });
+      return;
+    }
     const productsData: ProductCardProps[] = [];
     for (const productId of productIds) {
-      const productDetails = await getProductDetailsById(productId);
+      const productDetails = await getProductDetailsById(productId); // This now returns Product or null
       if (productDetails) {
         productsData.push({
           id: productDetails.id,
@@ -32,11 +38,13 @@ export default function WishlistPage() {
           fixedOfferPrice: productDetails.offerPrice,
           fixedOriginalPrice: productDetails.originalPrice,
         });
+      } else {
+        console.warn(`Product details not found for wishlist item ID: ${productId}`);
       }
     }
     setWishlistItems(productsData);
     setIsLoading(false);
-  }, []);
+  }, [toast]); // Removed db from dependencies as it's checked inside
 
   useEffect(() => {
     document.title = 'Your Wishlist - Creme Collections';
@@ -45,13 +53,13 @@ export default function WishlistPage() {
       return;
     }
     if (!user) {
-      setIsLoading(false);
+      setIsLoading(false); // User not logged in, stop loading
       return;
     }
     if (!db) {
         console.error("Firestore (db) is not initialized. Cannot fetch wishlist.");
         setIsLoading(false);
-        toast({ title: "Error", description: "Database not available. Cannot load wishlist.", variant: "destructive" });
+        // toast({ title: "Error", description: "Database not available. Cannot load wishlist.", variant: "destructive" });
         return;
     }
 
@@ -60,7 +68,7 @@ export default function WishlistPage() {
     const q = query(wishlistRef);
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const productIds = snapshot.docs.map(doc => doc.id);
+      const productIds = snapshot.docs.map(doc => doc.id); // doc.id is the productId
       fetchWishlistProducts(productIds);
     }, (error) => {
       console.error("Error fetching wishlist:", error);
@@ -68,7 +76,7 @@ export default function WishlistPage() {
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => unsubscribe(); // Cleanup on unmount
   }, [user, authLoading, toast, fetchWishlistProducts]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
@@ -79,8 +87,8 @@ export default function WishlistPage() {
     try {
       const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', productId);
       await deleteDoc(wishlistItemRef);
+      // No need to manually update state, onSnapshot will trigger a re-fetch and update
       toast({ title: "Removed from Wishlist", description: "The item has been removed from your wishlist." });
-      // State will update via onSnapshot
     } catch (error) {
       console.error("Error removing from wishlist:", error);
       toast({ title: "Error", description: "Could not remove item from wishlist.", variant: "destructive" });
@@ -144,12 +152,12 @@ export default function WishlistPage() {
               />
               <Button
                 variant="destructive"
-                size="sm"
-                className="absolute top-2 right-2 opacity-0 group-hover/wishlistitem:opacity-100 transition-opacity z-10"
+                size="icon"
+                className="absolute top-2 right-2 opacity-0 group-hover/wishlistitem:opacity-100 transition-opacity z-10 h-8 w-8"
                 onClick={() => handleRemoveFromWishlist(item.id)}
                 aria-label="Remove from wishlist"
               >
-                <Trash2 className="h-4 w-4 mr-1" /> Remove
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           ))}
@@ -169,3 +177,4 @@ export default function WishlistPage() {
     </div>
   );
 }
+

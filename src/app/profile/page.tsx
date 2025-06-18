@@ -1,23 +1,26 @@
 
 "use client";
 
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { User, ShoppingBag, Heart, MapPin, Edit3, LogOut, Loader2, Award, Mail } from 'lucide-react';
+import { User, ShoppingBag, Heart, MapPin, Edit3, LogOut, Loader2, Award, Mail, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase'; 
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { signOut, updateProfile, type User as FirebaseUser } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore'; 
+import { doc, setDoc, getDoc, collection, query, onSnapshot, deleteDoc, serverTimestamp } from 'firebase/firestore'; 
 import { useToast } from '@/hooks/use-toast';
 import InboxView from '@/components/features/profile/InboxView';
-import { manageLoyaltyPoints } from '@/ai/flows/loyalty-points-flow'; // Import the loyalty points flow
+import { manageLoyaltyPoints } from '@/ai/flows/loyalty-points-flow';
+import ProductCard, { type ProductCardProps } from '@/components/features/home/product-card';
+import { getProductDetailsById } from '@/services/productService';
+
 
 type ProfileSection = "personal" | "orders" | "wishlist" | "addresses" | "inbox";
 
@@ -33,10 +36,12 @@ export default function ProfilePage() {
   const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
   const [isSaving, setIsSaving] = useState(false);
   
-  const [currentPassword, setCurrentPassword] = useState(''); // Kept for UI, functionality not implemented
-  const [newPassword, setNewPassword] = useState(''); // Kept for UI, functionality not implemented
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [activeSection, setActiveSection] = useState<ProfileSection>("personal");
 
+  const [profileWishlistItems, setProfileWishlistItems] = useState<ProductCardProps[]>([]);
+  const [isProfileWishlistLoading, setIsProfileWishlistLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -60,19 +65,31 @@ export default function ProfilePage() {
             setLoyaltyPoints(userData.loyaltyPoints || 0);
             if (userData.firstName) setFirstName(userData.firstName);
             if (userData.lastName) setLastName(userData.lastName);
+          } else {
+            // If user document doesn't exist, create it with basic info
+            const newDisplayName = `${firstName} ${lastName}`.trim() || user.displayName;
+            await setDoc(userDocRef, {
+              email: user.email,
+              displayName: newDisplayName,
+              firstName: firstName,
+              lastName: lastName,
+              loyaltyPoints: 0,
+              createdAt: serverTimestamp()
+            }, { merge: true });
+             setLoyaltyPoints(0);
           }
         } catch (firestoreError) {
-            console.error("Error fetching user data from Firestore:", firestoreError);
+            console.error("Error fetching/creating user data from Firestore:", firestoreError);
             toast({
                 title: "Error",
-                description: "Could not fetch some profile details. Please try refreshing.",
+                description: "Could not fetch or initialize profile details. Please try refreshing.",
                 variant: "destructive"
             });
         }
       };
       fetchUserFirestoreData();
     }
-  }, [user, loading, router, toast]); 
+  }, [user, loading, router, toast, firstName, lastName]); // Added firstName, lastName to deps for initial doc creation
 
   const handleLogout = async () => {
     try {
@@ -106,20 +123,18 @@ export default function ProfilePage() {
         firstName: firstName,
         lastName: lastName,
         phone: phone,
-        email: user.email, 
+        email: user.email, // Ensure email is also stored/updated if necessary
         displayName: newDisplayName,
       }, { merge: true }); 
 
       toast({ title: "Profile Updated", description: "Your profile information has been successfully updated." });
 
-      // Award loyalty points for profile update
       try {
         const loyaltyResult = await manageLoyaltyPoints({
           userId: user.uid,
           activityType: 'profile_update',
-          // activityValue can be omitted as the AI flow will award 2 points for this type
         });
-        setLoyaltyPoints(loyaltyResult.newTotalPoints); // Update local state immediately
+        setLoyaltyPoints(loyaltyResult.newTotalPoints); 
         toast({
           title: "Points Awarded!",
           description: `You've earned ${loyaltyResult.pointsChange} loyalty points for updating your profile! New total: ${loyaltyResult.newTotalPoints}.`,
@@ -141,6 +156,67 @@ export default function ProfilePage() {
     }
   };
 
+  const fetchProfileWishlistProducts = useCallback(async (productIds: string[]) => {
+    if (!db) {
+      console.error("DB not initialized for fetchProfileWishlistProducts");
+      return;
+    }
+    setIsProfileWishlistLoading(true);
+    const productsData: ProductCardProps[] = [];
+    for (const productId of productIds) {
+      const productDetails = await getProductDetailsById(productId);
+      if (productDetails) {
+        productsData.push({
+          id: productDetails.id,
+          name: productDetails.name,
+          description: productDetails.description,
+          image: productDetails.image,
+          dataAiHint: productDetails.dataAiHint,
+          fixedOfferPrice: productDetails.offerPrice,
+          fixedOriginalPrice: productDetails.originalPrice,
+        });
+      }
+    }
+    setProfileWishlistItems(productsData);
+    setIsProfileWishlistLoading(false);
+  }, [toast]);
+
+  useEffect(() => {
+    if (activeSection === 'wishlist' && user && db) {
+      setIsProfileWishlistLoading(true);
+      const wishlistRef = collection(db, 'users', user.uid, 'wishlist');
+      const q = query(wishlistRef);
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const productIds = snapshot.docs.map(doc => doc.id);
+        fetchProfileWishlistProducts(productIds);
+      }, (error) => {
+        console.error("Error fetching profile wishlist:", error);
+        toast({ title: "Error", description: "Could not load your wishlist for profile view.", variant: "destructive" });
+        setIsProfileWishlistLoading(false);
+      });
+      return () => unsubscribe();
+    }
+  }, [activeSection, user, toast, fetchProfileWishlistProducts]);
+
+
+  const handleRemoveFromProfileWishlist = async (productId: string) => {
+    if (!user || !db) {
+      toast({ title: "Error", description: "You must be logged in to modify your wishlist.", variant: "destructive" });
+      return;
+    }
+    try {
+      const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', productId);
+      await deleteDoc(wishlistItemRef);
+      toast({ title: "Removed from Wishlist", description: "The item has been removed from your wishlist." });
+      // State updates via onSnapshot
+    } catch (error) {
+      console.error("Error removing from profile wishlist:", error);
+      toast({ title: "Error", description: "Could not remove item from wishlist.", variant: "destructive" });
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 flex justify-center items-center min-h-[calc(100vh-10rem)]">
@@ -159,7 +235,13 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return null; 
+    // This should ideally be caught by the redirect in useEffect, but as a fallback:
+    return (
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 flex justify-center items-center min-h-[calc(100vh-10rem)]">
+           <p>Redirecting to login...</p>
+           <Loader2 className="h-8 w-8 animate-spin text-primary ml-4" />
+        </div>
+    );
   }
 
   const getInitials = (name: string | null | undefined) => {
@@ -245,11 +327,48 @@ export default function ProfilePage() {
           </Card>
         );
       case 'wishlist':
-         return (
+        return (
           <Card className="md:col-span-2 shadow-lg">
-            <CardHeader><CardTitle>My Wishlist</CardTitle><CardDescription>Manage your saved items.</CardDescription></CardHeader>
+            <CardHeader>
+              <CardTitle>My Wishlist</CardTitle>
+              <CardDescription>Manage your saved items.</CardDescription>
+            </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Wishlist feature coming soon. For now, you can view your wishlist <Link href="/wishlist" className="text-primary underline">here</Link>.</p>
+              {isProfileWishlistLoading ? (
+                <div className="flex justify-center items-center py-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : profileWishlistItems.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {profileWishlistItems.map((item) => (
+                     <div key={item.id} className="relative group/wishlistitem-profile">
+                      <ProductCard
+                        id={item.id}
+                        name={item.name}
+                        description={item.description}
+                        image={item.image}
+                        dataAiHint={item.dataAiHint}
+                        fixedOfferPrice={item.fixedOfferPrice}
+                        fixedOriginalPrice={item.fixedOriginalPrice}
+                      />
+                       <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 opacity-0 group-hover/wishlistitem-profile:opacity-100 transition-opacity z-10 h-8 w-8"
+                          onClick={() => handleRemoveFromProfileWishlist(item.id)}
+                          aria-label="Remove from wishlist"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">Your wishlist is empty. Start adding products you love!</p>
+              )}
+               <Button variant="outline" size="sm" asChild className="mt-6">
+                <Link href="/wishlist">View Full Wishlist Page</Link>
+              </Button>
             </CardContent>
           </Card>
         );
@@ -327,3 +446,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+
