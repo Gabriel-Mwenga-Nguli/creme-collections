@@ -175,7 +175,7 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
               <ShoppingCart className="mr-1.5 h-4 w-4" /> Add to Cart
             </Button>
             <Button variant="outline" size="sm" className="w-full h-9 text-xs sm:text-sm" asChild>
-              <Link href={`/products/item/${id}`}><Eye className="mr-1.5 h-4 w-4"/>View Details</Link>
+              <Link href={`/products/item/${id}`}><span><Eye className="mr-1.5 h-4 w-4 inline" />View Details</span></Link>
             </Button>
         </div>
       </CardContent>

@@ -74,7 +74,9 @@ export default function OrderDetailPage() {
         <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base">We couldn't find the details for this order.</p>
         <Button asChild variant="outline">
           <Link href="/profile?section=orders">
-            <ChevronLeft className="mr-2 h-4 w-4" /> Back to My Orders
+            <span>
+             <ChevronLeft className="mr-2 h-4 w-4 inline-block" /> Back to My Orders
+            </span>
           </Link>
         </Button>
       </div>
@@ -97,8 +99,10 @@ export default function OrderDetailPage() {
       <div className="mb-6 md:mb-8">
         <Button variant="outline" size="sm" asChild>
           <Link href="/profile?section=orders">
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to My Orders
+            <span>
+              <ChevronLeft className="mr-2 h-4 w-4 inline-block" />
+              Back to My Orders
+            </span>
           </Link>
         </Button>
       </div>

@@ -52,7 +52,9 @@ export default function AdminProductsPage() {
         </div>
         <Button asChild>
           <Link href="/admin/products/add">
-            <PlusCircle className="mr-2 h-5 w-5" /> Add New Product
+            <span>
+              <PlusCircle className="mr-2 h-5 w-5 inline-block" /> Add New Product
+            </span>
           </Link>
         </Button>
       </div>
@@ -120,7 +122,9 @@ export default function AdminProductsPage() {
                       <TableCell className="text-right">
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/admin/products/edit/${product.id}`}>
-                            <Edit3 className="mr-1 h-3.5 w-3.5" /> Edit
+                            <span>
+                              <Edit3 className="mr-1 h-3.5 w-3.5 inline-block" /> Edit
+                            </span>
                           </Link>
                         </Button>
                       </TableCell>

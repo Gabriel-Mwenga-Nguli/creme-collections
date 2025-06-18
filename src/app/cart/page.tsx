@@ -61,8 +61,10 @@ export default function CartPage() {
       <div className="flex flex-col sm:flex-row items-center justify-between mb-8 md:mb-10 gap-4">
         <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
           <Link href="/products">
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Continue Shopping
+            <span>
+              <ChevronLeft className="mr-2 h-4 w-4 inline-block" />
+              Continue Shopping
+            </span>
           </Link>
         </Button>
         <div className="text-center">

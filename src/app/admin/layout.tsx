@@ -83,8 +83,10 @@ function AdminSidebarContent({ closeSheet }: { closeSheet?: () => void }) {
               onClick={closeSheet}
             >
               <Link href={link.href}>
-                <link.icon className="mr-2 h-4 w-4" />
-                {link.label}
+                <span>
+                  <link.icon className="mr-2 h-4 w-4 inline-block" />
+                  {link.label}
+                </span>
               </Link>
             </Button>
           ))}

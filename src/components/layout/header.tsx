@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Menu, X, Sun, Moon, Heart, ShoppingCart, User as UserIconLucide, ChevronDown, type LucideIcon, BarChart3 } from 'lucide-react'; 
-import { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef } from 'react';
+import { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -121,13 +121,14 @@ export default function Header() {
     }
   }, [isMobile, isMegaMenuOpen]);
 
-  const toggleMegaMenu = () => {
+  const toggleMegaMenu = useCallback(() => {
     if (!isMobile) {
-      setIsMegaMenuOpen(!isMegaMenuOpen);
+      setIsMegaMenuOpen(prev => !prev);
     }
-  };
+  }, [isMobile]);
   
-  const closeMegaMenu = () => setIsMegaMenuOpen(false);
+  const closeMegaMenu = useCallback(() => setIsMegaMenuOpen(false), []);
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
   const accountLink = currentUser ? "/profile" : "/login";
 
@@ -148,7 +149,7 @@ export default function Header() {
           <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
             {isAdmin && !isMobile && (
               <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm px-2 md:px-3 mr-2 border-primary text-primary hover:bg-primary/10">
-                <Link href="/admin/dashboard"><BarChart3 className="mr-1.5 h-3.5 w-3.5"/>Admin</Link>
+                <Link href="/admin/dashboard"><span><BarChart3 className="mr-1.5 h-3.5 w-3.5"/>Admin</span></Link>
               </Button>
             )}
             {!isMobile && !authLoading && !currentUser && (
@@ -181,7 +182,7 @@ export default function Header() {
              )}
             <ThemeToggle />
             {isMobile && (
-              <Sheet onOpenChange={(open) => { if (!open) closeMegaMenu(); }}>
+              <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" aria-label="Open menu" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
                     <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -203,7 +204,7 @@ export default function Header() {
                     </div>
 
                     <nav className="flex flex-col gap-1 mb-4">
-                       {MAIN_NAV_LINKS.map((link) => (
+                       {MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger).map((link) => ( 
                          <SheetClose asChild key={link.label}>
                             <Link
                               href={link.href}
@@ -230,19 +231,20 @@ export default function Header() {
                     <hr className="my-3"/>
                     <p className="px-2 text-sm font-semibold text-muted-foreground mb-2">Browse Categories</p>
                     <Accordion type="single" collapsible className="w-full">
-                      {CATEGORY_NAV_LINKS.map((category) => (
+                      {CATEGORY_NAV_LINKS.map((category) => ( 
                         <AccordionItem value={category.label} key={category.label}>
-                          <AccordionTrigger className="text-base font-medium hover:text-primary py-3 px-2">
-                            <div className="flex items-center gap-2">
-                              {category.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
-                              {category.label}
-                            </div>
+                          <AccordionTrigger className="text-base font-medium hover:text-primary py-3 px-2" asChild>
+                            <SheetClose asChild>
+                                <Link href={category.href} className="flex items-center gap-2 w-full text-left" onClick={(e) => e.stopPropagation()}>
+                                   <span>
+                                    {category.icon && <category.icon className="h-5 w-5 text-muted-foreground inline-block mr-2" />}
+                                    {category.label}
+                                   </span>
+                                </Link>
+                            </SheetClose>
                           </AccordionTrigger>
                           <AccordionContent className="pl-6 pr-2">
                             <nav className="flex flex-col gap-1.5 mt-1">
-                              <SheetClose asChild>
-                                <Link href={category.href} className="text-sm text-muted-foreground hover:text-primary py-1.5 block">All {category.label}</Link>
-                              </SheetClose>
                               {category.subLinks?.map((subLink) => (
                                 <SheetClose asChild key={subLink.label}>
                                   <Link
@@ -262,7 +264,8 @@ export default function Header() {
                     <hr className="my-4" />
                      <SheetClose asChild>
                          <Link href={authLoading ? "/login" : accountLink} className="text-base font-medium text-foreground hover:text-primary flex items-center gap-2 py-2 px-2">
-                             <UserIconLucide className="h-5 w-5 text-muted-foreground" /> {currentUser ? "My Account" : "Login / Profile"}
+                             <UserIconLucide className="h-5 w-5 text-muted-foreground" /> 
+                             <span>{currentUser ? "My Account" : "Login / Profile"}</span>
                          </Link>
                      </SheetClose>
                   </div>
@@ -305,6 +308,7 @@ export default function Header() {
                         key={megaMenuTriggerLink.label}
                         variant="ghost"
                         onClick={toggleMegaMenu}
+                        onMouseEnter={toggleMegaMenu} 
                         className={`text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md hover:bg-primary/20 hover:text-primary ${isMegaMenuOpen ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'text-foreground'}`}
                     >
                         {megaMenuTriggerLink.icon && <megaMenuTriggerLink.icon className={`mr-1.5 h-4 w-4 ${isMegaMenuOpen ? 'text-slate-100' : ''}`} />}
@@ -314,7 +318,7 @@ export default function Header() {
                 );
               })()}
               
-              <NavigationMenu className="ml-1">
+              <NavigationMenu>
                 <NavigationMenuList className="flex-wrap justify-start">
                   {MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger).map((link) => {
                     const parentCategoryData = CATEGORY_NAV_LINKS.find(cat => cat.href === link.href);
@@ -323,23 +327,18 @@ export default function Header() {
                       return (
                         <NavigationMenuItem key={link.label}>
                           <NavigationMenuTrigger 
-                            className="text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 data-[state=open]:bg-slate-800 data-[state=open]:text-slate-100 group"
+                            className={cn(navigationMenuTriggerStyle(),"text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 data-[state=open]:bg-slate-800 data-[state=open]:text-slate-100 group")}
+                            asChild
                           >
-                            {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-data-[state=open]:text-slate-100 group-hover:text-primary transition-colors" />}
-                            {link.label}
+                            <Link href={link.href} onClick={closeMegaMenu}>
+                                <span>
+                                {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-hover:text-primary transition-colors inline-block" />}
+                                {link.label}
+                                </span>
+                            </Link>
                           </NavigationMenuTrigger>
                           <NavigationMenuContent className="bg-slate-900 border-slate-700 text-slate-100">
                             <ul className="flex flex-col w-[220px] md:w-[250px] lg:w-[300px] gap-1 p-2 rounded-md shadow-lg max-h-[70vh] overflow-y-auto">
-                               <ListItem
-                                  key={`all-${parentCategoryData.label}`}
-                                  href={parentCategoryData.href}
-                                  title={`All ${parentCategoryData.label}`}
-                                  onClick={closeMegaMenu}
-                                  className="font-semibold"
-                                >
-                                  Browse all items in {parentCategoryData.label}.
-                                </ListItem>
-                                <hr className="my-1 border-slate-700"/>
                               {parentCategoryData.subLinks.map((subLink) => (
                                 <ListItem
                                   key={subLink.label}
@@ -361,8 +360,10 @@ export default function Header() {
                               className={cn(navigationMenuTriggerStyle(), "text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 group")}
                               onClick={closeMegaMenu}
                             >
-                              {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-hover:text-primary transition-colors" />}
+                             <span>
+                              {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-hover:text-primary transition-colors inline-block" />}
                               {link.label}
+                             </span>
                             </Link>
                           </NavigationMenuLink>
                         </NavigationMenuItem>

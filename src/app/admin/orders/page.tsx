@@ -127,7 +127,9 @@ export default function AdminOrdersPage() {
                       <TableCell className="text-right">
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/admin/orders/${order.id}`}>
-                            <Eye className="mr-1 h-3.5 w-3.5" /> View
+                            <span>
+                              <Eye className="mr-1 h-3.5 w-3.5 inline-block" /> View
+                            </span>
                           </Link>
                         </Button>
                       </TableCell>

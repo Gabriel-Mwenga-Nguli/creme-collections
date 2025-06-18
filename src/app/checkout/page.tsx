@@ -76,8 +76,10 @@ export default function CheckoutPage() {
       <div className="flex items-center justify-start mb-6 md:mb-8">
         <Button variant="outline" size="sm" asChild>
           <Link href="/cart">
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to Cart
+            <span>
+              <ChevronLeft className="mr-2 h-4 w-4 inline-block" />
+              Back to Cart
+            </span>
           </Link>
         </Button>
       </div>

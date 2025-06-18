@@ -110,8 +110,10 @@ export default async function HomePage() {
                   <div className="sm:w-1/2 p-4 md:p-6 lg:p-8 flex flex-col justify-center">
                     <h3 className={`text-xl md:text-2xl font-semibold ${banner.textColor === 'text-primary-foreground' ? 'text-primary' : 'text-accent'} font-headline`}>{banner.title}</h3>
                     <p className={`mt-1.5 md:mt-2 text-sm ${banner.textColor === 'text-primary-foreground' ? 'text-primary/80' : 'text-accent/80'}`}>{banner.description}</p>
-                    <Button variant={banner.bgColor === 'bg-primary/10' ? 'default' : 'outline'} size="sm" className="mt-3 md:mt-4 w-fit">
-                       Shop Now <ShoppingBag className="ml-2 h-4 w-4" />
+                    <Button variant={banner.bgColor === 'bg-primary/10' ? 'default' : 'outline'} size="sm" className="mt-3 md:mt-4 w-fit" asChild>
+                      <Link href={banner.href}>
+                        <span>Shop Now <ShoppingBag className="ml-2 h-4 w-4 inline" /></span>
+                      </Link>
                     </Button>
                   </div>
                   <div className="sm:w-1/2 aspect-video sm:aspect-auto">
@@ -182,7 +184,7 @@ export default async function HomePage() {
           )}
            <div className="text-center mt-8 md:mt-12">
             <Button size="lg" asChild>
-              <Link href="/products">Shop All Products <ShoppingBag className="ml-2 h-5 w-5" /></Link>
+              <Link href="/products"><span>Shop All Products <ShoppingBag className="ml-2 h-5 w-5 inline" /></span></Link>
             </Button>
           </div>
         </div>
