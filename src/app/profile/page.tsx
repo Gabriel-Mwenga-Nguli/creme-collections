@@ -8,13 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { User, ShoppingBag, Heart, MapPin, Edit3, LogOut, Loader2, Award, Mail, Trash2 } from 'lucide-react';
+import { User, ShoppingBag, Heart, MapPin, LogOut, Loader2, Award, Mail, Trash2, Edit3, Camera } from 'lucide-react'; // Added Camera, Edit3
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { auth, db } from '@/lib/firebase'; 
+import { auth, db, storage } from '@/lib/firebase'; 
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { signOut, updateProfile, type User as FirebaseUser } from 'firebase/auth';
-import { doc, setDoc, getDoc, collection, query, onSnapshot, deleteDoc, serverTimestamp } from 'firebase/firestore'; 
+import { doc, setDoc, getDoc, collection, query, onSnapshot, deleteDoc, serverTimestamp, Timestamp } from 'firebase/firestore'; 
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'; // Firebase Storage imports
 import { useToast } from '@/hooks/use-toast';
 import InboxView from '@/components/features/profile/InboxView';
 import { manageLoyaltyPoints } from '@/ai/flows/loyalty-points-flow';
@@ -36,12 +37,19 @@ export default function ProfilePage() {
   const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
   const [isSaving, setIsSaving] = useState(false);
   
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState(''); // Kept for UI structure, not functional
+  const [newPassword, setNewPassword] = useState(''); // Kept for UI structure, not functional
   const [activeSection, setActiveSection] = useState<ProfileSection>("personal");
 
   const [profileWishlistItems, setProfileWishlistItems] = useState<ProductCardProps[]>([]);
   const [isProfileWishlistLoading, setIsProfileWishlistLoading] = useState(false);
+
+  // Profile Picture States
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
 
   useEffect(() => {
     if (!loading && !user) {
@@ -54,6 +62,9 @@ export default function ProfilePage() {
       setFirstName(nameParts[0] || 'User');
       setLastName(nameParts.length > 1 ? nameParts.slice(1).join(' ') : '');
       setEmail(user.email || '');
+      if (user.photoURL) {
+        setPreviewUrl(user.photoURL); // Initialize preview with existing photoURL
+      }
 
       const fetchUserFirestoreData = async () => {
         const userDocRef = doc(db, 'users', user.uid);
@@ -65,8 +76,8 @@ export default function ProfilePage() {
             setLoyaltyPoints(userData.loyaltyPoints || 0);
             if (userData.firstName) setFirstName(userData.firstName);
             if (userData.lastName) setLastName(userData.lastName);
+            // if (userData.photoURL && !previewUrl) setPreviewUrl(userData.photoURL); // Prioritize auth URL
           } else {
-            // If user document doesn't exist, create it with basic info
             const newDisplayName = `${firstName} ${lastName}`.trim() || user.displayName;
             await setDoc(userDocRef, {
               email: user.email,
@@ -74,7 +85,8 @@ export default function ProfilePage() {
               firstName: firstName,
               lastName: lastName,
               loyaltyPoints: 0,
-              createdAt: serverTimestamp()
+              createdAt: serverTimestamp(),
+              photoURL: user.photoURL || null,
             }, { merge: true });
              setLoyaltyPoints(0);
           }
@@ -89,7 +101,7 @@ export default function ProfilePage() {
       };
       fetchUserFirestoreData();
     }
-  }, [user, loading, router, toast, firstName, lastName]); // Added firstName, lastName to deps for initial doc creation
+  }, [user, loading, router, toast]); 
 
   const handleLogout = async () => {
     try {
@@ -113,7 +125,10 @@ export default function ProfilePage() {
       const newDisplayName = `${firstName} ${lastName}`.trim();
       
       if (auth.currentUser) { 
-        await updateProfile(auth.currentUser, { displayName: newDisplayName });
+        // Only update displayName in auth if it has changed, photoURL handled separately
+        if (auth.currentUser.displayName !== newDisplayName) {
+            await updateProfile(auth.currentUser, { displayName: newDisplayName });
+        }
       } else {
         throw new Error("Current user not found in auth object.");
       }
@@ -123,8 +138,9 @@ export default function ProfilePage() {
         firstName: firstName,
         lastName: lastName,
         phone: phone,
-        email: user.email, // Ensure email is also stored/updated if necessary
+        email: user.email, 
         displayName: newDisplayName,
+        // photoURL is updated by handleImageUpload separately in Firestore
       }, { merge: true }); 
 
       toast({ title: "Profile Updated", description: "Your profile information has been successfully updated." });
@@ -209,10 +225,58 @@ export default function ProfilePage() {
       const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', productId);
       await deleteDoc(wishlistItemRef);
       toast({ title: "Removed from Wishlist", description: "The item has been removed from your wishlist." });
-      // State updates via onSnapshot
     } catch (error) {
       console.error("Error removing from profile wishlist:", error);
       toast({ title: "Error", description: "Could not remove item from wishlist.", variant: "destructive" });
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      // Basic validation for image type
+      if (!file.type.startsWith('image/')) {
+        toast({ title: "Invalid File", description: "Please select an image file (e.g., JPG, PNG, GIF).", variant: "destructive" });
+        return;
+      }
+      // Basic validation for file size (e.g., 5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({ title: "File Too Large", description: "Image size should not exceed 5MB.", variant: "destructive" });
+        return;
+      }
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!selectedFile || !user || !storage || !db) {
+      toast({ title: "Upload Error", description: "No file selected or user not authenticated.", variant: "destructive" });
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const fileExtension = selectedFile.name.split('.').pop();
+      const imageRef = storageRef(storage, `profilePictures/${user.uid}/profileImage.${fileExtension}`);
+      
+      const snapshot = await uploadBytes(imageRef, selectedFile);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { photoURL: downloadURL });
+      }
+      
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, { photoURL: downloadURL }, { merge: true });
+
+      setPreviewUrl(downloadURL); // Update preview with the final URL
+      setSelectedFile(null); // Clear selected file
+      toast({ title: "Profile Picture Updated", description: "Your new profile picture has been saved." });
+    } catch (uploadError: any) {
+      console.error("Error uploading profile picture:", uploadError);
+      toast({ title: "Upload Failed", description: uploadError.message || "Could not upload your profile picture.", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -235,7 +299,6 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    // This should ideally be caught by the redirect in useEffect, but as a fallback:
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 flex justify-center items-center min-h-[calc(100vh-10rem)]">
            <p>Redirecting to login...</p>
@@ -264,6 +327,7 @@ export default function ProfilePage() {
     : 'N/A';
   
   const currentDisplayName = `${firstName} ${lastName}`.trim() || user.displayName || 'User';
+  const displayPhotoUrl = previewUrl || user.photoURL; // Use previewUrl if available, else fallback to auth photoURL
 
   const renderSectionContent = () => {
     switch (activeSection) {
@@ -271,9 +335,7 @@ export default function ProfilePage() {
         return (
           <Card className="md:col-span-2 shadow-lg">
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-xl font-headline">Edit Profile</CardTitle>
-              </div>
+              <CardTitle className="text-xl font-headline">Edit Profile</CardTitle>
               <CardDescription>Update your personal details here.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -384,7 +446,6 @@ export default function ProfilePage() {
     }
   };
 
-
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
       <div className="max-w-5xl mx-auto">
@@ -396,10 +457,42 @@ export default function ProfilePage() {
         <div className="grid md:grid-cols-3 gap-8 items-start">
           <Card className="md:col-span-1 shadow-lg">
             <CardHeader className="items-center text-center">
-              <Avatar className="w-24 h-24 mb-4 border-2 border-primary">
-                <AvatarImage src={user.photoURL || undefined} alt={currentDisplayName} data-ai-hint="profile avatar" />
-                <AvatarFallback className="text-2xl bg-muted">{getInitials(currentDisplayName)}</AvatarFallback>
-              </Avatar>
+              <div className="relative group/avatar">
+                <Avatar className="w-24 h-24 mb-4 border-2 border-primary">
+                  <AvatarImage src={displayPhotoUrl || undefined} alt={currentDisplayName} data-ai-hint="profile avatar" />
+                  <AvatarFallback className="text-2xl bg-muted">{getInitials(currentDisplayName)}</AvatarFallback>
+                </Avatar>
+                <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="absolute bottom-2 right-2 rounded-full h-8 w-8 bg-background/80 hover:bg-background group-hover/avatar:opacity-100 md:opacity-0 transition-opacity"
+                    onClick={() => fileInputRef.current?.click()}
+                    aria-label="Change profile picture"
+                  >
+                  <Camera className="h-4 w-4" />
+                </Button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleFileChange} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+              </div>
+              {selectedFile && (
+                <div className="text-center mt-2 mb-2">
+                  <p className="text-xs text-muted-foreground">Selected: {selectedFile.name}</p>
+                  <Button 
+                    size="sm" 
+                    onClick={handleImageUpload} 
+                    disabled={isUploading} 
+                    className="mt-1"
+                  >
+                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Upload Picture
+                  </Button>
+                </div>
+              )}
               <CardTitle className="text-2xl">{currentDisplayName}</CardTitle>
               <CardDescription>{email || 'No email provided'}</CardDescription>
               <CardDescription className="text-xs">Joined {creationDate}</CardDescription>
@@ -447,3 +540,4 @@ export default function ProfilePage() {
   );
 }
 
+    
