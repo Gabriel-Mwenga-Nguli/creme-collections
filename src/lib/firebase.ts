@@ -28,21 +28,12 @@ const firebaseConfigValues = {
 };
 
 let app: FirebaseApp | undefined;
-let db: Firestore | null = null;
+let db: Firestore | null = null; // Initial state is null
 let auth: Auth | null = null;
 let storage: FirebaseStorage | null = null;
 let analytics: Analytics | null = null;
 
-// CRITICAL: Log the config values being read from environment variables
-console.log('[Firebase] Attempting to load Firebase Config from environment variables:', {
-  apiKeyExists: !!firebaseConfigValues.apiKey,
-  authDomain: firebaseConfigValues.authDomain,
-  projectId: firebaseConfigValues.projectId, // This will show "YOUR_PROJECT_ID" if not set correctly
-  storageBucketExists: !!firebaseConfigValues.storageBucket,
-  messagingSenderIdExists: !!firebaseConfigValues.messagingSenderId,
-  appIdExists: !!firebaseConfigValues.appId,
-  measurementIdExists: !!firebaseConfigValues.measurementId,
-});
+console.log('[Firebase Module Start] Initial value of db:', db === null ? 'null' : 'not null');
 
 if (
   !firebaseConfigValues.apiKey ||
@@ -54,6 +45,12 @@ if (
   console.error(
     '[Firebase] CRITICAL_CONFIG_MISSING: One or more critical Firebase configuration values (apiKey, authDomain, projectId) are missing or set to placeholder values in environment variables. These are expected as NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, and NEXT_PUBLIC_FIREBASE_PROJECT_ID. Firebase services will NOT be initialized. Please verify your .env.local file and ensure the Next.js server has been restarted.'
   );
+  // Ensure all services remain null if config is critically missing
+  app = undefined;
+  db = null;
+  auth = null;
+  storage = null;
+  analytics = null;
 } else {
   const firebaseConfig: FirebaseOptions = {
     apiKey: firebaseConfigValues.apiKey,
@@ -72,7 +69,7 @@ if (
       console.log('[Firebase] Firebase app initialized successfully.');
     } catch (initError) {
       console.error('[Firebase] FIREBASE_APP_INIT_ERROR: Firebase app initialization failed:', initError);
-      app = undefined; // Ensure app is undefined if init fails
+      app = undefined;
     }
   } else {
     app = getApp();
@@ -82,11 +79,17 @@ if (
   if (app) {
     try {
       console.log('[Firebase] Attempting to initialize Firestore...');
-      db = getFirestore(app);
-      console.log('[Firebase] Firestore initialized successfully.');
+      const firestoreInstance = getFirestore(app);
+      if (firestoreInstance) {
+        db = firestoreInstance;
+        console.log('[Firebase] Firestore initialized successfully. db is now SET.');
+      } else {
+        console.error('[Firebase] FIRESTORE_INIT_ERROR: getFirestore(app) returned undefined/null.');
+        db = null;
+      }
     } catch (dbError) {
       console.error('[Firebase] FIRESTORE_INIT_ERROR: Error initializing Firestore:', dbError);
-      db = null; // Ensure db is null if getFirestore fails
+      db = null;
     }
     
     try {
@@ -95,7 +98,7 @@ if (
       console.log('[Firebase] Firebase Auth initialized successfully.');
     } catch (authError) {
       console.error(
-        '[Firebase] FIREBASE_AUTH_INIT_ERROR: Error initializing Firebase Authentication. This can be due to an invalid API key or misconfiguration:', 
+        '[Firebase] FIREBASE_AUTH_INIT_ERROR: Error initializing Firebase Authentication:', 
         authError
       );
       auth = null; 
@@ -125,7 +128,13 @@ if (
 
   } else {
      console.error("[Firebase] FIREBASE_APP_UNAVAILABLE: Firebase app object is not available (likely due to missing or invalid config, or a prior initialization error). Firestore, Auth, Storage, and Analytics will not be available.");
+     db = null;
+     auth = null;
+     storage = null;
+     analytics = null;
   }
 }
 
+console.log('[Firebase Module End] Exporting db with value:', db === null ? 'null (Firestore NOT initialized or failed)' : 'VALID INSTANCE (Firestore SHOULD be working)');
 export { db, auth, storage, analytics };
+

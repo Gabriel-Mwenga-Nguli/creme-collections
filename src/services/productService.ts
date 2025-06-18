@@ -6,6 +6,9 @@ import type { DealProduct } from '@/components/features/home/weekly-deals-slider
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, limit, doc, getDoc, addDoc, updateDoc, serverTimestamp, Timestamp, type DocumentSnapshot, type QueryDocumentSnapshot, orderBy } from 'firebase/firestore';
 
+// Log the state of 'db' immediately after import at the module level
+console.log('[ProductService Module Load] Value of db imported from firebase.ts:', db === null ? 'null' : 'VALID INSTANCE');
+
 
 export interface Product {
   id: string; 
@@ -66,6 +69,7 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
 
 
 export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
+  console.log('[getFeaturedProducts Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch featured products.");
     return [];
@@ -95,6 +99,7 @@ export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
 }
 
 export async function getWeeklyDeals(): Promise<DealProduct[]> {
+  console.log('[getWeeklyDeals Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch weekly deals.");
     return [];
@@ -127,6 +132,7 @@ export interface ProductDetailsPageData extends Product {
 }
 
 export async function getProductDetailsById(productId: string): Promise<ProductDetailsPageData | null> {
+  console.log('[getProductDetailsById Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch product details for ID:", productId);
     return null;
@@ -152,6 +158,7 @@ export async function getProductDetailsById(productId: string): Promise<ProductD
 }
 
 export async function getAllProducts(categorySlugParam?: string, subCategorySlugParam?: string): Promise<Product[]> {
+  console.log('[getAllProducts Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch products.");
     return [];
@@ -181,6 +188,7 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
 }
 
 export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>): Promise<string | null> {
+    console.log('[addProduct Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
     if (!db) {
         console.error("Firestore 'db' object is not initialized. Cannot add product.");
         return null;
@@ -205,6 +213,7 @@ export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>)
 }
 
 export async function updateProduct(productId: string, productData: Partial<Omit<Product, 'id' | 'createdAt'>>): Promise<boolean> {
+    console.log('[updateProduct Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
     if (!db) {
         console.error("Firestore 'db' object is not initialized. Cannot update product.");
         return false;
@@ -226,3 +235,4 @@ export async function updateProduct(productId: string, productData: Partial<Omit
         return false;
     }
 }
+
