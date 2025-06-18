@@ -8,9 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import StatCard from '@/components/admin/StatCard';
-import SalesTrendChart from '@/components/admin/charts/SalesTrendChart'; // Placeholder, will create
-import CategoryPieChart from '@/components/admin/charts/CategoryPieChart'; // Placeholder, will create
-import { getDashboardStats, type DashboardStats } from '@/services/adminService'; // To be created
+import SalesTrendChart from '@/components/admin/charts/SalesTrendChart'; 
+import CategoryPieChart from '@/components/admin/charts/CategoryPieChart'; 
+import { getDashboardStats, type DashboardStats } from '@/services/adminService'; 
 import { getAllOrdersForAdmin, type OrderAdminItem } from '@/services/orderService';
 import { format } from 'date-fns';
 
@@ -35,7 +35,7 @@ export default function AdminDashboardPage() {
 
       setLoadingOrders(true);
       try {
-        const fetchedOrders = await getAllOrdersForAdmin(5); // Fetch last 5 orders
+        const fetchedOrders = await getAllOrdersForAdmin(5); 
         setRecentOrders(fetchedOrders);
       } catch (error) {
         console.error("Error fetching recent orders:", error);
@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
     fetchData();
   }, []);
 
-  const salesChartData = [ // Placeholder data
+  const salesChartData = [ 
     { name: 'Mon', sales: Math.floor(Math.random() * 5000) + 1000 },
     { name: 'Tue', sales: Math.floor(Math.random() * 5000) + 1000 },
     { name: 'Wed', sales: Math.floor(Math.random() * 5000) + 1000 },
@@ -56,7 +56,7 @@ export default function AdminDashboardPage() {
     { name: 'Sun', sales: Math.floor(Math.random() * 5000) + 1000 },
   ];
 
-  const categoryData = [ // Placeholder data
+  const categoryData = [ 
     { name: 'Electronics', value: 400, fill: 'hsl(var(--chart-1))' },
     { name: 'Fashion', value: 300, fill: 'hsl(var(--chart-2))' },
     { name: 'Home', value: 200, fill: 'hsl(var(--chart-3))' },
@@ -75,9 +75,9 @@ export default function AdminDashboardPage() {
           </h1>
           <p className="text-muted-foreground text-sm">Overview of your shop's performance and activity.</p>
         </div>
-        <Button asChild>
-          <Link href="/admin/products/add">Add New Product</Link>
-        </Button>
+        <Link href="/admin/products/add" passHref legacyBehavior>
+          <Button as="a">Add New Product</Button>
+        </Link>
       </div>
       
       <Separator />
@@ -117,9 +117,9 @@ export default function AdminDashboardPage() {
               <CardTitle>Recent Orders</CardTitle>
               <CardDescription>Last 5 orders placed on the website.</CardDescription>
             </div>
-            <Button variant="outline" size="sm" asChild>
-                <Link href="/admin/orders">View All Orders</Link>
-            </Button>
+            <Link href="/admin/orders" passHref legacyBehavior>
+              <Button as="a" variant="outline" size="sm">View All Orders</Button>
+            </Link>
           </CardHeader>
           <CardContent>
             {loadingOrders ? <p className="text-muted-foreground text-sm">Loading recent orders...</p> :

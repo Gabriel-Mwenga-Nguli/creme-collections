@@ -74,14 +74,14 @@ export default function CheckoutPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       <div className="flex items-center justify-start mb-6 md:mb-8">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/cart">
+        <Link href="/cart" passHref legacyBehavior>
+          <Button as="a" variant="outline" size="sm">
             <span>
               <ChevronLeft className="mr-2 h-4 w-4 inline-block" />
               Back to Cart
             </span>
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
       <div className="text-center mb-8 md:mb-10">
         <ShoppingBag className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-primary mb-2 sm:mb-4" />

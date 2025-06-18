@@ -27,7 +27,7 @@ export default function WishlistPage() {
     }
     const productsData: ProductCardProps[] = [];
     for (const productId of productIds) {
-      const productDetails = await getProductDetailsById(productId); // This now returns Product or null
+      const productDetails = await getProductDetailsById(productId); 
       if (productDetails) {
         productsData.push({
           id: productDetails.id,
@@ -44,7 +44,7 @@ export default function WishlistPage() {
     }
     setWishlistItems(productsData);
     setIsLoading(false);
-  }, [toast]); // Removed db from dependencies as it's checked inside
+  }, [toast]); 
 
   useEffect(() => {
     document.title = 'Your Wishlist - Creme Collections';
@@ -53,13 +53,12 @@ export default function WishlistPage() {
       return;
     }
     if (!user) {
-      setIsLoading(false); // User not logged in, stop loading
+      setIsLoading(false); 
       return;
     }
     if (!db) {
         console.error("Firestore (db) is not initialized. Cannot fetch wishlist.");
         setIsLoading(false);
-        // toast({ title: "Error", description: "Database not available. Cannot load wishlist.", variant: "destructive" });
         return;
     }
 
@@ -68,7 +67,7 @@ export default function WishlistPage() {
     const q = query(wishlistRef);
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const productIds = snapshot.docs.map(doc => doc.id); // doc.id is the productId
+      const productIds = snapshot.docs.map(doc => doc.id); 
       fetchWishlistProducts(productIds);
     }, (error) => {
       console.error("Error fetching wishlist:", error);
@@ -76,7 +75,7 @@ export default function WishlistPage() {
       setIsLoading(false);
     });
 
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe(); 
   }, [user, authLoading, toast, fetchWishlistProducts]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
@@ -87,7 +86,6 @@ export default function WishlistPage() {
     try {
       const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', productId);
       await deleteDoc(wishlistItemRef);
-      // No need to manually update state, onSnapshot will trigger a re-fetch and update
       toast({ title: "Removed from Wishlist", description: "The item has been removed from your wishlist." });
     } catch (error) {
       console.error("Error removing from wishlist:", error);
@@ -107,7 +105,9 @@ export default function WishlistPage() {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-center">
         <p className="text-destructive">Error loading your profile: {authError.message}</p>
-        <Button asChild className="mt-4"><Link href="/login">Login</Link></Button>
+        <Link href="/login" passHref legacyBehavior>
+          <Button as="a" className="mt-4">Login</Button>
+        </Link>
       </div>
     );
   }
@@ -120,9 +120,9 @@ export default function WishlistPage() {
         <p className="text-muted-foreground mb-6">
           Please <Link href="/login" className="text-primary hover:underline">log in</Link> to view or add items to your wishlist.
         </p>
-        <Button asChild size="lg">
-          <Link href="/login">Login to View Wishlist</Link>
-        </Button>
+        <Link href="/login" passHref legacyBehavior>
+          <Button as="a" size="lg">Login to View Wishlist</Button>
+        </Link>
       </div>
     );
   }
@@ -169,12 +169,11 @@ export default function WishlistPage() {
           <p className="text-muted-foreground mb-6">
             Add items you love to your wishlist by clicking the heart icon on product pages.
           </p>
-          <Button asChild size="lg">
-            <Link href="/products">Start Shopping</Link>
-          </Button>
+          <Link href="/products" passHref legacyBehavior>
+            <Button as="a" size="lg">Start Shopping</Button>
+          </Link>
         </div>
       )}
     </div>
   );
 }
-

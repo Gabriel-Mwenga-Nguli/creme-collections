@@ -75,20 +75,19 @@ function AdminSidebarContent({ closeSheet }: { closeSheet?: () => void }) {
       <ScrollArea className="flex-grow">
         <nav className="p-3 space-y-1">
           {ADMIN_NAV_LINKS.map((link) => (
-            <Button
-              key={link.label}
-              variant="ghost"
-              className="w-full justify-start text-sm font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              asChild
-              onClick={closeSheet}
-            >
-              <Link href={link.href}>
+            <Link key={link.label} href={link.href} passHref legacyBehavior>
+              <Button
+                as="a"
+                variant="ghost"
+                className="w-full justify-start text-sm font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                onClick={closeSheet}
+              >
                 <span>
                   <link.icon className="mr-2 h-4 w-4 inline-block" />
                   {link.label}
                 </span>
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           ))}
         </nav>
       </ScrollArea>
@@ -120,9 +119,9 @@ export default function AdminLayout({
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.replace('/login?redirect=/admin/dashboard'); // Redirect to login if not authenticated
+        router.replace('/login?redirect=/admin/dashboard'); 
       } else if (user.email !== ADMIN_EMAIL) {
-        router.replace('/'); // Redirect to homepage if not admin
+        router.replace('/'); 
         alert('Access Denied: You do not have permission to view this page.');
       }
     }
@@ -138,8 +137,6 @@ export default function AdminLayout({
   }
 
   if (!user || user.email !== ADMIN_EMAIL) {
-    // This state should ideally be brief due to the useEffect redirect,
-    // but it's good to have a fallback UI.
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <p className="text-lg text-destructive">Access Denied. Redirecting...</p>

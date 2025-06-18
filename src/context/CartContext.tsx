@@ -1,21 +1,19 @@
-
 "use client";
 
-import type { ProductCardProps } from '@/components/features/home/product-card'; // ProductCardProps ID is now string
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
+import type { ProductCardProps } from '@/components/features/home/product-card'; 
+import { useToast, createViewCartToastAction } from '@/hooks/use-toast'; // Import createViewCartToastAction
 import Link from 'next/link';
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
-export interface CartItem extends ProductCardProps { // id will be string from ProductCardProps
+export interface CartItem extends ProductCardProps { 
   quantity: number;
 }
 
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (product: ProductCardProps, quantity: number) => void;
-  updateItemQuantity: (productId: string, quantity: number) => void; // productId is now string
-  removeItemFromCart: (productId: string) => void; // productId is now string
+  updateItemQuantity: (productId: string, quantity: number) => void; 
+  removeItemFromCart: (productId: string) => void; 
   clearCart: () => void;
   getCartTotal: () => number;
   getCartItemCount: () => number;
@@ -47,16 +45,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     toast({
       title: `${product.name} added to cart!`,
       description: `Quantity: ${quantity}. Total items: ${currentCartItemCount + quantity}`,
-      action: (
-        <Button asChild variant="outline" size="sm">
-          <Link href="/cart">View Cart</Link>
-        </Button>
-      ),
+      action: createViewCartToastAction(), // Use the helper function
       duration: 5000,
     });
   }, [toast, currentCartItemCount]);
 
-  const updateItemQuantity = useCallback((productId: string, quantity: number) => { // productId is now string
+  const updateItemQuantity = useCallback((productId: string, quantity: number) => { 
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.id === productId ? { ...item, quantity: Math.max(0, quantity) } : item
@@ -64,7 +58,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
   }, []);
 
-  const removeItemFromCart = useCallback((productId: string) => { // productId is now string
+  const removeItemFromCart = useCallback((productId: string) => { 
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
     toast({
       title: "Item removed",
@@ -102,5 +96,3 @@ export const useCart = (): CartContextType => {
   }
   return context;
 };
-    
-    

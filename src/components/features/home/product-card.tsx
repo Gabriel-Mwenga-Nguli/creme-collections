@@ -4,14 +4,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'; // Removed CardDescription and CardFooter
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'; 
 import { Button } from '@/components/ui/button';
-import { Heart, ShoppingCart, Loader2, Eye } from 'lucide-react'; // Added Eye icon
+import { Heart, ShoppingCart, Loader2, Eye } from 'lucide-react'; 
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { auth, db } from '@/lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { doc, setDoc, deleteDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { ToastAction, createViewCartToastAction } from '@/hooks/use-toast';
+
 
 export interface ProductCardProps {
   id: string;
@@ -42,7 +44,6 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
         setOriginalPrice(null);
       }
     } else {
-      // Fallback if prices aren't fixed (e.g. for randomly generated example data)
       const basePrice = Math.random() * 8000 + 2000;
       const discount = Math.random() * 0.3 + 0.1;
       const calculatedOfferPrice = basePrice * (1 - discount);
@@ -81,7 +82,16 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
     event.stopPropagation();
 
     if (!user) {
-      toast({ title: "Login Required", description: "Please log in to manage your wishlist.", variant: "destructive", action: <Button asChild><Link href="/login">Login</Link></Button> });
+      toast({ 
+        title: "Login Required", 
+        description: "Please log in to manage your wishlist.", 
+        variant: "destructive", 
+        action: (
+          <Link href="/login" passHref legacyBehavior>
+            <ToastAction as="a" altText="Login">Login</ToastAction>
+          </Link>
+        ) 
+      });
       return;
     }
     if (!id || !db) {
@@ -174,9 +184,13 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
             >
               <ShoppingCart className="mr-1.5 h-4 w-4" /> Add to Cart
             </Button>
-            <Button variant="outline" size="sm" className="w-full h-9 text-xs sm:text-sm" asChild>
-              <Link href={`/products/item/${id}`}><span><Eye className="mr-1.5 h-4 w-4 inline" />View Details</span></Link>
-            </Button>
+            <Link href={`/products/item/${id}`} passHref legacyBehavior>
+              <Button as="a" variant="outline" size="sm" className="w-full h-9 text-xs sm:text-sm">
+                <span>
+                  <Eye className="mr-1.5 h-4 w-4 inline" />View Details
+                </span>
+              </Button>
+            </Link>
         </div>
       </CardContent>
     </Card>

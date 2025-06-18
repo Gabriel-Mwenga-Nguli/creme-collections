@@ -1,12 +1,13 @@
+
 "use client"
 
-// Inspired by react-hot-toast library
 import * as React from "react"
-
 import type {
   ToastActionElement,
   ToastProps,
 } from "@/components/ui/toast"
+import { ToastAction as RadixToastAction } from "@/components/ui/toast"
+// Link import is removed as it's no longer directly used in createViewCartToastAction for this test
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
@@ -60,7 +61,7 @@ const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
-    return
+    clearTimeout(toastTimeouts.get(toastId));
   }
 
   const timeout = setTimeout(() => {
@@ -77,6 +78,12 @@ const addToRemoveQueue = (toastId: string) => {
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
+      state.toasts.forEach(t => {
+        if (toastTimeouts.has(t.id)) {
+          clearTimeout(toastTimeouts.get(t.id));
+          toastTimeouts.delete(t.id);
+        }
+      });
       return {
         ...state,
         toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
@@ -93,8 +100,6 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -142,6 +147,11 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
+function toast(props: Toast & { action?: React.ReactElement<React.ComponentProps<typeof RadixToastAction>> }): {
+  id: string;
+  dismiss: () => void;
+  update: (props: ToasterToast) => void;
+}
 function toast({ ...props }: Toast) {
   const id = genId()
 
@@ -161,7 +171,7 @@ function toast({ ...props }: Toast) {
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
-    },
+    } as ToasterToast,
   })
 
   return {
@@ -191,4 +201,25 @@ function useToast() {
   }
 }
 
-export { useToast, toast }
+// Simplified version for testing: ToastAction is a regular button.
+export const createViewCartToastAction = (): ToastActionElement => {
+    return (
+      <RadixToastAction
+        altText="View Cart"
+        onClick={() => {
+            // For a real app, you'd use router.push('/cart') here.
+            // This requires this function to be a hook or have router passed in.
+            // For now, just logging to test if the Slot error is resolved.
+            console.log("View Cart toast action clicked");
+        }}
+        // Apply button styling if needed, though RadixToastAction should have its own
+        className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive"
+      >
+        <span>View Cart</span>
+      </RadixToastAction>
+    );
+};
+
+
+export { useToast, toast, RadixToastAction as ToastAction };
+

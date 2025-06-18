@@ -148,37 +148,43 @@ export default function Header() {
           )}
           <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
             {isAdmin && !isMobile && (
-              <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm px-2 md:px-3 mr-2 border-primary text-primary hover:bg-primary/10">
-                <Link href="/admin/dashboard"><span><BarChart3 className="mr-1.5 h-3.5 w-3.5"/>Admin</span></Link>
-              </Button>
+              <Link href="/admin/dashboard" passHref legacyBehavior>
+                <Button as="a" variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3 mr-2 border-primary text-primary hover:bg-primary/10">
+                  <span><BarChart3 className="mr-1.5 h-3.5 w-3.5"/>Admin</span>
+                </Button>
+              </Link>
             )}
             {!isMobile && !authLoading && !currentUser && (
                 <>
-                    <Button variant="outline" size="sm" asChild>
-                        <Link href="/login" className="text-xs sm:text-sm px-2 md:px-3">Login</Link>
-                    </Button>
-                    <Button variant="default" size="sm" asChild>
-                        <Link href="/register" className="text-xs sm:text-sm px-2 md:px-3">Register</Link>
-                    </Button>
+                    <Link href="/login" passHref legacyBehavior>
+                        <Button as="a" variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3">Login</Button>
+                    </Link>
+                    <Link href="/register" passHref legacyBehavior>
+                        <Button as="a" variant="default" size="sm" className="text-xs sm:text-sm px-2 md:px-3">Register</Button>
+                    </Link>
                 </>
             )}
-            <Button variant="ghost" size="icon" asChild aria-label="Wishlist" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
-              <Link href="/wishlist"><Heart className="h-4 w-4 sm:h-5 sm:w-5" /></Link>
-            </Button>
-            <Button variant="ghost" size="icon" asChild aria-label="Shopping Cart" className="relative text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
-              <Link href="/cart">
+            <Link href="/wishlist" passHref legacyBehavior>
+              <Button as="a" variant="ghost" size="icon" aria-label="Wishlist" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
+                <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </Link>
+            <Link href="/cart" passHref legacyBehavior>
+              <Button as="a" variant="ghost" size="icon" aria-label="Shopping Cart" className="relative text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
                 <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
                 {cartItemCount > 0 && (
                   <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 min-w-[0.75rem] p-[2px] text-[10px] flex items-center justify-center leading-none">
                     {cartItemCount}
                   </Badge>
                 )}
-              </Link>
-            </Button>
+              </Button>
+            </Link>
              {!isMobile && (
-                 <Button variant="ghost" size="icon" asChild aria-label="User Account" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9" disabled={authLoading}>
-                    <Link href={accountLink}><UserIconLucide className="h-4 w-4 sm:h-5 sm:w-5" /></Link>
+                <Link href={accountLink} passHref legacyBehavior>
+                 <Button as="a" variant="ghost" size="icon" aria-label="User Account" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9" disabled={authLoading}>
+                    <UserIconLucide className="h-4 w-4 sm:h-5 sm:w-5" />
                  </Button>
+                </Link>
              )}
             <ThemeToggle />
             {isMobile && (
@@ -211,7 +217,7 @@ export default function Header() {
                               className="flex items-center gap-2 py-2 px-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
                             >
                               {link.icon && <link.icon className="h-5 w-5 text-muted-foreground" />}
-                              {link.label}
+                              <span>{link.label}</span>
                             </Link>
                          </SheetClose>
                        ))}
@@ -222,7 +228,7 @@ export default function Header() {
                               className="flex items-center gap-2 py-2 px-2 rounded-md text-base font-medium text-primary hover:bg-primary/10"
                             >
                               <BarChart3 className="h-5 w-5 text-primary" />
-                              Admin Dashboard
+                              <span>Admin Dashboard</span>
                             </Link>
                          </SheetClose>
                        )}
@@ -280,14 +286,14 @@ export default function Header() {
                      ) : (
                        <div className="flex flex-col gap-2">
                           <SheetClose asChild>
-                           <Button variant="outline" className="w-full" asChild>
-                              <Link href="/login">Login</Link>
-                           </Button>
+                            <Link href="/login" passHref legacyBehavior>
+                              <Button as="a" variant="outline" className="w-full">Login</Button>
+                            </Link>
                           </SheetClose>
                           <SheetClose asChild>
-                           <Button className="w-full" asChild>
-                              <Link href="/register">Register</Link>
-                           </Button>
+                            <Link href="/register" passHref legacyBehavior>
+                              <Button as="a" className="w-full">Register</Button>
+                            </Link>
                           </SheetClose>
                        </div>
                      )}
@@ -311,9 +317,11 @@ export default function Header() {
                         onMouseEnter={toggleMegaMenu} 
                         className={`text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md hover:bg-primary/20 hover:text-primary ${isMegaMenuOpen ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'text-foreground'}`}
                     >
+                      <span>
                         {megaMenuTriggerLink.icon && <megaMenuTriggerLink.icon className={`mr-1.5 h-4 w-4 ${isMegaMenuOpen ? 'text-slate-100' : ''}`} />}
                         {megaMenuTriggerLink.label}
                         <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${isMegaMenuOpen ? 'rotate-180 text-slate-100' : ''}`} />
+                      </span>
                     </Button>
                 );
               })()}

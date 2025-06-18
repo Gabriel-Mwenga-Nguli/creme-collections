@@ -6,8 +6,7 @@ import type { DealProduct } from '@/components/features/home/weekly-deals-slider
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, limit, doc, getDoc, addDoc, updateDoc, serverTimestamp, Timestamp, type DocumentSnapshot, type QueryDocumentSnapshot, orderBy } from 'firebase/firestore';
 
-// Log the state of 'db' immediately after import at the module level
-console.log('[ProductService Module Load] Value of db imported from firebase.ts:', db === null ? 'null' : 'VALID INSTANCE');
+console.log('[ProductService Module Load] Value of db imported from firebase.ts:', db === null ? 'null (Firebase not initialized)' : 'VALID INSTANCE (Firebase should be working)');
 
 
 export interface Product {
@@ -38,6 +37,9 @@ export interface Product {
 function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Product {
   const data = document.data();
   if (!data) {
+    // This case should ideally not be hit if document.exists() was checked before calling.
+    // If it's a QueryDocumentSnapshot, data() should always return valid data.
+    console.error(`[mapDocToProduct] Document data is undefined for document ID: ${document.id}`);
     throw new Error(`Document data is undefined for document ID: ${document.id}`);
   }
   return {
@@ -69,9 +71,9 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
 
 
 export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
-  console.log('[getFeaturedProducts Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
+  console.log('[getFeaturedProducts Call] Value of db at function call:', db === null ? 'null (ERROR)' : 'VALID');
   if (!db) {
-    console.error("Firestore 'db' object is not initialized. Cannot fetch featured products.");
+    console.error("Firestore 'db' object is not initialized in getFeaturedProducts. Cannot fetch featured products.");
     return [];
   }
   try {
@@ -87,21 +89,26 @@ export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
         description: productData.description,
         image: productData.image,
         dataAiHint: productData.dataAiHint,
-        fixedOfferPrice: productData.offerPrice,
-        fixedOriginalPrice: productData.originalPrice,
+        fixedOfferPrice: productData.offerPrice, // Already a number from mapDocToProduct
+        fixedOriginalPrice: productData.originalPrice, // Already a number or undefined
       };
     });
+    console.log(`[getFeaturedProducts Call] Successfully fetched ${products.length} featured products.`);
     return products;
-  } catch (error) {
-    console.error("Error fetching featured products: ", error);
-    return [];
+  } catch (error: any) {
+    console.error("[getFeaturedProducts Call] Error fetching featured products: ", error.message);
+    if (error.code === 'failed-precondition' && error.message.includes('index')) {
+      console.error("[getFeaturedProducts Call] Firestore query requires an index. Please create it using the link provided by Firebase in the error details, or check your Firestore console.");
+      console.error("[getFeaturedProducts Call] Original Firebase error message for index:", error.message);
+    }
+    return []; // Return empty array on error to prevent page crash
   }
 }
 
 export async function getWeeklyDeals(): Promise<DealProduct[]> {
-  console.log('[getWeeklyDeals Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
+  console.log('[getWeeklyDeals Call] Value of db at function call:', db === null ? 'null (ERROR)' : 'VALID');
   if (!db) {
-    console.error("Firestore 'db' object is not initialized. Cannot fetch weekly deals.");
+    console.error("Firestore 'db' object is not initialized in getWeeklyDeals. Cannot fetch weekly deals.");
     return [];
   }
   try {
@@ -118,13 +125,18 @@ export async function getWeeklyDeals(): Promise<DealProduct[]> {
         image: productData.image,
         dataAiHint: productData.dataAiHint,
         fixedOfferPrice: productData.offerPrice,
-        fixedOriginalPrice: productData.originalPrice || productData.offerPrice * 1.2,
+        fixedOriginalPrice: productData.originalPrice || productData.offerPrice * 1.2, // Fallback for original price
       };
     });
+    console.log(`[getWeeklyDeals Call] Successfully fetched ${deals.length} weekly deals.`);
     return deals;
-  } catch (error) {
-    console.error("Error fetching weekly deals: ", error);
-    return [];
+  } catch (error: any) {
+    console.error("[getWeeklyDeals Call] Error fetching weekly deals: ", error.message);
+     if (error.code === 'failed-precondition' && error.message.includes('index')) {
+      console.error("[getWeeklyDeals Call] Firestore query requires an index. Please create it using the link provided by Firebase in the error details, or check your Firestore console.");
+      console.error("[getWeeklyDeals Call] Original Firebase error message for index:", error.message);
+    }
+    return []; // Return empty array on error
   }
 }
 
@@ -132,7 +144,7 @@ export interface ProductDetailsPageData extends Product {
 }
 
 export async function getProductDetailsById(productId: string): Promise<ProductDetailsPageData | null> {
-  console.log('[getProductDetailsById Call] Value of db at function call for ID', productId, ':', db === null ? 'null' : 'VALID INSTANCE');
+  console.log('[getProductDetailsById Call] Value of db for ID', productId, ':', db === null ? 'null (ERROR)' : 'VALID');
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch product details for ID:", productId);
     return null;
@@ -186,20 +198,21 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
 
     const products = querySnapshot.docs.map(docSn => mapDocToProduct(docSn));
     if (products.length === 0) {
-        console.warn(`[getAllProducts Call] No products found for query: ${queryDescription}. Check Firestore data and slugs.`);
+        console.warn(`[getAllProducts Call] No products found for query: ${queryDescription}. Check Firestore data, slugs, and ensure necessary Firestore indexes are created.`);
     }
     return products;
-  } catch (error) {
-    console.error("[getAllProducts Call] Error fetching products: ", error);
-    if (categorySlugParam) console.error("Category slug for error:", categorySlugParam);
-    if (subCategorySlugParam) console.error("Sub-category slug for error:", subCategorySlugParam);
-    console.error("If this error mentions missing indexes, please check your Firebase console for a link to create the required composite index.");
+  } catch (error: any) {
+    console.error(`[getAllProducts Call] Error fetching products for query "${queryDescription}": `, error.message);
+    if (error.code === 'failed-precondition' && error.message.includes('index')) {
+      console.error(`[getAllProducts Call] Firestore query requires an index. Link from Firebase: ${error.message.substring(error.message.indexOf('https://'))}`);
+      console.error("[getAllProducts Call] Please create the required composite index in your Firebase console.");
+    }
     return [];
   }
 }
 
 export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>): Promise<string | null> {
-    console.log('[addProduct Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
+    console.log('[addProduct Call] Value of db at function call:', db === null ? 'null (ERROR)' : 'VALID');
     if (!db) {
         console.error("Firestore 'db' object is not initialized. Cannot add product.");
         return null;
@@ -224,7 +237,7 @@ export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>)
 }
 
 export async function updateProduct(productId: string, productData: Partial<Omit<Product, 'id' | 'createdAt'>>): Promise<boolean> {
-    console.log('[updateProduct Call] Value of db at function call for ID', productId, ':', db === null ? 'null' : 'VALID INSTANCE');
+    console.log('[updateProduct Call] Value of db for ID', productId, ':', db === null ? 'null (ERROR)' : 'VALID');
     if (!db) {
         console.error("Firestore 'db' object is not initialized. Cannot update product.");
         return false;

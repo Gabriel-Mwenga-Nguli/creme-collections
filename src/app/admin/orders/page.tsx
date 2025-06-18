@@ -119,19 +119,19 @@ export default function AdminOrdersPage() {
                       <TableCell>
                         <Badge 
                             variant={order.status === 'Delivered' ? 'default' : order.status === 'Cancelled' ? 'destructive' : 'secondary'}
-                            className="text-xs capitalize whitespace-nowrap" // Ensure badge text doesn't wrap
+                            className="text-xs capitalize whitespace-nowrap" 
                         >
                           {order.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/admin/orders/${order.id}`}>
+                        <Link href={`/admin/orders/${order.id}`} passHref legacyBehavior>
+                          <Button as="a" variant="outline" size="sm">
                             <span>
                               <Eye className="mr-1 h-3.5 w-3.5 inline-block" /> View
                             </span>
-                          </Link>
-                        </Button>
+                          </Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                   ))}

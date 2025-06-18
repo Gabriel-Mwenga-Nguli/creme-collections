@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -16,8 +15,8 @@ interface Slide {
   buttonText: string;
   buttonLink: string;
   textAlign?: 'left' | 'center' | 'right';
-  textColor?: string; // e.g. 'text-white'
-  overlayColor?: string; // e.g. 'bg-black/50'
+  textColor?: string; 
+  overlayColor?: string; 
 }
 
 const slidesData: Slide[] = [
@@ -28,7 +27,7 @@ const slidesData: Slide[] = [
     title: 'Summer Collection is Here!',
     subtitle: 'Discover vibrant styles and fresh looks for the season.',
     buttonText: 'Shop Now',
-    buttonLink: '/products/category/fashion', // Updated link to be more specific
+    buttonLink: '/products/category/fashion', 
     textAlign: 'left',
     textColor: 'text-white',
     overlayColor: 'bg-black/40'
@@ -52,7 +51,7 @@ const slidesData: Slide[] = [
     title: 'Transform Your Home',
     subtitle: 'Find elegant decor and furnishings for every room.',
     buttonText: 'Discover Home Goods',
-    buttonLink: '/products/category/home-living', // Updated link to be more specific
+    buttonLink: '/products/category/home-living', 
     textAlign: 'right',
     textColor: 'text-foreground',
     overlayColor: 'bg-accent/20'
@@ -83,7 +82,7 @@ const HeroSlider = () => {
   };
 
   useEffect(() => {
-    const slideInterval = setInterval(nextSlide, 7000); // Auto-slide every 7 seconds
+    const slideInterval = setInterval(nextSlide, 7000); 
     return () => clearInterval(slideInterval);
   }, [nextSlide]);
 
@@ -107,8 +106,8 @@ const HeroSlider = () => {
           <Image
             src={slide.image}
             alt={slide.title}
-            fill // Changed from layout="fill" objectFit="cover"
-            style={{ objectFit: 'cover' }} // Added for fill
+            fill 
+            style={{ objectFit: 'cover' }} 
             priority={index === 0}
             className="transition-transform duration-\[7000ms\] ease-linear group-hover:scale-105"
             data-ai-hint={slide.dataAiHint}
@@ -121,9 +120,11 @@ const HeroSlider = () => {
             <p className="mt-4 text-lg sm:text-xl md:text-2xl max-w-xl drop-shadow-md">
               {slide.subtitle}
             </p>
-            <Button size="lg" className="mt-8 w-fit" asChild>
-              <Link href={slide.buttonLink}>{slide.buttonText}</Link>
-            </Button>
+            <Link href={slide.buttonLink} passHref legacyBehavior>
+              <Button as="a" size="lg" className="mt-8 w-fit">
+                <span>{slide.buttonText}</span>
+              </Button>
+            </Link>
           </div>
         </div>
       ))}
@@ -164,4 +165,3 @@ const HeroSlider = () => {
 };
 
 export default HeroSlider;
-

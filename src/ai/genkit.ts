@@ -1,26 +1,21 @@
 
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
-import { enableFirebaseTelemetry } from '@genkit-ai/firebase'; // Changed import path and name
+import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
 
 export const ai = genkit({
   plugins: [
     googleAI(),
-    enableFirebaseTelemetry, // Use the imported reference directly
+    enableFirebaseTelemetry, // This plugin handles sending traces and flow states to Firebase.
   ],
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.0-flash', // Default model for generate requests
+  flowStateStore: 'firebase', // Store flow states in Firestore
+  traceStore: 'firebase',     // Store traces in Firestore
+  // Removing explicit telemetry.instrumentation and telemetry.logger
+  // to rely on enableFirebaseTelemetry defaults and avoid potential
+  // Google Cloud auth issues if the environment isn't fully configured for direct Google Cloud logging/tracing.
   telemetry: {
-    instrumentation: {
-      // For OpenTelemetry compatible systems.
-      // exporter: new ConsoleMetricExporter(),
-      // metrics: {exportIntervalMillis: 5000}
-    },
-    logger: {
-      // For Google Cloud Logging.
-      // logger: new GoogleCloudLogger(),
-    }
-  },
-  flowStateStore: 'firebase', // Optional: Store flow states in Firestore
-  traceStore: 'firebase', // Optional: Store traces in Firestore (can also use Google Cloud Tracing)
+    // logger: undefined, // Explicitly disable default Google Cloud Logging if needed
+    // instrumentation: undefined, // Explicitly disable default OpenTelemetry if needed
+  }
 });
-

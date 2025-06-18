@@ -12,7 +12,7 @@ import { Loader2, ChevronLeft, ShoppingBag, MapPin, Package, AlertCircle } from 
 import { useToast } from '@/hooks/use-toast';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '@/lib/firebase';
-import type { Order, OrderItem, OrderStatus } from '@/services/orderService'; // Ensure OrderStatus is imported
+import type { Order, OrderItem, OrderStatus } from '@/services/orderService'; 
 import { getOrderDetails } from '@/services/orderService';
 import { format } from 'date-fns';
 
@@ -34,9 +34,9 @@ export default function OrderDetailPage() {
       return;
     }
     if (user && orderId) {
-      document.title = `Order Details - Creme Collections`; // Generic title until order loaded
+      document.title = `Order Details - Creme Collections`; 
       setIsLoading(true);
-      getOrderDetails(orderId, user.uid) // Pass userId for validation
+      getOrderDetails(orderId, user.uid) 
         .then(fetchedOrder => {
           if (fetchedOrder) {
             setOrder(fetchedOrder);
@@ -72,18 +72,18 @@ export default function OrderDetailPage() {
         <AlertCircle className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-destructive mb-3 sm:mb-4" />
         <h1 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">Order Not Found</h1>
         <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base">We couldn't find the details for this order.</p>
-        <Button asChild variant="outline">
-          <Link href="/profile?section=orders">
+        <Link href="/profile?section=orders" passHref legacyBehavior>
+          <Button as="a" variant="outline">
             <span>
              <ChevronLeft className="mr-2 h-4 w-4 inline-block" /> Back to My Orders
             </span>
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
     );
   }
   
-  const getStatusColor = (status: OrderStatus) => { // Use imported OrderStatus
+  const getStatusColor = (status: OrderStatus) => { 
     switch (status) {
       case 'Pending': return 'text-yellow-600 bg-yellow-100/80 border-yellow-500/80';
       case 'Processing': return 'text-blue-600 bg-blue-100/80 border-blue-500/80';
@@ -97,14 +97,14 @@ export default function OrderDetailPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       <div className="mb-6 md:mb-8">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/profile?section=orders">
+        <Link href="/profile?section=orders" passHref legacyBehavior>
+          <Button as="a" variant="outline" size="sm">
             <span>
               <ChevronLeft className="mr-2 h-4 w-4 inline-block" />
               Back to My Orders
             </span>
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
 
       <Card className="shadow-lg">
@@ -192,7 +192,9 @@ export default function OrderDetailPage() {
           <div className="text-center space-x-2">
              <Button variant="outline" size="sm" disabled>Track Package (Coming Soon)</Button>
              {order.status === 'Delivered' && <Button variant="secondary" size="sm" disabled>Request Return (Coming Soon)</Button>}
-             <Button variant="default" size="sm" asChild><Link href={`/contact?subject=Regarding Order #${order.orderId || order.id.substring(0,8)}`}>Contact Support</Link></Button>
+             <Link href={`/contact?subject=Regarding Order #${order.orderId || order.id.substring(0,8)}`} passHref legacyBehavior>
+                <Button as="a" variant="default" size="sm">Contact Support</Button>
+             </Link>
           </div>
 
         </CardContent>
