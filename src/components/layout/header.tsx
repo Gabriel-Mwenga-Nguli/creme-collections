@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, Heart, ShoppingCart, User as UserIconLucide, ChevronDown, type LucideIcon } from 'lucide-react'; // Renamed User to UserIconLucide
+import { Menu, X, Sun, Moon, Heart, ShoppingCart, User as UserIconLucide, ChevronDown, type LucideIcon } from 'lucide-react'; 
 import { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef } from 'react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
@@ -129,30 +129,32 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         {/* Top Row */}
-        <div className="flex h-16 items-center justify-between gap-4">
-          <Logo />
+        <div className="flex h-16 items-center justify-between gap-2 md:gap-4">
+          <div className="flex-shrink-0">
+            <Logo />
+          </div>
           {!isMobile && (
-            <div className="flex-1 max-w-xl">
+            <div className="flex-1 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-xl">
               <AISearchBar />
             </div>
           )}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
             {!isMobile && !authLoading && !currentUser && (
                 <>
                     <Button variant="outline" size="sm" asChild>
-                        <Link href="/login" className="text-xs sm:text-sm">Login</Link>
+                        <Link href="/login" className="text-xs sm:text-sm px-2 md:px-3">Login</Link>
                     </Button>
                     <Button variant="default" size="sm" asChild>
-                        <Link href="/register" className="text-xs sm:text-sm">Register</Link>
+                        <Link href="/register" className="text-xs sm:text-sm px-2 md:px-3">Register</Link>
                     </Button>
                 </>
             )}
-            <Button variant="ghost" size="icon" asChild aria-label="Wishlist" className="text-foreground hover:text-primary">
-              <Link href="/wishlist"><Heart className="h-5 w-5" /></Link>
+            <Button variant="ghost" size="icon" asChild aria-label="Wishlist" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
+              <Link href="/wishlist"><Heart className="h-4 w-4 sm:h-5 sm:w-5" /></Link>
             </Button>
-            <Button variant="ghost" size="icon" asChild aria-label="Shopping Cart" className="relative text-foreground hover:text-primary">
+            <Button variant="ghost" size="icon" asChild aria-label="Shopping Cart" className="relative text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
               <Link href="/cart">
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
                 {cartItemCount > 0 && (
                   <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 min-w-[0.75rem] p-[2px] text-[10px] flex items-center justify-center leading-none">
                     {cartItemCount}
@@ -161,16 +163,16 @@ export default function Header() {
               </Link>
             </Button>
              {!isMobile && (
-                 <Button variant="ghost" size="icon" asChild aria-label="User Account" className="text-foreground hover:text-primary" disabled={authLoading}>
-                    <Link href={accountLink}><UserIconLucide className="h-5 w-5" /></Link>
+                 <Button variant="ghost" size="icon" asChild aria-label="User Account" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9" disabled={authLoading}>
+                    <Link href={accountLink}><UserIconLucide className="h-4 w-4 sm:h-5 sm:w-5" /></Link>
                  </Button>
              )}
             <ThemeToggle />
             {isMobile && (
               <Sheet onOpenChange={(open) => { if (!open) closeMegaMenu(); }}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" aria-label="Open menu" className="text-foreground hover:text-primary">
-                    <Menu className="h-6 w-6" />
+                  <Button variant="ghost" size="icon" aria-label="Open menu" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
+                    <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[320px] p-0 bg-background flex flex-col">
@@ -270,10 +272,9 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Bottom Row - Desktop Only */}
         {!isMobile && (
           <div className="flex h-12 items-center justify-start border-t border-border/20 bg-primary/5 relative">
-            <nav className="flex gap-1 items-center">
+            <nav className="flex gap-1 items-center flex-wrap">
               {MAIN_NAV_LINKS.find(link => link.isMegaMenuTrigger) && (() => {
                 const megaMenuTriggerLink = MAIN_NAV_LINKS.find(link => link.isMegaMenuTrigger)!;
                 return (
@@ -281,7 +282,7 @@ export default function Header() {
                         key={megaMenuTriggerLink.label}
                         variant="ghost"
                         onClick={toggleMegaMenu}
-                        className={`text-sm font-medium px-3 py-2 h-auto rounded-md hover:bg-primary/20 hover:text-primary ${isMegaMenuOpen ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'text-foreground'}`}
+                        className={`text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md hover:bg-primary/20 hover:text-primary ${isMegaMenuOpen ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'text-foreground'}`}
                     >
                         {megaMenuTriggerLink.icon && <megaMenuTriggerLink.icon className={`mr-1.5 h-4 w-4 ${isMegaMenuOpen ? 'text-slate-100' : ''}`} />}
                         {megaMenuTriggerLink.label}
@@ -291,7 +292,7 @@ export default function Header() {
               })()}
               
               <NavigationMenu className="ml-1">
-                <NavigationMenuList>
+                <NavigationMenuList className="flex-wrap justify-start">
                   {MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger).map((link) => {
                     const parentCategoryData = CATEGORY_NAV_LINKS.find(cat => cat.href === link.href);
 
@@ -299,13 +300,13 @@ export default function Header() {
                       return (
                         <NavigationMenuItem key={link.label}>
                           <NavigationMenuTrigger 
-                            className="text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 data-[state=open]:bg-slate-800 data-[state=open]:text-slate-100 group"
+                            className="text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 data-[state=open]:bg-slate-800 data-[state=open]:text-slate-100 group"
                           >
                             {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-data-[state=open]:text-slate-100 group-hover:text-primary transition-colors" />}
                             {link.label}
                           </NavigationMenuTrigger>
                           <NavigationMenuContent className="bg-slate-900 border-slate-700 text-slate-100">
-                            <ul className="flex flex-col w-[250px] gap-1 p-2 md:w-[300px] rounded-md shadow-lg">
+                            <ul className="flex flex-col w-[220px] md:w-[250px] lg:w-[300px] gap-1 p-2 rounded-md shadow-lg max-h-[70vh] overflow-y-auto">
                                <ListItem
                                   key={`all-${parentCategoryData.label}`}
                                   href={parentCategoryData.href}
@@ -334,7 +335,7 @@ export default function Header() {
                            <NavigationMenuLink asChild>
                             <Link 
                               href={link.href}
-                              className={cn(navigationMenuTriggerStyle(), "text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 group")}
+                              className={cn(navigationMenuTriggerStyle(), "text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 group")}
                               onClick={closeMegaMenu}
                             >
                               {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-hover:text-primary transition-colors" />}
@@ -357,5 +358,3 @@ export default function Header() {
     </header>
   );
 }
-    
-

@@ -30,7 +30,7 @@ export default function OrderDetailPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.push('/login?redirect=/profile/orders'); // Redirect if not logged in
+      router.push('/login?redirect=/profile/orders'); 
       return;
     }
     if (user && orderId) {
@@ -42,7 +42,6 @@ export default function OrderDetailPage() {
             setOrder(fetchedOrder);
           } else {
             toast({ title: "Order Not Found", description: "The requested order could not be found.", variant: "destructive" });
-            // router.push('/profile'); // Or a 404 page
           }
         })
         .catch(err => {
@@ -68,9 +67,9 @@ export default function OrderDetailPage() {
   if (!order) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-center">
-        <AlertCircle className="mx-auto h-16 w-16 text-destructive mb-4" />
-        <h1 className="text-2xl font-semibold mb-2">Order Not Found</h1>
-        <p className="text-muted-foreground mb-6">We couldn't find the details for this order. It might have been removed or the ID is incorrect.</p>
+        <AlertCircle className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-destructive mb-3 sm:mb-4" />
+        <h1 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">Order Not Found</h1>
+        <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base">We couldn't find the details for this order.</p>
         <Button asChild variant="outline">
           <Link href="/profile?section=orders">
             <ChevronLeft className="mr-2 h-4 w-4" /> Back to My Orders
@@ -82,18 +81,18 @@ export default function OrderDetailPage() {
   
   const getStatusColor = (status: Order['status']) => {
     switch (status) {
-      case 'Pending': return 'text-yellow-600 bg-yellow-100 border-yellow-500';
-      case 'Processing': return 'text-blue-600 bg-blue-100 border-blue-500';
-      case 'Shipped': return 'text-indigo-600 bg-indigo-100 border-indigo-500';
-      case 'Delivered': return 'text-green-600 bg-green-100 border-green-500';
-      case 'Cancelled': return 'text-red-600 bg-red-100 border-red-500';
-      default: return 'text-gray-600 bg-gray-100 border-gray-500';
+      case 'Pending': return 'text-yellow-600 bg-yellow-100/80 border-yellow-500/80';
+      case 'Processing': return 'text-blue-600 bg-blue-100/80 border-blue-500/80';
+      case 'Shipped': return 'text-indigo-600 bg-indigo-100/80 border-indigo-500/80';
+      case 'Delivered': return 'text-green-600 bg-green-100/80 border-green-500/80';
+      case 'Cancelled': return 'text-red-600 bg-red-100/80 border-red-500/80';
+      default: return 'text-gray-600 bg-gray-100/80 border-gray-500/80';
     }
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-      <div className="mb-8">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="mb-6 md:mb-8">
         <Button variant="outline" size="sm" asChild>
           <Link href="/profile?section=orders">
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -103,41 +102,41 @@ export default function OrderDetailPage() {
       </div>
 
       <Card className="shadow-lg">
-        <CardHeader className="pb-4">
+        <CardHeader className="p-4 md:p-6 pb-3 md:pb-4">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
-              <CardTitle className="text-2xl font-headline text-primary">Order Details</CardTitle>
-              <CardDescription>Order ID: {order.orderId || order.id}</CardDescription>
+              <CardTitle className="text-xl sm:text-2xl font-headline text-primary">Order Details</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Order ID: {order.orderId || order.id}</CardDescription>
             </div>
-            <div className={`text-sm font-semibold px-3 py-1.5 rounded-full border ${getStatusColor(order.status)}`}>
+            <div className={`text-xs sm:text-sm font-semibold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border self-start sm:self-center ${getStatusColor(order.status)}`}>
                 Status: {order.status}
             </div>
           </div>
-           <p className="text-sm text-muted-foreground pt-2">
+           <p className="text-xs sm:text-sm text-muted-foreground pt-1 sm:pt-2">
             Date Placed: {order.orderDate ? format(order.orderDate.toDate(), 'PPpp') : 'N/A'}
           </p>
         </CardHeader>
 
-        <CardContent className="space-y-8">
+        <CardContent className="p-4 md:p-6 space-y-6 md:space-y-8">
           <section>
             <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><ShoppingBag className="h-5 w-5 text-primary" />Items Ordered ({order.items.length})</h2>
-            <ul className="space-y-4">
+            <ul className="space-y-3 md:space-y-4">
               {order.items.map((item, index) => (
-                <li key={item.productId + index} className="flex flex-col sm:flex-row gap-4 p-4 border rounded-md bg-muted/20">
+                <li key={item.productId + index} className="flex flex-col sm:flex-row gap-3 md:gap-4 p-3 md:p-4 border rounded-md bg-muted/20">
                   <Image 
-                    src={item.image || 'https://placehold.co/100x100.png'} 
+                    src={item.image || 'https://placehold.co/80x80.png'} 
                     alt={item.name} 
-                    width={80} 
-                    height={80} 
-                    className="rounded-md object-cover border flex-shrink-0 w-20 h-20"
+                    width={70} 
+                    height={70} 
+                    className="rounded-md object-cover border flex-shrink-0 w-16 h-16 sm:w-[70px] sm:h-[70px]"
                     data-ai-hint="product item" 
                   />
                   <div className="flex-grow">
-                    <Link href={`/products/item/${item.productId}`} className="font-medium text-foreground hover:text-primary transition-colors">{item.name}</Link>
-                    <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
-                    <p className="text-sm text-muted-foreground">Price per item: KES {item.priceAtPurchase.toLocaleString()}</p>
+                    <Link href={`/products/item/${item.productId}`} className="font-medium text-sm sm:text-base text-foreground hover:text-primary transition-colors">{item.name}</Link>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Price per item: KES {item.priceAtPurchase.toLocaleString()}</p>
                   </div>
-                  <p className="text-md font-semibold text-foreground sm:text-right shrink-0">KES {(item.priceAtPurchase * item.quantity).toLocaleString()}</p>
+                  <p className="text-sm sm:text-md font-semibold text-foreground sm:text-right shrink-0 self-start sm:self-center">KES {(item.priceAtPurchase * item.quantity).toLocaleString()}</p>
                 </li>
               ))}
             </ul>
@@ -145,7 +144,7 @@ export default function OrderDetailPage() {
 
           <Separator />
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8">
             <section>
               <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><MapPin className="h-5 w-5 text-primary"/>Shipping Address</h2>
               <div className="text-sm text-muted-foreground space-y-0.5">
@@ -174,7 +173,7 @@ export default function OrderDetailPage() {
                   <span className="font-medium text-foreground">KES 0</span> {/* Placeholder */}
                 </div>
                 <Separator className="my-2"/>
-                <div className="flex justify-between text-lg font-bold">
+                <div className="flex justify-between text-base md:text-lg font-bold">
                   <span className="text-foreground">Total Paid:</span>
                   <span className="text-primary">KES {order.totalAmount.toLocaleString()}</span>
                 </div>
@@ -185,9 +184,8 @@ export default function OrderDetailPage() {
           <Separator />
 
           <div className="text-center space-x-2">
-             {/* Future actions like "Track Package", "Request Return", "Reorder" can go here */}
-             <Button variant="outline">Track Package (Coming Soon)</Button>
-             {order.status === 'Delivered' && <Button variant="secondary">Request Return (Coming Soon)</Button>}
+             <Button variant="outline" size="sm">Track Package (Coming Soon)</Button>
+             {order.status === 'Delivered' && <Button variant="secondary" size="sm">Request Return (Coming Soon)</Button>}
           </div>
 
         </CardContent>

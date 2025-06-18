@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { User, ShoppingBag, Heart, MapPin, LogOut, Loader2, Award, Mail, Trash2, Edit3, Camera, ListOrdered, PlusCircle } from 'lucide-react';
+import { User, ShoppingBag, Heart, MapPin, LogOut, Loader2, Award, Mail, Trash2, Edit3, Camera, ListOrdered, PlusCircle, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth, db, storage } from '@/lib/firebase'; 
@@ -26,6 +26,7 @@ import { getUserOrders } from '@/services/orderService';
 import type { Address } from '@/services/addressService';
 import { getUserAddresses, addUserAddress } from '@/services/addressService';
 import { format } from 'date-fns';
+import { Sheet, SheetTrigger, SheetContent, SheetClose } from '@/components/ui/sheet'; // For mobile sidebar
 
 type ProfileSection = "personal" | "orders" | "wishlist" | "addresses" | "inbox";
 
@@ -42,6 +43,8 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   
   const [activeSection, setActiveSection] = useState<ProfileSection>("personal");
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
+
 
   const [profileWishlistItems, setProfileWishlistItems] = useState<ProductCardProps[]>([]);
   const [isProfileWishlistLoading, setIsProfileWishlistLoading] = useState(false);
@@ -361,25 +364,66 @@ export default function ProfilePage() {
   const currentDisplayName = `${firstName} ${lastName}`.trim() || user.displayName || 'User';
   const displayPhotoUrl = previewUrl || user.photoURL;
 
+  const ProfileSidebarContent = () => (
+     <Card className="shadow-lg h-full">
+        <CardHeader className="items-center text-center p-4 md:p-6">
+          <div className="relative group/avatar">
+            <Avatar className="w-20 h-20 sm:w-24 sm:h-24 mb-3 md:mb-4 border-2 border-primary"><AvatarImage src={displayPhotoUrl || undefined} alt={currentDisplayName} data-ai-hint="profile avatar" /><AvatarFallback className="text-xl sm:text-2xl bg-muted">{getInitials(currentDisplayName)}</AvatarFallback></Avatar>
+            <Button variant="outline" size="icon" className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 rounded-full h-7 w-7 sm:h-8 sm:w-8 bg-background/80 hover:bg-background group-hover/avatar:opacity-100 md:opacity-0 transition-opacity" onClick={() => fileInputRef.current?.click()} aria-label="Change"><Camera className="h-3 w-3 sm:h-4 sm:w-4" /></Button>
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+          </div>
+          {selectedFile && (<div className="text-center mt-1 mb-2"><p className="text-xs text-muted-foreground">Selected: {selectedFile.name}</p><Button size="sm" onClick={handleImageUpload} disabled={isUploading} className="mt-1 h-8 text-xs px-2">{isUploading && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}Upload Picture</Button></div>)}
+          <CardTitle className="text-xl md:text-2xl">{currentDisplayName}</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">{email || 'No email'}</CardDescription>
+          <CardDescription className="text-xs">Joined {creationDate}</CardDescription>
+          <div className="mt-2 pt-2 sm:mt-3 sm:pt-3 border-t w-full"><div className="flex items-center justify-center text-sm sm:text-lg font-semibold text-primary"><Award className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /><span>{loyaltyPoints.toLocaleString()} Loyalty Points</span></div><CardDescription className="text-xs mt-0.5 sm:mt-1">Earn points with activity!</CardDescription></div>
+        </CardHeader>
+        <Separator />
+        <CardContent className="p-2 sm:p-4 space-y-0.5 sm:space-y-1">
+          {(['personal', 'inbox', 'orders', 'wishlist', 'addresses'] as ProfileSection[]).map(section => (
+            <SheetClose asChild key={section}>
+              <Button 
+                variant="ghost" 
+                onClick={() => { setActiveSection(section); setIsMobileSheetOpen(false);}} 
+                className={`w-full justify-start text-sm md:text-base px-2 sm:px-3 py-1.5 sm:py-2 h-auto ${activeSection === section ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}
+              >
+                {section === 'personal' && <User className="mr-2 h-4 w-4" />}
+                {section === 'inbox' && <Mail className="mr-2 h-4 w-4" />}
+                {section === 'orders' && <ShoppingBag className="mr-2 h-4 w-4" />}
+                {section === 'wishlist' && <Heart className="mr-2 h-4 w-4" />}
+                {section === 'addresses' && <MapPin className="mr-2 h-4 w-4" />}
+                {section.charAt(0).toUpperCase() + section.slice(1)}
+              </Button>
+            </SheetClose>
+          ))}
+          <Separator className="my-1 sm:my-2"/>
+           <SheetClose asChild>
+            <Button variant="ghost" className="w-full justify-start text-sm md:text-base text-destructive hover:text-destructive/80 hover:bg-destructive/10 px-2 sm:px-3 py-1.5 sm:py-2 h-auto" onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" /> Logout</Button>
+          </SheetClose>
+        </CardContent>
+      </Card>
+  );
+
+
   const renderSectionContent = () => {
     switch (activeSection) {
       case 'personal':
         return (
-          <Card className="md:col-span-2 shadow-lg">
-            <CardHeader><CardTitle className="text-xl font-headline">Edit Profile</CardTitle><CardDescription>Update your personal details here.</CardDescription></CardHeader>
-            <CardContent className="space-y-6">
-              <form className="space-y-4" onSubmit={handleSaveChanges}>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div><Label htmlFor="firstName">First Name</Label><Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="mt-1" /></div>
-                  <div><Label htmlFor="lastName">Last Name</Label><Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} className="mt-1" /></div>
+          <Card className="shadow-lg">
+            <CardHeader><CardTitle className="text-xl md:text-2xl font-headline">Edit Profile</CardTitle><CardDescription>Update your personal details here.</CardDescription></CardHeader>
+            <CardContent className="space-y-4 md:space-y-6">
+              <form className="space-y-3 md:space-y-4" onSubmit={handleSaveChanges}>
+                <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
+                  <div><Label htmlFor="firstName">First Name</Label><Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="mt-1 text-base md:text-sm" /></div>
+                  <div><Label htmlFor="lastName">Last Name</Label><Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} className="mt-1 text-base md:text-sm" /></div>
                 </div>
                 <div>
                     <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" value={email} className="mt-1 bg-muted/50 cursor-not-allowed" readOnly disabled />
+                    <Input id="email" type="email" value={email} className="mt-1 bg-muted/50 cursor-not-allowed text-base md:text-sm" readOnly disabled />
                     <p className="text-xs text-muted-foreground mt-1">Email address cannot be changed here. Please contact support for assistance.</p>
                 </div>
-                <div><Label htmlFor="phone">Phone Number</Label><Input id="phone" type="tel" placeholder="+254 7XX XXX XXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1" /></div>
-                <div className="pt-2"><Button type="submit" disabled={isSaving}>{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save Changes</Button></div>
+                <div><Label htmlFor="phone">Phone Number</Label><Input id="phone" type="tel" placeholder="+254 7XX XXX XXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1 text-base md:text-sm" /></div>
+                <div className="pt-1 md:pt-2"><Button type="submit" disabled={isSaving}>{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save Changes</Button></div>
               </form>
             </CardContent>
           </Card>
@@ -388,23 +432,23 @@ export default function ProfilePage() {
         return <InboxView userId={user.uid} userEmail={user.email} />;
       case 'orders':
         return (
-          <Card className="md:col-span-2 shadow-lg">
-            <CardHeader><CardTitle className="flex items-center gap-2"><ListOrdered />My Orders</CardTitle><CardDescription>View your order history.</CardDescription></CardHeader>
+          <Card className="shadow-lg">
+            <CardHeader><CardTitle className="flex items-center gap-2 text-xl md:text-2xl"><ListOrdered />My Orders</CardTitle><CardDescription>View your order history.</CardDescription></CardHeader>
             <CardContent>
               {isOrdersLoading ? <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
                 : userOrders.length > 0 ? (
-                  <ul className="space-y-4">
+                  <ul className="space-y-3 md:space-y-4">
                     {userOrders.map(order => (
-                      <li key={order.id} className="p-4 border rounded-md hover:shadow-md transition-shadow">
+                      <li key={order.id} className="p-3 md:p-4 border rounded-md hover:shadow-md transition-shadow">
                         <Link href={`/profile/orders/${order.orderId || order.id}`}>
-                          <div className="flex justify-between items-center">
+                          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                             <div>
-                              <p className="font-semibold text-primary">Order ID: {order.orderId || order.id}</p>
-                              <p className="text-sm text-muted-foreground">Date: {order.orderDate ? format(order.orderDate.toDate(), 'PPP') : 'N/A'}</p>
+                              <p className="font-semibold text-primary text-sm sm:text-base">Order ID: {order.orderId || order.id}</p>
+                              <p className="text-xs sm:text-sm text-muted-foreground">Date: {order.orderDate ? format(order.orderDate.toDate(), 'PPP') : 'N/A'}</p>
                             </div>
-                            <div className="text-right">
-                              <p className="font-semibold">KES {order.totalAmount.toLocaleString()}</p>
-                              <p className={`text-sm font-medium ${order.status === 'Delivered' ? 'text-green-600' : order.status === 'Cancelled' ? 'text-red-600' : 'text-yellow-600'}`}>{order.status}</p>
+                            <div className="text-left sm:text-right mt-1 sm:mt-0">
+                              <p className="font-semibold text-sm sm:text-base">KES {order.totalAmount.toLocaleString()}</p>
+                              <p className={`text-xs sm:text-sm font-medium ${order.status === 'Delivered' ? 'text-green-600' : order.status === 'Cancelled' ? 'text-red-600' : 'text-yellow-600'}`}>{order.status}</p>
                             </div>
                           </div>
                         </Link>
@@ -417,16 +461,16 @@ export default function ProfilePage() {
         );
       case 'wishlist':
         return (
-          <Card className="md:col-span-2 shadow-lg">
-            <CardHeader><CardTitle className="flex items-center gap-2"><Heart />My Wishlist</CardTitle><CardDescription>Manage your saved items.</CardDescription></CardHeader>
+          <Card className="shadow-lg">
+            <CardHeader><CardTitle className="flex items-center gap-2 text-xl md:text-2xl"><Heart />My Wishlist</CardTitle><CardDescription>Manage your saved items.</CardDescription></CardHeader>
             <CardContent>
               {isProfileWishlistLoading ? <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
                 : profileWishlistItems.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                     {profileWishlistItems.map((item) => (
                        <div key={item.id} className="relative group/wishlistitem-profile">
                         <ProductCard {...item} />
-                         <Button variant="destructive" size="icon" className="absolute top-2 right-2 opacity-0 group-hover/wishlistitem-profile:opacity-100 transition-opacity z-10 h-8 w-8" onClick={() => handleRemoveFromProfileWishlist(item.id)} aria-label="Remove"><Trash2 className="h-4 w-4" /></Button>
+                         <Button variant="destructive" size="icon" className="absolute top-2 right-2 opacity-0 group-hover/wishlistitem-profile:opacity-100 transition-opacity z-10 h-7 w-7 sm:h-8 sm:w-8" onClick={() => handleRemoveFromProfileWishlist(item.id)} aria-label="Remove"><Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /></Button>
                       </div>
                     ))}
                   </div>
@@ -436,30 +480,30 @@ export default function ProfilePage() {
         );
       case 'addresses':
         return (
-          <Card className="md:col-span-2 shadow-lg">
-            <CardHeader className="flex flex-row justify-between items-center">
+          <Card className="shadow-lg">
+            <CardHeader className="flex flex-col sm:flex-row justify-between sm:items-center">
               <div>
-                <CardTitle className="flex items-center gap-2"><MapPin />Shipping Addresses</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl md:text-2xl"><MapPin />Shipping Addresses</CardTitle>
                 <CardDescription>Manage your shipping addresses.</CardDescription>
               </div>
-              <Button onClick={() => setShowAddAddressForm(prev => !prev)} size="sm" variant="outline">
+              <Button onClick={() => setShowAddAddressForm(prev => !prev)} size="sm" variant="outline" className="mt-2 sm:mt-0 self-start sm:self-center">
                 <PlusCircle className="mr-2 h-4 w-4" /> {showAddAddressForm ? 'Cancel' : 'Add New'}
               </Button>
             </CardHeader>
             <CardContent>
               {showAddAddressForm && (
-                <form onSubmit={handleAddNewAddress} className="space-y-4 p-4 border rounded-md mb-6 bg-muted/30">
+                <form onSubmit={handleAddNewAddress} className="space-y-3 md:space-y-4 p-3 md:p-4 border rounded-md mb-4 md:mb-6 bg-muted/30">
                   <h3 className="text-lg font-semibold">Add New Address</h3>
-                  <div><Label htmlFor="addrName">Address Label (e.g., Home, Work)</Label><Input id="addrName" value={newAddress.name} onChange={e => handleAddressInputChange('name', e.target.value)} required /></div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div><Label htmlFor="addrFirstName">First Name</Label><Input id="addrFirstName" value={newAddress.firstName} onChange={e => handleAddressInputChange('firstName', e.target.value)} required /></div>
-                    <div><Label htmlFor="addrLastName">Last Name</Label><Input id="addrLastName" value={newAddress.lastName} onChange={e => handleAddressInputChange('lastName', e.target.value)} required /></div>
+                  <div><Label htmlFor="addrName">Address Label (e.g., Home, Work)</Label><Input id="addrName" value={newAddress.name} onChange={e => handleAddressInputChange('name', e.target.value)} required className="text-base md:text-sm"/></div>
+                  <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
+                    <div><Label htmlFor="addrFirstName">First Name</Label><Input id="addrFirstName" value={newAddress.firstName} onChange={e => handleAddressInputChange('firstName', e.target.value)} required className="text-base md:text-sm"/></div>
+                    <div><Label htmlFor="addrLastName">Last Name</Label><Input id="addrLastName" value={newAddress.lastName} onChange={e => handleAddressInputChange('lastName', e.target.value)} required className="text-base md:text-sm"/></div>
                   </div>
-                  <div><Label htmlFor="addrLine1">Address Line 1</Label><Input id="addrLine1" value={newAddress.addressLine1} onChange={e => handleAddressInputChange('addressLine1', e.target.value)} required /></div>
-                  <div><Label htmlFor="addrCity">City</Label><Input id="addrCity" value={newAddress.city} onChange={e => handleAddressInputChange('city', e.target.value)} required /></div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                  <div><Label htmlFor="addrPostalCode">Postal Code</Label><Input id="addrPostalCode" value={newAddress.postalCode} onChange={e => handleAddressInputChange('postalCode', e.target.value)} required /></div>
-                  <div><Label htmlFor="addrPhone">Phone</Label><Input id="addrPhone" type="tel" value={newAddress.phone} onChange={e => handleAddressInputChange('phone', e.target.value)} required /></div>
+                  <div><Label htmlFor="addrLine1">Address Line 1</Label><Input id="addrLine1" value={newAddress.addressLine1} onChange={e => handleAddressInputChange('addressLine1', e.target.value)} required className="text-base md:text-sm"/></div>
+                  <div><Label htmlFor="addrCity">City</Label><Input id="addrCity" value={newAddress.city} onChange={e => handleAddressInputChange('city', e.target.value)} required className="text-base md:text-sm"/></div>
+                  <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
+                  <div><Label htmlFor="addrPostalCode">Postal Code</Label><Input id="addrPostalCode" value={newAddress.postalCode} onChange={e => handleAddressInputChange('postalCode', e.target.value)} required className="text-base md:text-sm"/></div>
+                  <div><Label htmlFor="addrPhone">Phone</Label><Input id="addrPhone" type="tel" value={newAddress.phone} onChange={e => handleAddressInputChange('phone', e.target.value)} required className="text-base md:text-sm"/></div>
                   </div>
                   <div className="flex items-center space-x-2"><Input type="checkbox" id="addrDefault" checked={!!newAddress.isDefault} onChange={e => handleAddressInputChange('isDefault', e.target.checked)} className="h-4 w-4" /><Label htmlFor="addrDefault">Set as default address</Label></div>
                   <Button type="submit" disabled={isAddingAddress}>{isAddingAddress && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save Address</Button>
@@ -467,15 +511,14 @@ export default function ProfilePage() {
               )}
               {isAddressesLoading ? <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
                 : userAddresses.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {userAddresses.map(addr => (
-                      <Card key={addr.id} className={`p-4 ${addr.isDefault ? 'border-primary ring-1 ring-primary' : ''}`}>
-                        <h4 className="font-semibold">{addr.name} {addr.isDefault && <span className="text-xs text-primary font-normal">(Default)</span>}</h4>
-                        <p className="text-sm text-muted-foreground">{addr.firstName} {addr.lastName}</p>
-                        <p className="text-sm text-muted-foreground">{addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ''}</p>
-                        <p className="text-sm text-muted-foreground">{addr.city}, {addr.postalCode}</p>
-                        <p className="text-sm text-muted-foreground">{addr.phone}</p>
-                        {/* Add Edit/Delete buttons here in future */}
+                      <Card key={addr.id} className={`p-3 md:p-4 ${addr.isDefault ? 'border-primary ring-1 ring-primary' : ''}`}>
+                        <h4 className="font-semibold text-sm md:text-base">{addr.name} {addr.isDefault && <span className="text-xs text-primary font-normal">(Default)</span>}</h4>
+                        <p className="text-xs md:text-sm text-muted-foreground">{addr.firstName} {addr.lastName}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">{addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ''}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">{addr.city}, {addr.postalCode}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">{addr.phone}</p>
                       </Card>
                     ))}
                   </div>
@@ -489,43 +532,35 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <User className="mx-auto h-12 w-12 text-primary mb-4" />
-          <h1 className="text-4xl font-bold text-primary font-headline">My Account</h1>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8 md:mb-10">
+          <User className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-primary mb-2 sm:mb-4" />
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary font-headline">My Account</h1>
+        </div>
+        
+        <div className="md:hidden mb-6">
+            <Sheet open={isMobileSheetOpen} onOpenChange={setIsMobileSheetOpen}>
+                <SheetTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                        <SlidersHorizontal className="mr-2 h-4 w-4" /> Profile Menu
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] p-0">
+                    <ProfileSidebarContent />
+                </SheetContent>
+            </Sheet>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 items-start">
-          <Card className="md:col-span-1 shadow-lg sticky top-24">
-            <CardHeader className="items-center text-center">
-              <div className="relative group/avatar">
-                <Avatar className="w-24 h-24 mb-4 border-2 border-primary"><AvatarImage src={displayPhotoUrl || undefined} alt={currentDisplayName} data-ai-hint="profile avatar" /><AvatarFallback className="text-2xl bg-muted">{getInitials(currentDisplayName)}</AvatarFallback></Avatar>
-                <Button variant="outline" size="icon" className="absolute bottom-2 right-2 rounded-full h-8 w-8 bg-background/80 hover:bg-background group-hover/avatar:opacity-100 md:opacity-0 transition-opacity" onClick={() => fileInputRef.current?.click()} aria-label="Change"><Camera className="h-4 w-4" /></Button>
-                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-              </div>
-              {selectedFile && (<div className="text-center mt-2 mb-2"><p className="text-xs text-muted-foreground">Selected: {selectedFile.name}</p><Button size="sm" onClick={handleImageUpload} disabled={isUploading} className="mt-1">{isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Upload Picture</Button></div>)}
-              <CardTitle className="text-2xl">{currentDisplayName}</CardTitle>
-              <CardDescription>{email || 'No email'}</CardDescription>
-              <CardDescription className="text-xs">Joined {creationDate}</CardDescription>
-              <div className="mt-3 pt-3 border-t w-full"><div className="flex items-center justify-center text-lg font-semibold text-primary"><Award className="mr-2 h-5 w-5" /><span>{loyaltyPoints.toLocaleString()} Loyalty Points</span></div><CardDescription className="text-xs mt-1">Earn points with activity!</CardDescription></div>
-            </CardHeader>
-            <Separator />
-            <CardContent className="p-4 space-y-1">
-              <Button variant="ghost" onClick={() => setActiveSection("personal")} className={`w-full justify-start ${activeSection === 'personal' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}><User className="mr-2 h-4 w-4" /> Personal Information</Button>
-              <Button variant="ghost" onClick={() => setActiveSection("inbox")} className={`w-full justify-start ${activeSection === 'inbox' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}><Mail className="mr-2 h-4 w-4" /> My Inbox</Button>
-              <Button variant="ghost" onClick={() => setActiveSection("orders")} className={`w-full justify-start ${activeSection === 'orders' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}><ShoppingBag className="mr-2 h-4 w-4" /> My Orders</Button>
-              <Button variant="ghost" onClick={() => setActiveSection("wishlist")} className={`w-full justify-start ${activeSection === 'wishlist' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}><Heart className="mr-2 h-4 w-4" /> My Wishlist</Button>
-              <Button variant="ghost" onClick={() => setActiveSection("addresses")} className={`w-full justify-start ${activeSection === 'addresses' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}><MapPin className="mr-2 h-4 w-4" /> Shipping Addresses</Button>
-              <Separator className="my-2"/>
-              <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive/80 hover:bg-destructive/10" onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" /> Logout</Button>
-            </CardContent>
-          </Card>
-          {renderSectionContent()}
+        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 items-start">
+          <div className="hidden md:block md:col-span-1 lg:col-span-1 sticky top-24">
+             <ProfileSidebarContent />
+          </div>
+          <div className="md:col-span-2 lg:col-span-3">
+            {renderSectionContent()}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-    
-

@@ -30,7 +30,7 @@ export default function CartPage() {
     document.title = 'Shopping Cart - Creme Collections';
   }, []);
 
-  const handleQuantityChange = (id: string, newQuantity: number) => { // id is now string
+  const handleQuantityChange = (id: string, newQuantity: number) => { 
     if (newQuantity < 1) {
         removeItemFromCart(id); 
     } else {
@@ -50,31 +50,31 @@ export default function CartPage() {
       .join('\n');
     const message = `Hello Creme Collections! I'd like to place an order for the following items:\n\n${itemDetails}\n\nSubtotal: KES ${subtotal.toLocaleString()}\nShipping: KES ${shippingCost.toLocaleString()}\nTotal: KES ${total.toLocaleString()}\n\nPlease advise on payment and delivery.`;
     
-    const whatsappNumber = "254742468070"; // Updated to the first provided WhatsApp number
+    const whatsappNumber = "254742468070";
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank');
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-      <div className="flex items-center justify-between mb-10">
-        <Button variant="outline" size="sm" asChild>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-8 md:mb-10 gap-4">
+        <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
           <Link href="/products">
             <ChevronLeft className="mr-2 h-4 w-4" />
             Continue Shopping
           </Link>
         </Button>
         <div className="text-center">
-          <ShoppingCart className="mx-auto h-10 w-10 text-primary mb-2" />
-          <h1 className="text-3xl font-bold text-primary font-headline">Your Cart</h1>
+          <ShoppingCart className="mx-auto h-8 w-8 sm:h-10 sm:w-10 text-primary mb-1 sm:mb-2" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary font-headline">Your Cart</h1>
         </div>
-        <div className="w-[180px]"></div> {/* Spacer for alignment */}
+        <div className="w-full sm:w-[180px]"></div> {/* Spacer for alignment, adjusted for mobile */}
       </div>
 
       {cartItems.length > 0 ? (
-        <div className="grid lg:grid-cols-3 gap-8 md:gap-12 items-start">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-start">
+          <div className="md:col-span-2 space-y-6">
             {cartItems.map((item) => (
               <Card key={item.id} className="overflow-hidden shadow-md">
                 <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4 items-start">
@@ -87,12 +87,12 @@ export default function CartPage() {
                     data-ai-hint={item.dataAiHint}
                   />
                   <div className="flex-grow">
-                    <Link href={`/products/item/${item.id}`}> {/* Updated Link to use string ID */}
+                    <Link href={`/products/item/${item.id}`}>
                         <h2 className="text-lg font-semibold text-foreground hover:text-primary transition-colors">{item.name}</h2>
                     </Link>
                     <p className="text-md font-medium text-primary mt-1">KES {(item.fixedOfferPrice || 0).toLocaleString()}</p>
                   </div>
-                  <div className="flex flex-col items-end gap-3 mt-2 sm:mt-0 w-full sm:w-auto">
+                  <div className="flex flex-col items-start sm:items-end gap-3 mt-2 sm:mt-0 w-full sm:w-auto">
                     <div className="flex items-center border rounded-md">
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => handleQuantityChange(item.id, item.quantity - 1)} aria-label="Decrease quantity">
                         <Minus className="h-4 w-4" />
@@ -116,7 +116,7 @@ export default function CartPage() {
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10" onClick={() => removeItemFromCart(item.id)}>
+                    <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10 self-end sm:self-auto" onClick={() => removeItemFromCart(item.id)}>
                       <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
                     </Button>
                   </div>
@@ -125,8 +125,8 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="lg:col-span-1">
-            <Card className="shadow-lg">
+          <div className="md:col-span-1">
+            <Card className="shadow-lg sticky top-24">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-foreground font-headline">Order Summary</CardTitle>
               </CardHeader>
@@ -168,9 +168,9 @@ export default function CartPage() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <ShoppingCart className="mx-auto h-20 w-20 text-muted-foreground/30 mb-6" />
-          <p className="text-xl font-semibold text-foreground mb-2">Your cart is currently empty.</p>
-          <p className="text-muted-foreground mb-6">
+          <ShoppingCart className="mx-auto h-16 w-16 sm:h-20 sm:w-20 text-muted-foreground/30 mb-4 sm:mb-6" />
+          <p className="text-lg sm:text-xl font-semibold text-foreground mb-2">Your cart is currently empty.</p>
+          <p className="text-muted-foreground mb-4 sm:mb-6">
             Looks like you haven't added anything to your cart yet.
           </p>
           <Button asChild size="lg">

@@ -4,9 +4,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'; // Removed CardDescription and CardFooter
 import { Button } from '@/components/ui/button';
-import { Heart, ShoppingCart, Loader2 } from 'lucide-react';
+import { Heart, ShoppingCart, Loader2, Eye } from 'lucide-react'; // Added Eye icon
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { auth, db } from '@/lib/firebase';
@@ -42,6 +42,7 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
         setOriginalPrice(null);
       }
     } else {
+      // Fallback if prices aren't fixed (e.g. for randomly generated example data)
       const basePrice = Math.random() * 8000 + 2000;
       const discount = Math.random() * 0.3 + 0.1;
       const calculatedOfferPrice = basePrice * (1 - discount);
@@ -69,10 +70,10 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
   }, [user, id, authLoading]);
 
   const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); // Prevent link navigation if card is wrapped in Link
-    event.stopPropagation(); // Stop event from bubbling up
+    event.preventDefault(); 
+    event.stopPropagation(); 
     const productToAdd = { id, name, description, image, dataAiHint, fixedOfferPrice, fixedOriginalPrice };
-    addToCart(productToAdd, 1); // Add 1 quantity by default from card
+    addToCart(productToAdd, 1); 
   };
 
   const handleToggleWishlist = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -109,21 +110,21 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
       console.error("Error toggling wishlist from product card:", error);
       toast({ title: "Error", description: "Could not update your wishlist. Please try again.", variant: "destructive" });
     } finally {
-       // setIsWishlistProcessing(false); // Snapshot listener will set this
+       // Snapshot listener will set this
     }
   };
 
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl group/card h-full flex flex-col">
-      <CardHeader className="p-0 relative">
-        <Link href={`/products/item/${id}`} className="block aspect-square">
+    <Card className="overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl group/card h-full flex flex-col bg-card border border-border hover:border-primary/50">
+      <div className="p-0 relative">
+        <Link href={`/products/item/${id}`} className="block aspect-square overflow-hidden rounded-t-lg">
             <Image
               src={image}
               alt={name}
               width={400}
               height={400}
-              className="object-cover w-full h-full group-hover/card:opacity-80 transition-opacity"
+              className="object-cover w-full h-full group-hover/card:scale-105 transition-transform duration-300"
               data-ai-hint={dataAiHint}
             />
         </Link>
@@ -132,52 +133,49 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
             size="icon"
             onClick={handleToggleWishlist}
             disabled={authLoading || isWishlistProcessing}
-            className="absolute top-2 right-2 z-10 bg-background/60 hover:bg-background/90 text-foreground hover:text-primary rounded-full h-9 w-9 opacity-80 group-hover/card:opacity-100 transition-opacity"
+            className="absolute top-2 right-2 z-10 bg-background/70 hover:bg-background/90 text-foreground hover:text-primary rounded-full h-8 w-8 sm:h-9 sm:w-9"
             aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
         >
             {isWishlistProcessing ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
             ) : (
-                <Heart className={`h-5 w-5 ${isInWishlist ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
+                <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${isInWishlist ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
             )}
         </Button>
-      </CardHeader>
-      <CardContent className="p-4 flex flex-col flex-grow">
-        <Link href={`/products/item/${id}`} className="block">
-            <CardTitle className="text-lg font-semibold group-hover/card:text-primary transition-colors font-headline truncate" title={name}>{name}</CardTitle>
-            <CardDescription className="text-sm mt-1 h-10 overflow-hidden text-ellipsis">
-            {description.length > 60 ? `${description.substring(0, 60)}...` : description}
-            </CardDescription>
+      </div>
+      <CardContent className="p-3 sm:p-4 flex flex-col flex-grow">
+        <Link href={`/products/item/${id}`} className="block mb-1">
+            <CardTitle className="text-base md:text-lg font-semibold group-hover/card:text-primary transition-colors font-headline truncate leading-tight" title={name}>{name}</CardTitle>
         </Link>
-        <div className="mt-2 flex items-baseline gap-2">
+        <div className="flex items-baseline gap-2 mb-2">
           {offerPrice !== null ? (
             <>
-              <p className="text-xl font-bold text-primary">
+              <p className="text-lg md:text-xl font-bold text-primary">
                 KES {offerPrice}
               </p>
               {originalPrice !== null && (
-                <p className="text-sm text-muted-foreground line-through">
+                <p className="text-xs md:text-sm text-muted-foreground line-through">
                   KES {originalPrice}
                 </p>
               )}
             </>
           ) : (
-            <p className="text-lg font-bold text-primary">Price not available</p>
+            <p className="text-base md:text-lg font-bold text-primary">Price not available</p>
           )}
         </div>
         
-        <div className="mt-auto pt-3 space-y-2">
+        <div className="mt-auto space-y-2">
             <Button 
                 variant="default" 
                 size="sm" 
-                className="w-full" 
+                className="w-full h-9 text-xs sm:text-sm" 
                 onClick={handleAddToCart}
-                disabled={fixedOfferPrice === undefined} // Disable if no price
+                disabled={fixedOfferPrice === undefined} 
             >
-              <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+              <ShoppingCart className="mr-1.5 h-4 w-4" /> Add to Cart
             </Button>
-            <Button variant="outline" size="sm" className="w-full" asChild>
-              <Link href={`/products/item/${id}`}>View Details</Link>
+            <Button variant="outline" size="sm" className="w-full h-9 text-xs sm:text-sm" asChild>
+              <Link href={`/products/item/${id}`}><Eye className="mr-1.5 h-4 w-4"/>View Details</Link>
             </Button>
         </div>
       </CardContent>
