@@ -1,7 +1,8 @@
+
 "use client";
 
 import type { ProductCardProps } from '@/components/features/home/product-card'; 
-import { useToast, createViewCartToastAction } from '@/hooks/use-toast'; // Import createViewCartToastAction
+import { useToast } from '@/hooks/use-toast'; 
 import Link from 'next/link';
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
@@ -45,7 +46,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     toast({
       title: `${product.name} added to cart!`,
       description: `Quantity: ${quantity}. Total items: ${currentCartItemCount + quantity}`,
-      action: createViewCartToastAction(), // Use the helper function
+      // action: createViewCartToastAction(), // Removed action temporarily
       duration: 5000,
     });
   }, [toast, currentCartItemCount]);

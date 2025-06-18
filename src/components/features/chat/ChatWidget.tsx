@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -5,8 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BotIcon as BotMessageSquare, Send, X, Loader2, User as UserIcon } from 'lucide-react'; 
+import { BotIcon as BotMessageSquare, Send, X, Loader2, User as UserIcon } from 'lucide-react';
 import { comprehensiveChatSupport, type ComprehensiveChatSupportInput, type ComprehensiveChatSupportOutput } from '@/ai/flows/comprehensive-chat-support';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast'; // Radix ToastAction
 
 interface ChatMessage {
   id: string;
@@ -22,9 +28,44 @@ export default function ChatWidget() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [user, authLoading] = useAuthState(auth);
+  const router = useRouter();
+  const { toast } = useToast();
+
+
+  const handleOpenChatRequest = useCallback(() => {
+    if (authLoading) {
+      // Optionally, show a spinner on the button or disable it
+      // For now, just prevent opening if auth state is loading
+      return;
+    }
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to use chat support.",
+        action: (
+          <ToastAction
+            altText="Login"
+            onClick={() => router.push('/login?redirect=.')} // Redirect to login, then back to current page
+          >
+            Login
+          </ToastAction>
+        ),
+        duration: 5000,
+      });
+      return;
+    }
+    setIsOpen(true);
+  }, [authLoading, user, toast, router]);
+
   const toggleChat = useCallback(() => {
-    setIsOpen(prev => !prev);
-  }, []);
+    if (isOpen) {
+      setIsOpen(false);
+    } else {
+      handleOpenChatRequest();
+    }
+  }, [isOpen, handleOpenChatRequest]);
+
 
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
@@ -38,7 +79,7 @@ export default function ChatWidget() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
-  
+
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
@@ -57,13 +98,13 @@ export default function ChatWidget() {
 
     try {
       const historyForFlow = messages.map(msg => ({ role: msg.role, content: msg.content }));
-      
+
       const input: ComprehensiveChatSupportInput = {
         message: userMessageContent,
-        chatHistory: historyForFlow, 
+        chatHistory: historyForFlow,
       };
       const result: ComprehensiveChatSupportOutput = await comprehensiveChatSupport(input);
-      
+
       const aiResponse: ChatMessage = { id: `${Date.now()}-model`, role: 'model', content: result.response };
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
@@ -72,17 +113,21 @@ export default function ChatWidget() {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      setTimeout(() => inputRef.current?.focus(), 0); 
+      setTimeout(() => inputRef.current?.focus(), 0);
     }
   }, [inputValue, messages]);
 
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && user && messages.length === 0) { // Only show welcome if user is logged in and chat opens
       setMessages([
-        { id: 'welcome-msg', role: 'model', content: "Hello! I'm CremeBot, your virtual assistant for Creme Collections. How can I help you today?" }
+        { id: 'welcome-msg', role: 'model', content: `Hello ${user.displayName || 'there'}! I'm CremeBot, your virtual assistant for Creme Collections. How can I help you today?` }
       ]);
     }
-  }, [isOpen, messages.length]);
+    if (isOpen && !user && !authLoading) { // If chat was somehow opened without user, reset (e.g., user logs out)
+        setIsOpen(false); // Close it
+        setMessages([]); // Clear messages
+    }
+  }, [isOpen, user, messages.length, authLoading]);
 
 
   return (
@@ -93,11 +138,12 @@ export default function ChatWidget() {
         className="fixed bottom-6 right-6 rounded-full shadow-xl w-16 h-16 p-0 z-[60] flex items-center justify-center"
         onClick={toggleChat}
         aria-label={isOpen ? "Close chat support" : "Open chat support"}
+        disabled={authLoading && !isOpen} // Disable if auth is loading and trying to open
       >
-        {isOpen ? <X className="h-7 w-7" /> : <BotMessageSquare className="h-7 w-7" />}
+        {authLoading && !isOpen ? <Loader2 className="h-7 w-7 animate-spin" /> : isOpen ? <X className="h-7 w-7" /> : <BotMessageSquare className="h-7 w-7" />}
       </Button>
 
-      {isOpen && (
+      {isOpen && user && ( // Only render the chat window if open AND user is logged in
         <div className="fixed bottom-24 right-6 w-full max-w-sm h-auto max-h-[calc(100vh-11rem)] shadow-2xl z-[60] flex flex-col rounded-lg overflow-hidden animate-in fade-in-0 slide-in-from-bottom-5 duration-300">
           <Card className="w-full h-full flex flex-col bg-card border border-border">
             <CardHeader className="p-4 border-b flex-shrink-0">

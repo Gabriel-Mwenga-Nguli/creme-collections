@@ -72,12 +72,14 @@ const ListItem = forwardRef<
           onClick={onClick}
           {...props}
         >
-          <div className="text-sm font-medium leading-none text-slate-100 group-hover/listitem:text-primary">{title}</div>
-          {children && (
-            <p className="line-clamp-2 text-sm leading-snug text-slate-400">
-              {children}
-            </p>
-          )}
+          <> {/* Wrap children of Link in a React.Fragment */}
+            <div className="text-sm font-medium leading-none text-slate-100 group-hover/listitem:text-primary">{title}</div>
+            {children && (
+              <p className="line-clamp-2 text-sm leading-snug text-slate-400">
+                {children}
+              </p>
+            )}
+          </>
         </Link>
       </NavigationMenuLink>
     </li>
@@ -336,9 +338,9 @@ export default function Header() {
                         <NavigationMenuItem key={link.label}>
                           <NavigationMenuTrigger 
                             className={cn(navigationMenuTriggerStyle(),"text-sm font-medium px-2 md:px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 data-[state=open]:bg-slate-800 data-[state=open]:text-slate-100 group")}
-                            asChild
                           >
-                            <Link href={link.href} onClick={closeMegaMenu}>
+                            {/* Link content directly in Trigger for asChild-like behavior with styling */}
+                             <Link href={link.href} onClick={closeMegaMenu}>
                                 <span>
                                 {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-hover:text-primary transition-colors inline-block" />}
                                 {link.label}
@@ -390,3 +392,4 @@ export default function Header() {
     </header>
   );
 }
+

@@ -1,16 +1,15 @@
 
-"use client"; // Make it a client component for form handling and useToast
+"use client"; 
 
-import type { Metadata } from 'next'; // Metadata can't be used directly
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Mail, MessageSquare, MapPin, Clock } from 'lucide-react'; // Replaced Phone with MessageSquare for WhatsApp, added Clock
+import { Mail, Phone, MapPin, Clock } from 'lucide-react'; 
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from 'react';
+import HelpSection from '@/components/features/contact/HelpSection'; // Import the new component
 
-// Set title dynamically for client component
 const PageTitle = 'Contact Us - Creme Collections';
 
 export default function ContactPage() {
@@ -23,7 +22,6 @@ export default function ContactPage() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // In a real app, you would handle form submission here (e.g., send data to an API)
     console.log("Form submitted with data:", {
         name: (event.currentTarget.elements.namedItem('name') as HTMLInputElement).value,
         email: (event.currentTarget.elements.namedItem('email') as HTMLInputElement).value,
@@ -36,72 +34,40 @@ export default function ContactPage() {
       description: "Thank you for contacting us. We'll get back to you soon.",
       variant: "default",
     });
-    // Optionally, reset the form
     event.currentTarget.reset();
   };
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-primary mb-12 font-headline">Contact Us</h1>
+      <div className="max-w-6xl mx-auto"> {/* Increased max-width to accommodate layout */}
+        <h1 className="text-4xl font-bold text-center text-primary mb-12 font-headline">Contact Creme Collections</h1>
 
-        <div className="grid md:grid-cols-2 gap-12 items-start">
+        <div className="grid md:grid-cols-2 gap-10 md:gap-12 items-start">
+          {/* Left Column: New Help Section */}
           <div className="space-y-8">
-            <div>
-              <h2 className="text-2xl font-semibold text-foreground mb-4 font-headline">Get in Touch</h2>
-              <p className="text-muted-foreground">
-                We'd love to hear from you! Whether you have a question about our products, an order, or anything else, our team is ready to answer all your questions.
-              </p>
-            </div>
+            <HelpSection />
             
-            <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center mt-1">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Email Us</h3>
-                  <a href="mailto:support@cremecollections.shop" className="text-primary hover:underline block">support@cremecollections.shop</a>
-                  <a href="mailto:creme.collectionlt@gmail.com" className="text-primary hover:underline block">creme.collectionlt@gmail.com</a>
-                  <p className="text-sm text-muted-foreground">We typically respond within 24 hours.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center mt-1">
-                  <MessageSquare className="w-5 h-5" /> {/* Changed from Phone to MessageSquare for WhatsApp */}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">WhatsApp Us</h3>
-                  <a href="https://wa.me/254742468070" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline block">+254 742 468070</a>
-                  <a href="https://wa.me/254743117211" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline block">+254 743 117211</a>
-                  <a href="https://wa.me/254717988700" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline block">+254 717 988700</a>
-                </div>
-              </div>
-               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center mt-1">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Operating Hours (EAT)</h3>
-                  <p className="text-muted-foreground">Mon – Fri: 9am – 5pm</p>
-                  <p className="text-muted-foreground">Saturday: 9am – 12pm</p>
-                  <p className="text-muted-foreground">Sunday & Public Holidays: Closed</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center mt-1">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Our Office</h3>
-                  <p className="text-muted-foreground">123 Creme Collections St, Suite 100<br />Commerce City, EC 54321</p>
-                </div>
+            {/* Additional Contact Info / Store Details - Re-add if HelpSection doesn't cover everything */}
+            <div className="mt-8 p-6 bg-card rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-foreground mb-4 font-headline flex items-center"><MapPin className="w-5 h-5 mr-2 text-primary" /> Our Office</h3>
+              <address className="text-sm text-muted-foreground not-italic space-y-1">
+                <p>123 Creme Collections St, Suite 100</p>
+                <p>Commerce City, EC 54321, Kenya</p>
+                <p className="mt-2">Email: <a href="mailto:support@cremecollections.shop" className="text-primary hover:underline">support@cremecollections.shop</a></p>
+              </address>
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold text-foreground mb-2 font-headline flex items-center"><Clock className="w-5 h-5 mr-2 text-primary" /> Operating Hours (EAT)</h3>
+                <p className="text-sm text-muted-foreground">Mon – Fri: 9am – 5pm</p>
+                <p className="text-sm text-muted-foreground">Saturday: 9am – 12pm</p>
+                <p className="text-sm text-muted-foreground">Sunday & Public Holidays: Closed</p>
               </div>
             </div>
           </div>
 
+          {/* Right Column: Contact Form */}
           <div>
-            <form onSubmit={handleSubmit} className="space-y-6 bg-card p-6 sm:p-8 rounded-lg shadow-lg">
+            <form onSubmit={handleSubmit} className="space-y-6 bg-card p-6 sm:p-8 rounded-lg shadow-xl">
+              <h2 className="text-2xl font-semibold text-foreground mb-5 font-headline">Send Us a Message</h2>
               <div>
                 <Label htmlFor="name" className="font-medium">Full Name</Label>
                 <Input type="text" name="name" id="name" autoComplete="name" required className="mt-1" />
@@ -116,10 +82,10 @@ export default function ContactPage() {
               </div>
               <div>
                 <Label htmlFor="message" className="font-medium">Message</Label>
-                <Textarea name="message" id="message" rows={4} required className="mt-1" />
+                <Textarea name="message" id="message" rows={5} required className="mt-1" />
               </div>
               <div>
-                <Button type="submit" className="w-full">Send Message</Button>
+                <Button type="submit" className="w-full" size="lg">Send Message</Button>
               </div>
             </form>
           </div>
@@ -128,3 +94,4 @@ export default function ContactPage() {
     </div>
   );
 }
+
