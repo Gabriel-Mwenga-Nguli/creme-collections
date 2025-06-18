@@ -25,8 +25,8 @@ import {
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { Badge } from '@/components/ui/badge';
-import { auth } from '@/lib/firebase'; // Import Firebase auth
-import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth'; // Import Firebase User type
+import { auth } from '@/lib/firebase'; 
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth'; 
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -66,15 +66,15 @@ const ListItem = forwardRef<
           href={href}
           ref={ref}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-slate-800 focus:bg-slate-800 group/listitem",
             className
           )}
           onClick={onClick}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
+          <div className="text-sm font-medium leading-none text-slate-100 group-hover/listitem:text-primary">{title}</div>
           {children && (
-            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            <p className="line-clamp-2 text-sm leading-snug text-slate-400">
               {children}
             </p>
           )}
@@ -90,7 +90,7 @@ export default function Header() {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const { getCartItemCount } = useCart(); 
   const cartItemCount = getCartItemCount();
-  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null); // Store Firebase user object
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null); 
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function Header() {
       setCurrentUser(user);
       setAuthLoading(false);
     });
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe(); 
   }, []);
 
 
@@ -281,11 +281,11 @@ export default function Header() {
                         key={megaMenuTriggerLink.label}
                         variant="ghost"
                         onClick={toggleMegaMenu}
-                        className={`text-sm font-medium px-3 py-2 h-auto rounded-md hover:bg-primary/20 hover:text-primary ${isMegaMenuOpen ? 'bg-primary/15 text-primary' : 'text-foreground'}`}
+                        className={`text-sm font-medium px-3 py-2 h-auto rounded-md hover:bg-primary/20 hover:text-primary ${isMegaMenuOpen ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'text-foreground'}`}
                     >
-                        {megaMenuTriggerLink.icon && <megaMenuTriggerLink.icon className="mr-1.5 h-4 w-4" />}
+                        {megaMenuTriggerLink.icon && <megaMenuTriggerLink.icon className={`mr-1.5 h-4 w-4 ${isMegaMenuOpen ? 'text-slate-100' : ''}`} />}
                         {megaMenuTriggerLink.label}
-                        <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${isMegaMenuOpen ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${isMegaMenuOpen ? 'rotate-180 text-slate-100' : ''}`} />
                     </Button>
                 );
               })()}
@@ -299,13 +299,13 @@ export default function Header() {
                       return (
                         <NavigationMenuItem key={link.label}>
                           <NavigationMenuTrigger 
-                            className="text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 data-[state=open]:bg-primary/10"
+                            className="text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 data-[state=open]:bg-slate-800 data-[state=open]:text-slate-100 group"
                           >
-                            {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
+                            {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-data-[state=open]:text-slate-100 group-hover:text-primary transition-colors" />}
                             {link.label}
                           </NavigationMenuTrigger>
-                          <NavigationMenuContent>
-                            <ul className="flex flex-col w-[250px] gap-1 p-2 md:w-[300px] bg-popover border rounded-md shadow-lg">
+                          <NavigationMenuContent className="bg-slate-900 border-slate-700 text-slate-100">
+                            <ul className="flex flex-col w-[250px] gap-1 p-2 md:w-[300px] rounded-md shadow-lg">
                                <ListItem
                                   key={`all-${parentCategoryData.label}`}
                                   href={parentCategoryData.href}
@@ -315,7 +315,7 @@ export default function Header() {
                                 >
                                   Browse all items in {parentCategoryData.label}.
                                 </ListItem>
-                                <hr className="my-1"/>
+                                <hr className="my-1 border-slate-700"/>
                               {parentCategoryData.subLinks.map((subLink) => (
                                 <ListItem
                                   key={subLink.label}
@@ -334,10 +334,10 @@ export default function Header() {
                            <NavigationMenuLink asChild>
                             <Link 
                               href={link.href}
-                              className={cn(navigationMenuTriggerStyle(), "text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10")}
+                              className={cn(navigationMenuTriggerStyle(), "text-sm font-medium px-3 py-2 h-auto rounded-md text-foreground hover:bg-primary/20 hover:text-primary bg-transparent focus:bg-primary/10 group")}
                               onClick={closeMegaMenu}
                             >
-                              {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
+                              {link.icon && <link.icon className="mr-1.5 h-4 w-4 group-hover:text-primary transition-colors" />}
                               {link.label}
                             </Link>
                           </NavigationMenuLink>
@@ -358,3 +358,4 @@ export default function Header() {
   );
 }
     
+
