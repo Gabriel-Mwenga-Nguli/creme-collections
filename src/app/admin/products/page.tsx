@@ -36,7 +36,8 @@ export default function AdminProductsPage() {
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()))
+    (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (product.id && product.id.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -64,10 +65,10 @@ export default function AdminProductsPage() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search products by name, category, brand..."
+              placeholder="Search by name, category, brand, ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 w-full sm:w-1/2 lg:w-1/3"
+              className="pl-8 w-full md:w-1/2 lg:w-2/5" 
             />
           </div>
         </CardHeader>
@@ -81,12 +82,12 @@ export default function AdminProductsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[80px]">Image</TableHead>
+                    <TableHead className="w-[60px] sm:w-[80px]">Image</TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
+                    <TableHead className="hidden md:table-cell">Category</TableHead>
                     <TableHead>Price (KES)</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden sm:table-cell">Stock</TableHead>
+                    <TableHead className="hidden sm:table-cell">Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -97,21 +98,21 @@ export default function AdminProductsPage() {
                         <Image
                           src={product.image}
                           alt={product.name}
-                          width={50}
-                          height={50}
-                          className="rounded-md object-cover"
+                          width={40}
+                          height={40}
+                          className="rounded-md object-cover w-10 h-10 sm:w-12 sm:h-12"
                           data-ai-hint={product.dataAiHint}
                         />
                       </TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell>{product.category || 'N/A'}</TableCell>
+                      <TableCell className="font-medium max-w-[150px] sm:max-w-xs truncate" title={product.name}>{product.name}</TableCell>
+                      <TableCell className="hidden md:table-cell">{product.category || 'N/A'}</TableCell>
                       <TableCell>{product.offerPrice.toLocaleString()}</TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         <Badge variant={product.stock && product.stock < 10 ? (product.stock === 0 ? 'destructive' : 'secondary') : 'outline'} className="text-xs">
                           {product.stock ?? 'N/A'}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         <Badge variant={product.availability === 'In Stock' ? 'default' : 'destructive'} className="bg-opacity-75 text-xs">
                           {product.availability || 'N/A'}
                         </Badge>

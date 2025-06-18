@@ -2,7 +2,7 @@
 'use server';
 
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, getDoc, orderBy, Timestamp, updateDoc, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, orderBy, Timestamp, updateDoc, addDoc, limit, serverTimestamp } from 'firebase/firestore';
 
 export interface OrderItem {
   productId: string;
@@ -13,9 +13,9 @@ export interface OrderItem {
 }
 
 export interface OrderShippingAddress {
-    name: string; // Full name, or first + last
-    firstName?: string; // if name is not full name
-    lastName?: string; // if name is not full name
+    name: string; 
+    firstName?: string; 
+    lastName?: string; 
     addressLine1: string;
     addressLine2?: string;
     city: string;
@@ -31,7 +31,7 @@ export interface Order {
   id: string; 
   orderId?: string; 
   userId: string;
-  userEmail?: string; // Added for admin view
+  userEmail?: string;
   items: OrderItem[];
   totalAmount: number;
   status: OrderStatus;
@@ -39,7 +39,6 @@ export interface Order {
   shippingAddress: OrderShippingAddress; 
 }
 
-// For admin listing, might want to include user email directly
 export interface OrderAdminItem extends Order {
     userEmail?: string;
 }
@@ -52,18 +51,17 @@ function mapDocToOrder(document: FirebaseFirestore.QueryDocumentSnapshot | Fireb
   }
   return {
     id: document.id,
-    userId: data.userId,
-    userEmail: data.userEmail, // Will be undefined if not present, handle in UI
+    userId: data.userId || 'Unknown User',
+    userEmail: data.userEmail || undefined, 
     orderId: data.orderId || document.id, 
-    items: data.items || [],
-    totalAmount: data.totalAmount || 0,
+    items: data.items && Array.isArray(data.items) ? data.items : [],
+    totalAmount: typeof data.totalAmount === 'number' ? data.totalAmount : 0,
     status: data.status || 'Pending',
-    orderDate: data.orderDate || Timestamp.now(), 
-    shippingAddress: data.shippingAddress || {},
+    orderDate: data.orderDate instanceof Timestamp ? data.orderDate : Timestamp.now(), 
+    shippingAddress: data.shippingAddress || { name: 'N/A', addressLine1: 'N/A', city: 'N/A', postalCode: 'N/A', phone: 'N/A' },
   };
 }
 
-// Fetches orders for a specific user
 export async function getUserOrders(userId: string): Promise<Order[]> {
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch user orders.");
@@ -75,8 +73,6 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
   }
 
   try {
-    // Assuming orders are stored under a top-level 'orders' collection, filtered by userId
-    // Or, if orders are in a subcollection: collection(db, 'users', userId, 'orders')
     const ordersRef = collection(db, 'orders'); 
     const q = query(ordersRef, where('userId', '==', userId), orderBy('orderDate', 'desc'));
     const querySnapshot = await getDocs(q);
@@ -89,45 +85,50 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
   }
 }
 
-// Fetches details for a specific order (can be used by user or admin if they have the orderId)
-export async function getOrderDetails(orderId: string): Promise<Order | null> {
-  if (!db) {
-    console.error("Firestore 'db' object is not initialized. Cannot fetch order details.");
-    return null;
-  }
-   if (!orderId) {
-    console.error("Order ID is required to fetch order details.");
-    return null;
-  }
-  try {
-    // Assuming orders are in a top-level 'orders' collection
-    const orderDocRef = doc(db, 'orders', orderId);
-    const orderSnap = await getDoc(orderDocRef);
-
-    if (orderSnap.exists()) {
-      return mapDocToOrder(orderSnap);
-    } else {
-      console.log(`No such order document with ID: ${orderId}`);
-      return null;
+export async function getOrderDetails(orderId: string, userId?: string): Promise<Order | null> {
+    if (!db) {
+        console.error("Firestore 'db' object is not initialized. Cannot fetch order details.");
+        return null;
     }
-  } catch (error) {
-    console.error(`Error fetching order details for order ID ${orderId}: `, error);
-    return null;
-  }
+    if (!orderId) {
+        console.error("Order ID is required to fetch order details.");
+        return null;
+    }
+    try {
+        const orderDocRef = doc(db, 'orders', orderId);
+        const orderSnap = await getDoc(orderDocRef);
+
+        if (orderSnap.exists()) {
+            const orderData = mapDocToOrder(orderSnap);
+            // If userId is provided (for user-specific access), validate ownership
+            if (userId && orderData.userId !== userId) {
+                console.warn(`User ${userId} attempted to access order ${orderId} belonging to another user.`);
+                return null; 
+            }
+            return orderData;
+        } else {
+            console.warn(`No such order document with ID: ${orderId}`);
+            return null;
+        }
+    } catch (error) {
+        console.error(`Error fetching order details for order ID ${orderId}: `, error);
+        return null;
+    }
 }
 
 
-// Fetches all orders for admin dashboard
 export async function getAllOrdersForAdmin(countLimit?: number): Promise<OrderAdminItem[]> {
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch all orders for admin.");
     return [];
   }
   try {
-    const ordersRef = collection(db, 'orders'); // Assuming a top-level 'orders' collection
-    let q = query(ordersRef, orderBy('orderDate', 'desc'));
-    if (countLimit) {
+    const ordersRef = collection(db, 'orders');
+    let q;
+    if (countLimit && countLimit > 0) {
         q = query(ordersRef, orderBy('orderDate', 'desc'), limit(countLimit));
+    } else {
+        q = query(ordersRef, orderBy('orderDate', 'desc'));
     }
     const querySnapshot = await getDocs(q);
     
@@ -139,10 +140,13 @@ export async function getAllOrdersForAdmin(countLimit?: number): Promise<OrderAd
   }
 }
 
-// Admin: Update order status
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus): Promise<boolean> {
     if (!db) {
         console.error("Firestore 'db' object is not initialized. Cannot update order status.");
+        return false;
+    }
+    if (!orderId) {
+        console.error("Order ID is required to update status.");
         return false;
     }
     try {
@@ -155,12 +159,9 @@ export async function updateOrderStatus(orderId: string, newStatus: OrderStatus)
     }
 }
 
-
-// Example: Create a new order (e.g., from checkout)
-// This would typically be more complex, involving transaction, inventory updates etc.
 export async function createOrder(
     userId: string,
-    userEmail: string | null, // Add userEmail
+    userEmail: string | null, 
     items: OrderItem[],
     totalAmount: number,
     shippingAddress: OrderShippingAddress
@@ -169,15 +170,18 @@ export async function createOrder(
         console.error("Firestore 'db' object is not initialized. Cannot create order.");
         return null;
     }
+     if (!userId || !items || items.length === 0 || totalAmount <= 0 || !shippingAddress) {
+        console.error("Invalid parameters for creating order.");
+        return null;
+    }
     try {
-        // For a real system, you would generate a more robust orderId
-        const simpleOrderId = `CREME-${Date.now().toString().slice(-6)}`;
+        const simpleOrderId = `CREME-${Date.now().toString().slice(-6)}${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
-        const ordersRef = collection(db, 'orders'); // Assumes top-level 'orders'
+        const ordersRef = collection(db, 'orders');
         const newOrderData = {
             orderId: simpleOrderId,
             userId: userId,
-            userEmail: userEmail || null, // Store user's email
+            userEmail: userEmail || null,
             items: items,
             totalAmount: totalAmount,
             shippingAddress: shippingAddress,
@@ -185,7 +189,7 @@ export async function createOrder(
             orderDate: serverTimestamp(),
         };
         const docRef = await addDoc(ordersRef, newOrderData);
-        return docRef.id; // Returns Firestore document ID
+        return docRef.id;
     } catch (error) {
         console.error("Error creating order: ", error);
         return null;

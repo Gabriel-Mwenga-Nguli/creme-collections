@@ -12,7 +12,7 @@ import { Loader2, ChevronLeft, ShoppingBag, MapPin, Package, AlertCircle } from 
 import { useToast } from '@/hooks/use-toast';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '@/lib/firebase';
-import type { Order, OrderItem } from '@/services/orderService';
+import type { Order, OrderItem, OrderStatus } from '@/services/orderService'; // Ensure OrderStatus is imported
 import { getOrderDetails } from '@/services/orderService';
 import { format } from 'date-fns';
 
@@ -30,18 +30,20 @@ export default function OrderDetailPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.push('/login?redirect=/profile/orders'); 
+      router.push(`/login?redirect=/profile/orders/${orderId || ''}`); 
       return;
     }
     if (user && orderId) {
-      document.title = `Order ${orderId} - Creme Collections`;
+      document.title = `Order Details - Creme Collections`; // Generic title until order loaded
       setIsLoading(true);
-      getOrderDetails(user.uid, orderId)
+      getOrderDetails(orderId, user.uid) // Pass userId for validation
         .then(fetchedOrder => {
           if (fetchedOrder) {
             setOrder(fetchedOrder);
+            document.title = `Order #${fetchedOrder.orderId || fetchedOrder.id.substring(0,8)} - Creme Collections`;
           } else {
-            toast({ title: "Order Not Found", description: "The requested order could not be found.", variant: "destructive" });
+            toast({ title: "Order Not Found", description: "The requested order could not be found or you do not have permission to view it.", variant: "destructive" });
+            router.replace('/profile?section=orders');
           }
         })
         .catch(err => {
@@ -52,7 +54,7 @@ export default function OrderDetailPage() {
     } else if (!orderId) {
         toast({ title: "Error", description: "Order ID is missing.", variant: "destructive" });
         setIsLoading(false);
-        router.push('/profile');
+        router.push('/profile?section=orders');
     }
   }, [user, authLoading, orderId, router, toast]);
 
@@ -79,7 +81,7 @@ export default function OrderDetailPage() {
     );
   }
   
-  const getStatusColor = (status: Order['status']) => {
+  const getStatusColor = (status: OrderStatus) => { // Use imported OrderStatus
     switch (status) {
       case 'Pending': return 'text-yellow-600 bg-yellow-100/80 border-yellow-500/80';
       case 'Processing': return 'text-blue-600 bg-blue-100/80 border-blue-500/80';
@@ -129,7 +131,7 @@ export default function OrderDetailPage() {
                     width={70} 
                     height={70} 
                     className="rounded-md object-cover border flex-shrink-0 w-16 h-16 sm:w-[70px] sm:h-[70px]"
-                    data-ai-hint="product item" 
+                    data-ai-hint={item.name.split(' ').slice(0,2).join(' ').toLowerCase()} 
                   />
                   <div className="flex-grow">
                     <Link href={`/products/item/${item.productId}`} className="font-medium text-sm sm:text-base text-foreground hover:text-primary transition-colors">{item.name}</Link>
@@ -162,20 +164,20 @@ export default function OrderDetailPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal:</span>
-                  <span className="font-medium text-foreground">KES {order.totalAmount.toLocaleString()}</span> {/* Assuming totalAmount is subtotal */}
+                  <span className="font-medium text-foreground">KES {order.totalAmount.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Shipping:</span>
-                  <span className="font-medium text-foreground">KES 0</span> {/* Placeholder */}
+                  <span className="font-medium text-foreground">{order.totalAmount > 10000 ? 'Free' : 'KES 500'}</span> 
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Taxes:</span>
-                  <span className="font-medium text-foreground">KES 0</span> {/* Placeholder */}
+                  <span className="text-muted-foreground">Taxes (Est.):</span>
+                  <span className="font-medium text-foreground">KES {(order.totalAmount * 0.16).toLocaleString(undefined, {maximumFractionDigits: 0})}</span> 
                 </div>
                 <Separator className="my-2"/>
                 <div className="flex justify-between text-base md:text-lg font-bold">
                   <span className="text-foreground">Total Paid:</span>
-                  <span className="text-primary">KES {order.totalAmount.toLocaleString()}</span>
+                  <span className="text-primary">KES {(order.totalAmount + (order.totalAmount > 10000 ? 0 : 500) + (order.totalAmount * 0.16)).toLocaleString(undefined, {maximumFractionDigits:0})}</span>
                 </div>
               </div>
             </section>
@@ -184,8 +186,9 @@ export default function OrderDetailPage() {
           <Separator />
 
           <div className="text-center space-x-2">
-             <Button variant="outline" size="sm">Track Package (Coming Soon)</Button>
-             {order.status === 'Delivered' && <Button variant="secondary" size="sm">Request Return (Coming Soon)</Button>}
+             <Button variant="outline" size="sm" disabled>Track Package (Coming Soon)</Button>
+             {order.status === 'Delivered' && <Button variant="secondary" size="sm" disabled>Request Return (Coming Soon)</Button>}
+             <Button variant="default" size="sm" asChild><Link href={`/contact?subject=Regarding Order #${order.orderId || order.id.substring(0,8)}`}>Contact Support</Link></Button>
           </div>
 
         </CardContent>

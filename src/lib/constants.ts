@@ -22,7 +22,7 @@ export const MAIN_NAV_LINKS: NavLink[] = [
   { href: '/products/category/beauty-personal-care', label: 'Beauty & Care', icon: VenetianMask },
   { href: '/products/category/sports-outdoors', label: 'Sports', icon: Bike },
   { href: '/products/category/toys-kids-baby', label: 'Toys & Baby', icon: ToyBrick },
-  { href: '/products?filter=offers', label: 'Offers', icon: Percent },
+  { href: '/products', label: 'All Products', icon: ShoppingBasket }, // Changed from "Offers" to "All Products" for clarity
 ];
 
 
@@ -108,9 +108,9 @@ export const CATEGORY_NAV_LINKS: NavLink[] = [
       { label: 'Camping & Hiking', href: '/products/category/sports-outdoors/camping-hiking', icon: Tent },
       { label: 'Team Sports Gear', href: '/products/category/sports-outdoors/team-sports' },
       { label: 'Outdoor Recreation', href: '/products/category/sports-outdoors/outdoor-recreation' },
-      { label: 'Sportswear', href: '/products/category/sports-outdoors/sportswear' }, // Link to fashion or specific sportswear
+      { label: 'Sportswear', href: '/products/category/sports-outdoors/sportswear' }, 
       { label: 'Water Sports', href: '/products/category/sports-outdoors/water-sports' },
-      { label: 'Fitness Trackers', href: '/products/category/sports-outdoors/fitness-trackers' }, // Link to electronics/wearables
+      { label: 'Fitness Trackers', href: '/products/category/sports-outdoors/fitness-trackers' }, 
     ],
   },
   {
@@ -122,8 +122,8 @@ export const CATEGORY_NAV_LINKS: NavLink[] = [
       { label: 'Baby Care & Essentials', href: '/products/category/toys-kids-baby/baby-care', icon: Baby },
       { label: 'Baby Gear (Strollers, Carriers)', href: '/products/category/toys-kids-baby/baby-gear' },
       { label: 'Nursery Furniture & Decor', href: '/products/category/toys-kids-baby/nursery' },
-      { label: 'Kids\' Books', href: '/products/category/toys-kids-baby/kids-books' }, // Link to books
-      { label: 'School Supplies for Kids', href: '/products/category/toys-kids-baby/school-supplies' }, // Link to stationery
+      { label: 'Kids\' Books', href: '/products/category/toys-kids-baby/kids-books' }, 
+      { label: 'School Supplies for Kids', href: '/products/category/toys-kids-baby/school-supplies' }, 
     ],
   },
   {
@@ -161,7 +161,7 @@ export const CATEGORY_NAV_LINKS: NavLink[] = [
     subLinks: [
       { label: 'Vitamins & Supplements', href: '/products/category/health-wellness/vitamins-supplements' },
       { label: 'First Aid Supplies', href: '/products/category/health-wellness/first-aid' },
-      { label: 'Personal Hygiene', href: '/products/category/health-wellness/personal-hygiene' }, // Can overlap with beauty
+      { label: 'Personal Hygiene', href: '/products/category/health-wellness/personal-hygiene' }, 
       { label: 'Medical Equipment', href: '/products/category/health-wellness/medical-equipment', icon: Stethoscope },
       { label: 'Optical Care', href: '/products/category/health-wellness/optical-care' },
       { label: 'Family Planning', href: '/products/category/health-wellness/family-planning' },
@@ -184,16 +184,14 @@ export const FOOTER_SUPPORT_LINKS: NavLink[] = [
   { href: "/shipping", label: "Shipping & Returns", icon: Package },
 ];
 
-// Original header nav links (for reference or other uses, e.g. mobile slideout if different)
 export const LEGACY_HEADER_NAV_LINKS: NavLink[] = [
-  { href: "/products?filter=offers", label: "Offers", icon: Percent },
-  { href: "/products?filter=new", label: "New Arrivals", icon: Sparkles },
+  { href: "/products", label: "Offers", icon: Percent }, // Note: Actual filtering not implemented
+  { href: "/products", label: "New Arrivals", icon: Sparkles }, // Note: Actual filtering not implemented
   { href: "/#weekly-deals", label: "Flash Deals", icon: Zap },
   { href: "/contact", label: "Contact Us", icon: Phone },
   { href: "/chat-support", label: "Support", icon: MessageSquare },
 ];
 
-// Helper to get all slugs for static generation
 export function getAllCategorySlugs(navLinks: NavLink[]): string[][] {
   const slugs: string[][] = [];
   function generateSlugs(links: NavLink[], currentPath: string[] = []) {
@@ -210,5 +208,3 @@ export function getAllCategorySlugs(navLinks: NavLink[]): string[][] {
   generateSlugs(navLinks);
   return slugs;
 }
-// const allSlugs = getAllCategorySlugs(CATEGORY_NAV_LINKS);
-// console.log(JSON.stringify(allSlugs, null, 2));

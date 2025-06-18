@@ -31,7 +31,7 @@ export interface Product {
   stock?: number;
   isFeatured?: boolean;
   isWeeklyDeal?: boolean;
-  createdAt?: Timestamp; // Added for sorting recent products
+  createdAt?: Timestamp; 
 }
 
 
@@ -44,20 +44,20 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
     id: document.id, 
     name: data.name || 'Unnamed Product',
     description: data.description || '',
-    longDescription: data.longDescription || data.description || '', 
+    longDescription: data.longDescription || data.description || 'No detailed description available for this product.', 
     image: data.image || 'https://placehold.co/400x400.png',
     images: data.images && Array.isArray(data.images) && data.images.length > 0 
             ? data.images 
-            : (data.image ? [data.image] : ['https://placehold.co/100x100.png']),
+            : (data.image ? [data.image] : ['https://placehold.co/400x400.png']),
     dataAiHint: data.dataAiHint || 'product',
     offerPrice: typeof data.offerPrice === 'number' ? data.offerPrice : 0,
     originalPrice: typeof data.originalPrice === 'number' ? data.originalPrice : undefined,
     rating: data.rating !== undefined ? String(data.rating) : '0', 
     reviewsCount: typeof data.reviewsCount === 'number' ? data.reviewsCount : 0,
-    availability: data.availability || 'N/A',
+    availability: data.availability || 'Availability Unknown',
     category: data.category || 'Uncategorized',
     categorySlug: data.categorySlug || (data.category ? data.category.toLowerCase().replace(/\s+/g, '-') : 'uncategorized'),
-    subCategory: data.subCategory,
+    subCategory: data.subCategory || undefined,
     subCategorySlug: data.subCategorySlug || (data.subCategory ? data.subCategory.toLowerCase().replace(/\s+/g, '-') : undefined),
     brand: data.brand || 'Unbranded',
     stock: typeof data.stock === 'number' ? data.stock : 0,
@@ -76,7 +76,7 @@ export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
   }
   try {
     const productsRef = collection(db, 'products');
-    const q = query(productsRef, where('isFeatured', '==', true), limit(4));
+    const q = query(productsRef, where('isFeatured', '==', true), orderBy('createdAt', 'desc'), limit(8)); // Fetch more for variety
     const querySnapshot = await getDocs(q);
     
     const products = querySnapshot.docs.map(doc => {
@@ -87,8 +87,8 @@ export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
         description: productData.description,
         image: productData.image,
         dataAiHint: productData.dataAiHint,
-        fixedOfferPrice: productData.offerPrice,
-        fixedOriginalPrice: productData.originalPrice,
+        fixedOfferPrice: productData.offerPrice, // Ensured this is number
+        fixedOriginalPrice: productData.originalPrice, // Ensured this is number | undefined
       };
     });
     return products;
@@ -106,7 +106,7 @@ export async function getWeeklyDeals(): Promise<DealProduct[]> {
   }
   try {
     const productsRef = collection(db, 'products');
-    const q = query(productsRef, where('isWeeklyDeal', '==', true), limit(6));
+    const q = query(productsRef, where('isWeeklyDeal', '==', true), orderBy('createdAt', 'desc'), limit(8)); // Fetch more for variety
     const querySnapshot = await getDocs(q);
 
     const deals = querySnapshot.docs.map(doc => {
@@ -117,8 +117,8 @@ export async function getWeeklyDeals(): Promise<DealProduct[]> {
         description: productData.description,
         image: productData.image,
         dataAiHint: productData.dataAiHint,
-        fixedOfferPrice: productData.offerPrice, 
-        fixedOriginalPrice: productData.originalPrice || productData.offerPrice * 1.2, 
+        fixedOfferPrice: productData.offerPrice,  // Ensured this is number
+        fixedOriginalPrice: productData.originalPrice || productData.offerPrice * 1.2, // Ensured this is number
       };
     });
     return deals;
@@ -132,7 +132,7 @@ export interface ProductDetailsPageData extends Product {
 }
 
 export async function getProductDetailsById(productId: string): Promise<ProductDetailsPageData | null> {
-  console.log('[getProductDetailsById Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
+  console.log('[getProductDetailsById Call] Value of db at function call for ID', productId, ':', db === null ? 'null' : 'VALID INSTANCE');
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch product details for ID:", productId);
     return null;
@@ -148,7 +148,7 @@ export async function getProductDetailsById(productId: string): Promise<ProductD
     if (productSnap.exists()) {
       return mapDocToProduct(productSnap) as ProductDetailsPageData;
     } else {
-      console.log(`No such product document with ID: ${productId}`);
+      console.warn(`No such product document with ID: ${productId}`);
       return null;
     }
   } catch (error) {
@@ -198,7 +198,7 @@ export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>)
         const newProductData = {
             ...productData,
             offerPrice: Number(productData.offerPrice) || 0,
-            originalPrice: productData.originalPrice ? Number(productData.originalPrice) : undefined,
+            originalPrice: productData.originalPrice ? Number(productData.originalPrice) : undefined, // Keep undefined if not set
             stock: Number(productData.stock) || 0,
             reviewsCount: Number(productData.reviewsCount) || 0,
             rating: productData.rating ? String(productData.rating) : '0',
@@ -213,7 +213,7 @@ export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>)
 }
 
 export async function updateProduct(productId: string, productData: Partial<Omit<Product, 'id' | 'createdAt'>>): Promise<boolean> {
-    console.log('[updateProduct Call] Value of db at function call:', db === null ? 'null' : 'VALID INSTANCE');
+    console.log('[updateProduct Call] Value of db at function call for ID', productId, ':', db === null ? 'null' : 'VALID INSTANCE');
     if (!db) {
         console.error("Firestore 'db' object is not initialized. Cannot update product.");
         return false;
@@ -222,8 +222,11 @@ export async function updateProduct(productId: string, productData: Partial<Omit
         const productRef = doc(db, 'products', productId);
         const updateData: { [key: string]: any } = { ...productData };
         
+        // Ensure numeric fields are numbers, or null/undefined if intended to be unset
         if (productData.offerPrice !== undefined) updateData.offerPrice = Number(productData.offerPrice);
-        if (productData.originalPrice !== undefined) updateData.originalPrice = productData.originalPrice ? Number(productData.originalPrice) : null; // Allow unsetting
+        if (productData.originalPrice !== undefined) {
+          updateData.originalPrice = productData.originalPrice === null || productData.originalPrice === undefined ? null : Number(productData.originalPrice);
+        }
         if (productData.stock !== undefined) updateData.stock = Number(productData.stock);
         if (productData.reviewsCount !== undefined) updateData.reviewsCount = Number(productData.reviewsCount);
         if (productData.rating !== undefined) updateData.rating = String(productData.rating);
@@ -235,4 +238,3 @@ export async function updateProduct(productId: string, productData: Partial<Omit
         return false;
     }
 }
-

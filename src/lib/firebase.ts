@@ -8,9 +8,10 @@ import { getStorage, type FirebaseStorage } from 'firebase/storage';
 import { getAnalytics, type Analytics } from "firebase/analytics";
 
 // Log environment variables at the VERY START of the module execution
+// These logs are crucial for debugging environment variable loading issues.
 console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_API_KEY:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'Exists' : 'MISSING');
 console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:', process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN);
-console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_PROJECT_ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID); // This will show what value is being read
+console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_PROJECT_ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
 console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:', process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
 console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID:', process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID);
 console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_APP_ID:', process.env.NEXT_PUBLIC_FIREBASE_APP_ID);
@@ -34,42 +35,41 @@ let storage: FirebaseStorage | null = null;
 let analytics: Analytics | null = null;
 
 console.log('[Firebase Module Start] Initial value of db:', db === null ? 'null' : 'not null');
-console.log('[Firebase Module Start] Attempting to load Firebase Config from environment variables:', firebaseConfigValues);
+console.log('[Firebase Module Start] Attempting to load Firebase Config from environment variables. Parsed values:', firebaseConfigValues);
 
-// More specific check for projectId placeholder
-const projectIdIsInvalid = !firebaseConfigValues.projectId ||
-                           firebaseConfigValues.projectId.trim() === "" || // Check for empty string
-                           firebaseConfigValues.projectId.toUpperCase() === "YOUR_PROJECT_ID" || // Case-insensitive check for common placeholder
-                           firebaseConfigValues.projectId.toLowerCase().includes("your-project-id"); // Catch variations like "your-project-id-123" if that's how it's formatted in .env
+const projectIdIsMissingOrPlaceholder = !firebaseConfigValues.projectId ||
+                                      firebaseConfigValues.projectId.trim() === "" ||
+                                      firebaseConfigValues.projectId.toUpperCase().includes("YOUR_PROJECT_ID");
 
 if (
   !firebaseConfigValues.apiKey ||
   !firebaseConfigValues.authDomain ||
-  projectIdIsInvalid
+  projectIdIsMissingOrPlaceholder
 ) {
-  const apiKeyStatus = firebaseConfigValues.apiKey ? 'OK' : 'MISSING';
-  const authDomainStatus = firebaseConfigValues.authDomain ? 'OK' : 'MISSING';
+  const apiKeyStatus = firebaseConfigValues.apiKey ? 'OK' : 'MISSING or invalid';
+  const authDomainStatus = firebaseConfigValues.authDomain ? 'OK' : 'MISSING or invalid';
   
-  let projectIdStatus = 'OK';
+  let projectIdStatusDetail = 'OK';
   if (!firebaseConfigValues.projectId || firebaseConfigValues.projectId.trim() === "") {
-    projectIdStatus = 'MISSING (empty or not set)';
-  } else if (firebaseConfigValues.projectId.toUpperCase() === "YOUR_PROJECT_ID" || firebaseConfigValues.projectId.toLowerCase().includes("your-project-id")) {
-    projectIdStatus = `PLACEHOLDER ('${firebaseConfigValues.projectId}')`;
+    projectIdStatusDetail = 'MISSING (empty or not set in .env.local)';
+  } else if (firebaseConfigValues.projectId.toUpperCase().includes("YOUR_PROJECT_ID")) {
+    projectIdStatusDetail = `PLACEHOLDER ('${firebaseConfigValues.projectId}') - Please replace with your actual Firebase Project ID.`;
   } else {
-    // This case means projectId is set, but apiKey or authDomain might be missing.
-    // For the error message, if projectId is not the issue, show its actual value.
-    projectIdStatus = firebaseConfigValues.projectId; 
+    projectIdStatusDetail = firebaseConfigValues.projectId; 
   }
-  // If the critical error is due to projectIdIsInvalid, ensure projectIdStatus reflects that.
-  if (projectIdIsInvalid && (!firebaseConfigValues.projectId || firebaseConfigValues.projectId.trim() === "" || firebaseConfigValues.projectId.toUpperCase() === "YOUR_PROJECT_ID" || firebaseConfigValues.projectId.toLowerCase().includes("your-project-id"))) {
-     projectIdStatus = `PLACEHOLDER ('${firebaseConfigValues.projectId || 'NOT SET'}')`;
+  
+  if (projectIdIsMissingOrPlaceholder) {
+     projectIdStatusDetail = `MISSING or PLACEHOLDER ('${firebaseConfigValues.projectId || 'NOT SET'}') - Please set NEXT_PUBLIC_FIREBASE_PROJECT_ID in .env.local to your actual Firebase Project ID.`;
   }
 
 
   console.error(
-    `[Firebase] CRITICAL_CONFIG_MISSING: One or more critical Firebase configuration values (apiKey, authDomain, projectId) are missing or set to placeholder values. ` +
-    `Checked values -> apiKey: [ ${apiKeyStatus} ], authDomain: [ ${authDomainStatus} ], projectId: [ ${projectIdStatus} ]. ` +
-    `Firebase services will NOT be initialized. Please verify your .env.local file, ensure it contains the correct NEXT_PUBLIC_FIREBASE_PROJECT_ID and other Firebase variables, and that the Next.js server has been restarted.`
+    `[Firebase] CRITICAL_CONFIG_MISSING: Firebase initialization failed due to missing or placeholder configuration values. ` +
+    `Please check your .env.local file and ensure all NEXT_PUBLIC_FIREBASE_... variables, especially API_KEY, AUTH_DOMAIN, and PROJECT_ID, are correctly set with your project's actual credentials. ` +
+    `\n  - NEXT_PUBLIC_FIREBASE_API_KEY status: [ ${apiKeyStatus} ]` +
+    `\n  - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN status: [ ${authDomainStatus} ]` +
+    `\n  - NEXT_PUBLIC_FIREBASE_PROJECT_ID status: [ ${projectIdStatusDetail} ]` +
+    `\nAfter correcting .env.local, YOU MUST RESTART your Next.js development server.`
   );
   app = undefined;
   db = null;
@@ -78,7 +78,7 @@ if (
   analytics = null;
 } else {
   const firebaseConfig: FirebaseOptions = {
-    apiKey: firebaseConfigValues.apiKey!, // At this point, these are considered valid
+    apiKey: firebaseConfigValues.apiKey!, 
     authDomain: firebaseConfigValues.authDomain!,
     projectId: firebaseConfigValues.projectId!,
     storageBucket: firebaseConfigValues.storageBucket,
@@ -163,4 +163,3 @@ if (
 
 console.log('[Firebase Module End] Exporting db with value:', db === null ? 'null (Firestore NOT initialized or failed)' : 'VALID INSTANCE (Firestore SHOULD be working)');
 export { db, auth, storage, analytics };
-

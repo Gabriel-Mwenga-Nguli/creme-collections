@@ -36,10 +36,12 @@ export default function AdminOrdersPage() {
   }, []);
 
   const filteredOrders = orders.filter(order => {
+    const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
-        (order.orderId && order.orderId.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (order.userEmail && order.userEmail.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (order.shippingAddress.name && order.shippingAddress.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        (order.orderId && order.orderId.toLowerCase().includes(searchLower)) ||
+        (order.userEmail && order.userEmail.toLowerCase().includes(searchLower)) ||
+        (order.shippingAddress.name && order.shippingAddress.name.toLowerCase().includes(searchLower)) ||
+        (order.id && order.id.toLowerCase().includes(searchLower));
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -62,19 +64,19 @@ export default function AdminOrdersPage() {
         <CardHeader>
           <CardTitle>All Orders ({filteredOrders.length})</CardTitle>
           <CardDescription>List of all orders placed by customers.</CardDescription>
-          <div className="flex flex-col sm:flex-row gap-2 mt-2">
-            <div className="relative sm:flex-grow">
+          <div className="flex flex-col sm:flex-row gap-2 mt-2 items-center">
+            <div className="relative w-full sm:flex-grow">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                type="search"
-                placeholder="Search by Order ID, Email, Name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-full"
+                  type="search"
+                  placeholder="Search by Order ID, Email, Name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8 w-full"
                 />
             </div>
             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as OrderStatus | 'all')}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-auto sm:min-w-[180px]">
                     <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -98,7 +100,7 @@ export default function AdminOrdersPage() {
                   <TableRow>
                     <TableHead>Order ID</TableHead>
                     <TableHead>Customer</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead className="hidden md:table-cell">Date</TableHead>
                     <TableHead>Total (KES)</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -108,16 +110,16 @@ export default function AdminOrdersPage() {
                   {filteredOrders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell className="font-medium text-primary">#{order.orderId || order.id.substring(0,8)}</TableCell>
-                      <TableCell>
-                        <div>{order.shippingAddress.name || `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`}</div>
-                        <div className="text-xs text-muted-foreground">{order.userEmail || 'N/A'}</div>
+                      <TableCell className="max-w-[150px] sm:max-w-xs truncate">
+                        <div title={order.shippingAddress.name || `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`}>{order.shippingAddress.name || `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`}</div>
+                        <div className="text-xs text-muted-foreground" title={order.userEmail || 'N/A'}>{order.userEmail || 'N/A'}</div>
                       </TableCell>
-                      <TableCell>{format(order.orderDate.toDate(), 'dd MMM yyyy, HH:mm')}</TableCell>
+                      <TableCell className="hidden md:table-cell">{format(order.orderDate.toDate(), 'dd MMM yyyy, HH:mm')}</TableCell>
                       <TableCell>{order.totalAmount.toLocaleString()}</TableCell>
                       <TableCell>
                         <Badge 
                             variant={order.status === 'Delivered' ? 'default' : order.status === 'Cancelled' ? 'destructive' : 'secondary'}
-                            className="text-xs capitalize"
+                            className="text-xs capitalize whitespace-nowrap" // Ensure badge text doesn't wrap
                         >
                           {order.status}
                         </Badge>
