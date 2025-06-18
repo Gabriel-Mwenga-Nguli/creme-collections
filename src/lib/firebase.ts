@@ -1,5 +1,5 @@
 
-console.log('[Firebase Module Load] Attempting to load and initialize Firebase services...'); // Added log
+// console.log('[Firebase Module Load] Attempting to load and initialize Firebase services...'); // Removed this line
 
 import { initializeApp, getApps, getApp, type FirebaseApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore, type Firestore } from 'firebase/firestore';
@@ -137,4 +137,3 @@ if (
 
 console.log('[Firebase Module End] Exporting db with value:', db === null ? 'null (Firestore NOT initialized or failed)' : 'VALID INSTANCE (Firestore SHOULD be working)');
 export { db, auth, storage, analytics };
-
