@@ -1,10 +1,9 @@
 
 "use client";
 
-import React from 'react'; // Added this line
+import React, { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Link from 'next/link';
 import { Menu, X, Sun, Moon, Heart, ShoppingCart, User as UserIconLucide, ChevronDown, type LucideIcon, BarChart3 } from 'lucide-react';
-import { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -141,18 +140,19 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         {/* Top Row */}
-        <div className="flex h-16 items-center justify-between gap-2 md:gap-4">
+        <div className="flex h-16 items-center justify-between gap-1 sm:gap-2 md:gap-4">
           <div className="flex-shrink-0">
             <Logo />
           </div>
-          {!isMobile && (
-            <div className="flex-1 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-xl">
-              <AISearchBar />
-            </div>
-          )}
-          <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
+          
+          {/* AISearchBar - Always visible and flexible */}
+          <div className="flex-1 min-w-0 mx-1 sm:mx-2 md:mx-4">
+            <AISearchBar />
+          </div>
+
+          <div className="flex items-center gap-0.5 sm:gap-1">
             {isAdmin && !isMobile && (
-              <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3 mr-2 border-primary text-primary hover:bg-primary/10">
+              <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3 mr-1 md:mr-2 border-primary text-primary hover:bg-primary/10">
                 <Link href="/admin/dashboard">
                   <span>
                     <BarChart3 className="mr-1.5 h-3.5 w-3.5"/>Admin
@@ -170,7 +170,7 @@ export default function Header() {
                     </Button>
                 </>
             )}
-            <Button asChild variant="ghost" size="icon" aria-label="Wishlist" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:w-9">
+            <Button asChild variant="ghost" size="icon" aria-label="Wishlist" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
               <Link href="/wishlist">
                 <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
@@ -187,15 +187,8 @@ export default function Header() {
                 </>
               </Link>
             </Button>
-             {!isMobile && (
-                <Button asChild variant="ghost" size="icon" aria-label="User Account" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9" disabled={authLoading}>
-                  <Link href={accountLink}>
-                    <UserIconLucide className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </Link>
-                </Button>
-             )}
-            <ThemeToggle />
-            {isMobile && (
+             <ThemeToggle />
+            {isMobile ? (
               <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" aria-label="Open menu" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
@@ -213,11 +206,8 @@ export default function Header() {
                   </div>
 
                   <div className="p-4 flex-1 overflow-y-auto">
-                    <div className="mb-4">
-                      <AISearchBar />
-                    </div>
-
-                    <nav className="flex flex-col gap-1 mb-4">
+                    {/* AISearchBar removed from here as it's now in the main header */}
+                    <nav className="flex flex-col gap-1 mb-4 mt-4"> {/* Added mt-4 for spacing since search bar is removed */}
                        {MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger).map((link) => (
                          <SheetClose asChild key={link.label}>
                             <Link
@@ -314,6 +304,10 @@ export default function Header() {
                   </div>
                 </SheetContent>
               </Sheet>
+            ) : (
+              <Button asChild variant="ghost" size="icon" aria-label="User Account" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9" disabled={authLoading}>
+                <Link href={accountLink}><UserIconLucide className="h-4 w-4 sm:h-5 sm:w-5" /></Link>
+              </Button>
             )}
           </div>
         </div>
@@ -339,7 +333,7 @@ export default function Header() {
                     <ChevronDown className={cn("ml-1 h-4 w-4 transition-transform group-hover/megamenu:text-primary", isMegaMenuOpen ? 'rotate-180 text-slate-100' : 'text-muted-foreground')} />
                   </Button>
                   {(otherNavLinks.length > 0 || CATEGORY_NAV_LINKS.filter(c => MAIN_NAV_LINKS.some(m => m.href === c.href && !m.isMegaMenuTrigger)).length > 0) && (
-                    <div className="h-5 w-px bg-border/70 self-center mx-2 md:mx-3" />
+                    <div className="h-5 w-px bg-border/70 self-center mx-1 md:mx-2" />
                   )}
                 </div>
               )}
