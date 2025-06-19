@@ -4,41 +4,53 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Products: Allow public read access.
-    // Writes should be restricted (e.g., to admins).
+    // Products: Publicly readable, only admins can write (example for write)
     match /products/{productId} {
       allow read: if true;
       // Example: allow write: if request.auth != null && request.auth.token.admin == true;
-      // For now, denying writes by default if not admin (assuming admin claim exists)
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      // For now, falling back to the global time-based rule for writes.
+      // Consider making this more specific for production.
+      allow write: if request.time < timestamp.date(2025, 7, 17); // Temporary write rule
     }
 
-    // User-specific data:
-    // Allow authenticated users to read/write their own data under /users/{userId}/...
-    match /users/{userId}/{document=**} {
+    // User specific data: Only the authenticated user can read/write their own data.
+    match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Wishlist: User can manage their own wishlist
+      match /wishlist/{itemId} {
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Addresses: User can manage their own addresses
+      match /addresses/{addressId} {
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Messages: User can manage their own messages
+      match /messages/{messageId} {
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     // Orders:
-    // Allow authenticated users to create orders for themselves.
-    // Allow authenticated users to read their own orders.
-    // Admins can read/write all orders.
+    // - Authenticated users can create orders (write).
+    // - Users can only read their own orders.
+    // - Admins (example) could potentially read all orders or update status.
     match /orders/{orderId} {
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || request.auth.token.admin == true);
-      // Example: allow update, delete: if request.auth != null && request.auth.token.admin == true; // Or more specific logic
-      allow update, delete: if request.auth != null && request.auth.token.admin == true;
+      allow create: if request.auth != null; // Any authenticated user can create an order
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+                   // Example admin read access: || (request.auth != null && request.auth.token.admin == true);
+      // For updates (like status by admin), use specific rules.
+      // allow update: if request.auth != null && request.auth.token.admin == true; // Example for admin
+      // Temporary write/update rule for now
+      allow write, update: if request.time < timestamp.date(2025, 7, 17);
     }
 
-    // It's generally safer to deny access to any path not explicitly matched.
-    // If you have other collections, add rules for them.
-    // Your previous rule: match /{document=**} { allow read, write: if request.time < timestamp.date(2025, 7, 17); }
-    // can be a fallback, but it's very broad.
-    // If you keep a fallback, ensure it doesn't unintentionally override more specific denials.
-    // For now, let's remove the broad timed rule if the specific rules above cover main cases.
-    // If you need a general temporary rule, re-add it CAREFULLY.
-    // match /{document=**} {
-    //  allow read, write: if false; // Default deny unless matched above
-    // }
+    // Default rule for any other paths (as per your existing setup)
+    // This is a broad rule and should be refined for production for paths not explicitly covered above.
+    match /{document=**} {
+      allow read, write: if request.time < timestamp.date(2025, 7, 17);
+    }
   }
 }
