@@ -23,8 +23,8 @@ interface Slide {
 const slidesData: Slide[] = [
   {
     id: 1,
-    image: 'https://placehold.co/1600x800.png',
-    dataAiHint: 'fashion sale',
+    image: '/images/banners/slide1.png',
+    dataAiHint: 'fashion model',
     title: 'Summer Collection is Here!',
     subtitle: 'Discover vibrant styles and fresh looks for the season.',
     buttonText: 'Shop Now',
@@ -35,8 +35,8 @@ const slidesData: Slide[] = [
   },
   {
     id: 2,
-    image: 'https://placehold.co/1600x800.png',
-    dataAiHint: 'electronics gadgets',
+    image: '/images/banners/slide2.png',
+    dataAiHint: 'modern tech',
     title: 'Latest Tech Gadgets',
     subtitle: 'Upgrade your life with cutting-edge technology.',
     buttonText: 'Explore Tech',
@@ -47,8 +47,8 @@ const slidesData: Slide[] = [
   },
   {
     id: 3,
-    image: 'https://placehold.co/1600x800.png',
-    dataAiHint: 'home decor',
+    image: '/images/banners/slide3.png',
+    dataAiHint: 'cozy home',
     title: 'Transform Your Home',
     subtitle: 'Find elegant decor and furnishings for every room.',
     buttonText: 'Discover Home Goods',
@@ -59,8 +59,8 @@ const slidesData: Slide[] = [
   },
   {
     id: 4,
-    image: 'https://placehold.co/1600x800.png',
-    dataAiHint: 'special offer',
+    image: '/images/banners/promo1.png',
+    dataAiHint: 'store promotion',
     title: 'Exclusive Member Deals',
     subtitle: 'Sign up today and get access to special discounts.',
     buttonText: 'Join Now',
@@ -110,7 +110,7 @@ const HeroSlider = () => {
             fill 
             style={{ objectFit: 'cover' }} 
             priority={index === 0}
-            className="transition-transform duration-\[7000ms\] ease-linear group-hover:scale-105"
+            className="transition-transform duration-[7000ms] ease-linear group-hover:scale-105"
             data-ai-hint={slide.dataAiHint}
           />
           <div className={`absolute inset-0 ${slide.overlayColor || 'bg-black/30'}`} />

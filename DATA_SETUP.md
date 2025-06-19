@@ -3,6 +3,8 @@
 
 For your Creme Collections application to display products correctly, especially on category and subcategory pages, you need to have well-structured data in your Firestore database, specifically in a collection named `products`.
 
+Your project now uses local images from the `/public/images/` directory. When adding products, ensure your image paths reflect this structure (e.g., `/images/products/my-product-image.png`). For the sample data below, we'll use some generic images from `/public/images/banners/` to get you started.
+
 Follow these steps to add sample product data through the Firebase Console:
 
 ## 1. Access Firestore Database
@@ -31,10 +33,10 @@ You'll now add individual product documents to this `products` collection. For e
 *   `name` (Type: `string`) - Example: `Modern Smartwatch Series X`
 *   `description` (Type: `string`) - Example: `Sleek smartwatch with advanced health tracking and notifications.`
 *   `longDescription` (Type: `string`) - Example: `Full-featured Modern Smartwatch Series X with a vibrant AMOLED display, heart rate monitoring, SpO2 sensor, GPS, and up to 7 days battery life. Compatible with Android and iOS.`
-*   `image` (Type: `string`) - Example: `https://placehold.co/600x600/EFEFEF/AAAAAA.png`
+*   `image` (Type: `string`) - Example: `/images/banners/electronics.png`
 *   `images` (Type: `array`)
-    *   `0` (Type: `string`) - `https://placehold.co/600x600/EFEFEF/AAAAAA.png`
-    *   `1` (Type: `string`) - `https://placehold.co/600x600/CCCCCC/333333.png`
+    *   `0` (Type: `string`) - `/images/banners/electronics.png`
+    *   `1` (Type: `string`) - `/images/banners/promo1.png`
 *   `dataAiHint` (Type: `string`) - Example: `smartwatch technology`
 *   `offerPrice` (Type: `number`) - Example: `12999`
 *   `originalPrice` (Type: `number`) - Example: `15999`
@@ -56,10 +58,10 @@ You'll now add individual product documents to this `products` collection. For e
 *   `name` (Type: `string`) - Example: `Classic Men's Polo Shirt`
 *   `description` (Type: `string`) - Example: `Comfortable and stylish polo shirt for everyday wear.`
 *   `longDescription` (Type: `string`) - Example: `Made from 100% premium cotton, this classic fit polo shirt offers both comfort and durability. Features a two-button placket and ribbed collar and cuffs. Available in various colors.`
-*   `image` (Type: `string`) - Example: `https://placehold.co/600x600/A0D2DB/3D405B.png`
+*   `image` (Type: `string`) - Example: `/images/banners/fashion.png`
 *   `images` (Type: `array`)
-    *   `0` (Type: `string`) - `https://placehold.co/600x600/A0D2DB/3D405B.png`
-    *   `1` (Type: `string`) - `https://placehold.co/600x600/BEE7E8/50514F.png`
+    *   `0` (Type: `string`) - `/images/banners/fashion.png`
+    *   `1` (Type: `string`) - `/images/promos/flash-sale.png`
 *   `dataAiHint` (Type: `string`) - Example: `men shirt`
 *   `offerPrice` (Type: `number`) - Example: `2499`
 *   `originalPrice` (Type: `number`) - Example: `3200`
@@ -81,7 +83,7 @@ You'll now add individual product documents to this `products` collection. For e
 *   `name` (Type: `string`) - Example: `Stainless Steel Cookware Set`
 *   `description` (Type: `string`) - Example: `Durable 10-piece cookware set for all your culinary needs.`
 *   `longDescription` (Type: `string`) - Example: `This 10-piece stainless steel cookware set includes saucepans, frying pans, and stockpot, all with ergonomic handles and tempered glass lids. Suitable for all stovetops, including induction.`
-*   `image` (Type: `string`) - Example: `https://placehold.co/600x600/F0EFEB/4A4A4A.png`
+*   `image` (Type: `string`) - Example: `/images/banners/home.png`
 *   `dataAiHint` (Type: `string`) - Example: `cookware kitchen`
 *   `offerPrice` (Type: `number`) - Example: `7999`
 *   `originalPrice` (Type: `number`) - Example: `9500`
@@ -113,7 +115,7 @@ You'll now add individual product documents to this `products` collection. For e
     *   Example: If a subcategory link is `/products/category/fashion/men-clothing`, the `categorySlug` must be `fashion` and `subCategorySlug` must be `men-clothing`.
 *   **`isFeatured`**: Set to `true` for products you want in the "Featured Products" section on the homepage.
 *   **`isWeeklyDeal`**: Set to `true` for products you want in the "Flash Deals of the Week!" slider.
-*   **Images**: Use publicly accessible URLs for images. `https://placehold.co` is good for placeholders.
+*   **Images**: Use local paths like `/images/products/your-image-name.png`. Ensure these images exist in your `/public/images/products/` directory. For the sample data, we've used generic banner images.
 *   **`createdAt`**: This field (type `timestamp`) is useful for sorting new arrivals. You can set it to the current server timestamp when adding documents.
 
 ## 4. Verify in Your App

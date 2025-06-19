@@ -126,7 +126,7 @@ export default function OrderDetailPage() {
               {order.items.map((item, index) => (
                 <li key={item.productId + index} className="flex flex-col sm:flex-row gap-3 md:gap-4 p-3 md:p-4 border rounded-md bg-muted/20">
                   <Image 
-                    src={item.image || 'https://placehold.co/80x80.png'} 
+                    src={item.image || '/images/banners/electronics.png'} 
                     alt={item.name} 
                     width={70} 
                     height={70} 

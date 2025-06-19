@@ -26,8 +26,8 @@ export default function AdminAddProductPage() {
     name: '',
     description: '',
     longDescription: '',
-    image: 'https://placehold.co/600x600.png', // Default placeholder
-    images: ['https://placehold.co/600x600/EFEFEF/AAAAAA.png', 'https://placehold.co/600x600/CCCCCC/333333.png'], // Default placeholders
+    image: '/images/banners/electronics.png', // Default local placeholder
+    images: ['/images/banners/electronics.png', '/images/banners/fashion.png'], // Default local placeholders
     dataAiHint: '',
     offerPrice: 0,
     originalPrice: undefined,
@@ -148,12 +148,10 @@ export default function AdminAddProductPage() {
             </Card>
             
             <Card>
-                <CardHeader><CardTitle>Images</CardTitle><CardDescription>Enter URLs for product images.</CardDescription></CardHeader>
+                <CardHeader><CardTitle>Images</CardTitle><CardDescription>Enter URLs for product images. Use paths like /images/products/your-image.png</CardDescription></CardHeader>
                 <CardContent className="space-y-3">
-                    <div><Label htmlFor="image">Main Image URL</Label><Input id="image" name="image" value={formData.image} onChange={handleInputChange} placeholder="https://placehold.co/600x600.png" required /></div>
-                    {/* For simplicity, handling multiple images as comma-separated string for now */}
-                    <div><Label htmlFor="images">Additional Image URLs (comma-separated)</Label><Textarea id="images_temp" name="images_temp" value={formData.images?.join(', ') || ''} onChange={(e) => setFormData(prev => ({...prev, images: e.target.value.split(',').map(url => url.trim()).filter(url => url)}))} placeholder="url1, url2, url3" rows={2} /></div>
-                    {/* Basic image preview could be added here */}
+                    <div><Label htmlFor="image">Main Image URL</Label><Input id="image" name="image" value={formData.image} onChange={handleInputChange} placeholder="/images/products/main-image.png" required /></div>
+                    <div><Label htmlFor="images">Additional Image URLs (comma-separated)</Label><Textarea id="images_temp" name="images_temp" value={formData.images?.join(', ') || ''} onChange={(e) => setFormData(prev => ({...prev, images: e.target.value.split(',').map(url => url.trim()).filter(url => url)}))} placeholder="/images/products/image1.png, /images/products/image2.png" rows={2} /></div>
                 </CardContent>
             </Card>
 

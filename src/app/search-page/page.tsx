@@ -118,7 +118,7 @@ function SearchPageComponent() {
                     id={index + 1000 + Math.floor(Math.random()*1000)} 
                     name={productName}
                     description={`AI suggested product based on your search for "${searchTerm}".`}
-                    image="https://placehold.co/400x400.png" // Placeholder image
+                    image="/images/banners/electronics.png" // Placeholder image
                     dataAiHint="search result" // Generic hint
                     // Prices would ideally come from the flow or a subsequent lookup
                   />

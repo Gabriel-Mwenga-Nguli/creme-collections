@@ -40,12 +40,12 @@ export default function HelpSection() {
           </div>
           <div className="hidden md:flex justify-center items-center">
             <Image
-              src="https://placehold.co/400x450.png"
+              src="/images/banners/beauty.png"
               alt="Customer Support"
               width={300}
               height={338}
               className="rounded-lg object-cover shadow-md"
-              data-ai-hint="customer service representative"
+              data-ai-hint="customer support helpdesk"
             />
           </div>
         </div>

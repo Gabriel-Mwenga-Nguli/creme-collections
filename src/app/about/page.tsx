@@ -20,12 +20,12 @@ export default function AboutPage() {
 
           <div className="my-12 rounded-lg overflow-hidden shadow-lg">
             <Image 
-              src="https://placehold.co/800x400.png" 
+              src="/images/banners/promo2.png" 
               alt="Our Team or Company Vision" 
               width={800} 
               height={400} 
               className="w-full object-cover"
-              data-ai-hint="team collaboration" 
+              data-ai-hint="team vision" 
             />
           </div>
 

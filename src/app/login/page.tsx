@@ -127,8 +127,8 @@ export default function LoginPage() {
   return (
     <div 
       className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-10rem)] bg-cover bg-center"
-      style={{ backgroundImage: "url('https://placehold.co/1920x1080.png')" }}
-      data-ai-hint="abstract pattern"
+      style={{ backgroundImage: "url('/images/forms/login-banner.png')" }}
+      data-ai-hint="secure access"
     >
       <Card className="w-full max-w-md shadow-xl bg-card/90 backdrop-blur-sm mx-4">
         <CardHeader className="text-center px-4 py-6 sm:px-6">

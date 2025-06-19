@@ -47,10 +47,10 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
     name: data.name || 'Unnamed Product',
     description: data.description || '',
     longDescription: data.longDescription || data.description || 'No detailed description available for this product.',
-    image: data.image || 'https://placehold.co/400x400.png',
+    image: data.image || '/images/banners/electronics.png', // Updated fallback
     images: data.images && Array.isArray(data.images) && data.images.length > 0
             ? data.images
-            : (data.image ? [data.image] : ['https://placehold.co/400x400.png']),
+            : (data.image ? [data.image] : ['/images/banners/electronics.png']), // Updated fallback
     dataAiHint: data.dataAiHint || 'product',
     offerPrice: typeof data.offerPrice === 'number' ? data.offerPrice : 0,
     originalPrice: typeof data.originalPrice === 'number' ? data.originalPrice : undefined,

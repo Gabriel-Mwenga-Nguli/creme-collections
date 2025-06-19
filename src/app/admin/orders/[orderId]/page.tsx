@@ -118,11 +118,12 @@ export default function AdminOrderDetailPage() {
                     {order.items.map((item, index) => (
                         <li key={item.productId + index} className="flex gap-3 py-2 border-b last:border-b-0">
                         <Image 
-                            src={item.image || 'https://placehold.co/80x80.png'} 
+                            src={item.image || '/images/banners/electronics.png'} 
                             alt={item.name} 
                             width={60} 
                             height={60} 
                             className="rounded-md object-cover border"
+                            data-ai-hint={item.name.split(' ').slice(0,2).join(' ')}
                         />
                         <div className="flex-grow">
                             <Link href={`/products/item/${item.productId}`} target="_blank" className="font-medium text-sm text-foreground hover:text-primary">{item.name}</Link>

@@ -11,14 +11,14 @@ import { getFeaturedProducts, getWeeklyDeals } from '@/services/productService';
 import { Input } from '@/components/ui/input'; 
 
 const categoryHighlights = [
-  { name: "Electronics", image: "https://placehold.co/400x300.png", dataAiHint: "gadgets technology", href: "/products/category/electronics" },
-  { name: "Fashion", image: "https://placehold.co/400x300.png", dataAiHint: "apparel clothing", href: "/products/category/fashion" },
-  { name: "Home Goods", image: "https://placehold.co/400x300.png", dataAiHint: "furniture decor", href: "/products/category/home-living" },
+  { name: "Electronics", image: "/images/banners/electronics.png", dataAiHint: "latest gadgets", href: "/products/category/electronics" },
+  { name: "Fashion", image: "/images/banners/fashion.png", dataAiHint: "stylish apparel", href: "/products/category/fashion" },
+  { name: "Home Goods", image: "/images/banners/home.png", dataAiHint: "home decor", href: "/products/category/home-living" },
 ];
 
 const promotionalBanners = [
-  { title: "Weekend Sale Extravaganza", description: "Up to 50% off on selected items! Don't miss out.", image: "https://placehold.co/600x400.png", dataAiHint: "sale discount", bgColor: "bg-primary/10", textColor: "text-primary-foreground", href: "/products?filter=sale" },
-  { title: "Fresh New Arrivals", description: "Check out the latest trends and must-have products.", image: "https://placehold.co/600x400.png", dataAiHint: "new products", bgColor: "bg-accent/10", textColor: "text-accent-foreground", href: "/products?filter=new" },
+  { title: "Weekend Sale Extravaganza", description: "Up to 50% off on selected items! Don't miss out.", image: "/images/promos/flash-sale.png", dataAiHint: "sale offer", bgColor: "bg-primary/10", textColor: "text-primary-foreground", href: "/products?filter=sale" },
+  { title: "Fresh New Arrivals", description: "Check out the latest trends and must-have products.", image: "/images/promos/back-to-school.png", dataAiHint: "new products", bgColor: "bg-accent/10", textColor: "text-accent-foreground", href: "/products?filter=new" },
 ];
 
 const whyChooseUsFeatures = [

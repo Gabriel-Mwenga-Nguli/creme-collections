@@ -38,7 +38,7 @@ export default function AdminCustomersPage() {
         // For now, using placeholder data as getAllUsersForAdmin is complex
         const placeholderCustomers: AdminUserView[] = [
           { id: 'user1', email: 'customer1@example.com', displayName: 'Alice Smith', photoURL: null, creationTime: new Date(2023, 0, 15).toISOString(), lastSignInTime: new Date(2024, 4, 1).toISOString(), orderCount: 5, totalSpent: 12500 },
-          { id: 'user2', email: 'customer2@example.com', displayName: 'Bob Johnson', photoURL: 'https://placehold.co/40x40.png', creationTime: new Date(2023, 2, 20).toISOString(), lastSignInTime: new Date(2024, 3, 28).toISOString(), orderCount: 2, totalSpent: 4800 },
+          { id: 'user2', email: 'customer2@example.com', displayName: 'Bob Johnson', photoURL: '/images/banners/fashion.png', creationTime: new Date(2023, 2, 20).toISOString(), lastSignInTime: new Date(2024, 3, 28).toISOString(), orderCount: 2, totalSpent: 4800 },
           { id: 'user3', email: 'customer3@example.com', displayName: 'Carol Williams', photoURL: null, creationTime: new Date(2024, 0, 5).toISOString(), lastSignInTime: new Date(2024, 4, 3).toISOString(), orderCount: 1, totalSpent: 1500 },
         ];
         setCustomers(placeholderCustomers);
@@ -116,7 +116,7 @@ export default function AdminCustomersPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
-                                <AvatarImage src={customer.photoURL || undefined} alt={customer.displayName || 'Customer'} />
+                                <AvatarImage src={customer.photoURL || undefined} alt={customer.displayName || 'Customer'} data-ai-hint="profile avatar" />
                                 <AvatarFallback>{getInitials(customer.displayName)}</AvatarFallback>
                             </Avatar>
                             <span className="font-medium">{customer.displayName || 'N/A'}</span>
