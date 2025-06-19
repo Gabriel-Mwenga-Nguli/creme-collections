@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { SITE_NAME, FOOTER_COMPANY_LINKS, FOOTER_SUPPORT_LINKS } from '@/lib/constants';
 import Logo from '@/components/logo'; 
-import { MapPin, Mail, MessageSquare, Clock } from 'lucide-react';
+import { MapPin, Mail, MessageSquare, Clock, Facebook, Instagram, Twitter, Linkedin, Youtube, Power } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -10,13 +10,15 @@ export default function Footer() {
       <div className="container mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           
-          {/* Column 1: Logo & Location */}
-          <div className="lg:col-span-1 lg:border-r lg:border-slate-700 lg:pr-8">
-            <Logo />
-            <p className="mt-4 text-sm text-slate-400">
-              All you want, all in one place. Shop smarter with Creme Collections — Kenya's most trusted online marketplace.
-            </p>
-            <div className="mt-6">
+          {/* Column 1: Logo, Location & Social */}
+          <div className="lg:col-span-1 lg:border-r lg:border-slate-700 lg:pr-8 space-y-6">
+            <div>
+              <Logo />
+              <p className="mt-4 text-sm text-slate-400">
+                All you want, all in one place. Shop smarter with Creme Collections — Kenya's most trusted online marketplace.
+              </p>
+            </div>
+            <div>
               <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase mb-2 flex items-center">
                 <MapPin className="w-4 h-4 mr-2 text-primary" /> Shop Location
               </h3>
@@ -24,6 +26,26 @@ export default function Footer() {
                 Kenya<br />
                 Taveta Rd, Nairobi.
               </address>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-100 tracking-wider uppercase mb-3">Connect With Us</h3>
+              <div className="flex space-x-4">
+                <a href="https://facebook.com/cremecollections" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-slate-400 hover:text-primary transition-colors">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="https://instagram.com/cremecollections" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-slate-400 hover:text-primary transition-colors">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="https://twitter.com/cremecollections" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-slate-400 hover:text-primary transition-colors">
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a href="https://linkedin.com/company/cremecollections" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-slate-400 hover:text-primary transition-colors">
+                  <Linkedin className="w-5 h-5" />
+                </a>
+                <a href="https://youtube.com/cremecollections" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-slate-400 hover:text-primary transition-colors">
+                  <Youtube className="w-5 h-5" />
+                </a>
+              </div>
             </div>
           </div>
 
@@ -118,9 +140,12 @@ export default function Footer() {
           </div>
 
         </div>
-        <div className="mt-12 border-t border-slate-700 pt-8">
-          <p className="text-sm text-slate-400 text-center">
+        <div className="mt-12 border-t border-slate-700 pt-8 text-center">
+          <p className="text-sm text-slate-400">
             &copy; {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
+          </p>
+          <p className="text-xs text-slate-500 mt-1 flex items-center justify-center">
+            <Power className="w-3 h-3 mr-1" /> Powered by Google Cloud
           </p>
         </div>
       </div>
