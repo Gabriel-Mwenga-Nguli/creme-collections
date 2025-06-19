@@ -89,19 +89,21 @@ export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
         description: productData.description,
         image: productData.image,
         dataAiHint: productData.dataAiHint,
-        fixedOfferPrice: productData.offerPrice, // Already a number from mapDocToProduct
-        fixedOriginalPrice: productData.originalPrice, // Already a number or undefined
+        fixedOfferPrice: productData.offerPrice,
+        fixedOriginalPrice: productData.originalPrice,
       };
     });
     console.log(`[getFeaturedProducts Call] Successfully fetched ${products.length} featured products.`);
     return products;
   } catch (error: any) {
     console.error("[getFeaturedProducts Call] Error fetching featured products: ", error.message);
-    if (error.code === 'failed-precondition' && error.message.includes('index')) {
+    if (error.code === 'permission-denied') {
+      console.error(`[getFeaturedProducts Call] FIREBASE PERMISSION DENIED. Please check your Firestore security rules to allow read access to the 'products' collection. Path: /products. Example rule: "allow read: if true;"`);
+    } else if (error.code === 'failed-precondition' && error.message.includes('index')) {
       console.error("[getFeaturedProducts Call] Firestore query requires an index. Please create it using the link provided by Firebase in the error details, or check your Firestore console.");
       console.error("[getFeaturedProducts Call] Original Firebase error message for index:", error.message);
     }
-    return []; // Return empty array on error to prevent page crash
+    return [];
   }
 }
 
@@ -125,18 +127,20 @@ export async function getWeeklyDeals(): Promise<DealProduct[]> {
         image: productData.image,
         dataAiHint: productData.dataAiHint,
         fixedOfferPrice: productData.offerPrice,
-        fixedOriginalPrice: productData.originalPrice || productData.offerPrice * 1.2, // Fallback for original price
+        fixedOriginalPrice: productData.originalPrice || productData.offerPrice * 1.2,
       };
     });
     console.log(`[getWeeklyDeals Call] Successfully fetched ${deals.length} weekly deals.`);
     return deals;
   } catch (error: any) {
     console.error("[getWeeklyDeals Call] Error fetching weekly deals: ", error.message);
-     if (error.code === 'failed-precondition' && error.message.includes('index')) {
+    if (error.code === 'permission-denied') {
+      console.error(`[getWeeklyDeals Call] FIREBASE PERMISSION DENIED. Please check your Firestore security rules to allow read access to the 'products' collection. Path: /products. Example rule: "allow read: if true;"`);
+    } else if (error.code === 'failed-precondition' && error.message.includes('index')) {
       console.error("[getWeeklyDeals Call] Firestore query requires an index. Please create it using the link provided by Firebase in the error details, or check your Firestore console.");
       console.error("[getWeeklyDeals Call] Original Firebase error message for index:", error.message);
     }
-    return []; // Return empty array on error
+    return [];
   }
 }
 
@@ -177,10 +181,10 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
     console.error("Firestore 'db' object is not initialized. Cannot fetch products.");
     return [];
   }
+  let queryDescription = "all products";
   try {
     const productsRef = collection(db, 'products');
     let q;
-    let queryDescription = "all products";
 
     if (categorySlugParam && subCategorySlugParam) {
        queryDescription = `products with categorySlug='${categorySlugParam}' AND subCategorySlug='${subCategorySlugParam}'`;
@@ -198,12 +202,14 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
 
     const products = querySnapshot.docs.map(docSn => mapDocToProduct(docSn));
     if (products.length === 0) {
-        console.warn(`[getAllProducts Call] No products found for query: ${queryDescription}. Check Firestore data, slugs, and ensure necessary Firestore indexes are created.`);
+        console.warn(`[getAllProducts Call] No products found for query: ${queryDescription}. Check Firestore data, slugs, and ensure necessary Firestore indexes are created if this is unexpected.`);
     }
     return products;
   } catch (error: any) {
     console.error(`[getAllProducts Call] Error fetching products for query "${queryDescription}": `, error.message);
-    if (error.code === 'failed-precondition' && error.message.includes('index')) {
+    if (error.code === 'permission-denied') {
+      console.error(`[getAllProducts Call] FIREBASE PERMISSION DENIED. Please check your Firestore security rules to allow read access to the 'products' collection. Path: /products. Example rule: "allow read: if true;"`);
+    } else if (error.code === 'failed-precondition' && error.message.includes('index')) {
       console.error(`[getAllProducts Call] Firestore query requires an index. Link from Firebase: ${error.message.substring(error.message.indexOf('https://'))}`);
       console.error("[getAllProducts Call] Please create the required composite index in your Firebase console.");
     }
