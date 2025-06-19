@@ -1,16 +1,16 @@
 
 "use client"; 
 
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { auth } from '@/lib/firebase'; 
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
@@ -26,7 +26,22 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (auth) {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const redirectUrl = searchParams.get('redirect') || '/profile';
+          router.replace(redirectUrl);
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [router, searchParams]);
+
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -48,11 +63,12 @@ export default function LoginPage() {
         title: 'Login Successful!',
         description: 'Welcome back to Creme Collections!',
       });
-      router.push('/profile'); 
+      const redirectUrl = searchParams.get('redirect') || '/profile';
+      router.push(redirectUrl); 
     } catch (error: any) {
       let errorMessage = 'Failed to login. Please check your credentials and try again.';
       
-      if (error.code === 'auth/invalid-credential') {
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         errorMessage = 'Invalid email or password. Please try again.';
       } else if (error.code === 'auth/invalid-email') {
         errorMessage = 'The email address you entered is not valid. Please check and try again.';
@@ -88,7 +104,8 @@ export default function LoginPage() {
         title: 'Login Successful!',
         description: 'Welcome to Creme Collections!',
       });
-      router.push('/profile'); 
+      const redirectUrl = searchParams.get('redirect') || '/profile';
+      router.push(redirectUrl); 
     } catch (error: any) {
       console.error("Google login error:", error);
       let errorMessage = 'Failed to login with Google. Please try again.';

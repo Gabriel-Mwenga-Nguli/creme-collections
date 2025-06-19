@@ -4,54 +4,53 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Products: Publicly readable, admin-only write/delete (adjust admin check as needed)
+    // Products: Public read is essential for e-commerce.
+    // Write access should be restricted to admin users in production.
     match /products/{productId} {
       allow read: if true;
-      // Example: Allow write/delete if the user is an admin (you'd need to set custom claims for this)
-      // allow write, delete: if request.auth != null && request.auth.token.admin == true;
-      // For now, fallback to your timed rule for writes, but this should be secured.
-      allow write, delete: if request.time < timestamp.date(2025, 7, 17); // Temporary, from your old rules
+      // Example for admin-only write, adjust as per your admin setup:
+      // allow write: if request.auth != null && request.auth.token.admin == true;
+      // Using time-based rule for now as a fallback from your previous config:
+      allow write: if request.time < timestamp.date(2025, 7, 17);
     }
 
-    // Users: Users can read/write their own data.
-    // User's public profile info might be readable by others if you choose.
+    // User profiles:
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      // To allow admins to read/write user data (e.g., for support)
-      // allow read, write: if request.auth != null && (request.auth.uid == userId || request.auth.token.admin == true);
-    }
-
-    // User subcollections (wishlist, addresses, messages)
-    match /users/{userId}/wishlist/{itemId} {
-      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
-    }
-    match /users/{userId}/addresses/{addressId} {
-      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
-    }
-    match /users/{userId}/messages/{messageId} {
-      // Users can create messages (outgoing). Only user can read their messages.
-      // Support/admin might need broader read access based on roles.
+      // Allow a user to create their own document after signing up
       allow create: if request.auth != null && request.auth.uid == userId;
-      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
-      // Example for admin to read messages:
-      // allow read: if request.auth != null && (request.auth.uid == userId || request.auth.token.admin == true);
+      // Allow an authenticated user to read and update their own profile
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      // Deletion might be restricted or handled by admin logic
+      // allow delete: if request.auth != null && (request.auth.uid == userId || request.auth.token.admin == true);
     }
 
-    // Orders: Users can create their own orders and read their own orders.
-    // Admins can read/update all orders.
+    // User subcollections (wishlist, addresses, messages, etc.):
+    // User can manage their own items within these subcollections.
+    match /users/{userId}/{subcollection}/{documentId} {
+      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Orders:
     match /orders/{orderId} {
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || request.auth.token.admin == true);
-      // For now, fallback to your timed rule for updates/deletes by users, but this should be secured.
-      // Admins should be the ones primarily updating status.
-      allow update, delete: if request.auth != null && (request.auth.uid == resource.data.userId && request.time < timestamp.date(2025, 7, 17) || request.auth.token.admin == true) ;
+      // Authenticated users can create orders for themselves.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Users can read their own orders. Admins/Shop Managers might need broader read access.
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      //   || (request.auth.token.admin == true || request.auth.token.shopManager == true) // Example for admin/manager read
+      
+      // Updating/Deleting orders should be highly restricted, typically admin/manager only,
+      // or for specific status updates by users (e.g., cancelling a pending order).
+      // Using time-based rule for now as a fallback:
+      allow update, delete: if request.time < timestamp.date(2025, 7, 17);
+      // Example for admin-only update/delete:
+      // allow update, delete: if request.auth != null && request.auth.token.admin == true;
     }
 
-    // Fallback for any other paths - currently uses your time-based rule.
-    // It's better to explicitly define rules for all collections.
-    // If this rule is too broad, narrow it down or remove if all paths are covered above.
+    // Generic fallback - this is very broad.
+    // Consider removing or making more restrictive if all specific paths are covered.
+    // If kept, ensure it's what you intend for any unlisted paths.
     match /{document=**} {
-       allow read, write: if request.time < timestamp.date(2025, 7, 17);
+      allow read, write: if request.time < timestamp.date(2025, 7, 17);
     }
   }
 }
