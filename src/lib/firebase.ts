@@ -6,6 +6,7 @@ import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
 import { getAnalytics, type Analytics } from "firebase/analytics";
+import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from 'firebase/app-check';
 
 // Log environment variables at the VERY START of the module execution
 // These logs are crucial for debugging environment variable loading issues.
@@ -16,6 +17,7 @@ console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:', pro
 console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID:', process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID);
 console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_APP_ID:', process.env.NEXT_PUBLIC_FIREBASE_APP_ID);
 console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID:', process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID);
+console.log('[Firebase ENV Check] Raw NEXT_PUBLIC_RECAPTCHA_SITE_KEY:', process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ? 'Exists' : 'MISSING for App Check');
 
 
 const firebaseConfigValues = {
@@ -33,6 +35,7 @@ let db: Firestore | null = null;
 let auth: Auth | null = null;
 let storage: FirebaseStorage | null = null;
 let analytics: Analytics | null = null;
+let appCheck: AppCheck | null = null;
 
 console.log('[Firebase Module Start] Initial value of db:', db === null ? 'null' : 'not null');
 console.log('[Firebase Module Start] Attempting to load Firebase Config from environment variables. Parsed values:', firebaseConfigValues);
@@ -76,6 +79,7 @@ if (
   auth = null;
   storage = null;
   analytics = null;
+  appCheck = null;
 } else {
   const firebaseConfig: FirebaseOptions = {
     apiKey: firebaseConfigValues.apiKey!, 
@@ -148,18 +152,38 @@ if (
         console.error('[Firebase] FIREBASE_ANALYTICS_INIT_ERROR: Error initializing Firebase Analytics:', analyticsError);
         analytics = null;
       }
+      // Initialize App Check on the client-side
+      try {
+        console.log('[Firebase] Attempting to initialize Firebase App Check (client-side)...');
+        if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+          appCheck = initializeAppCheck(app, {
+            provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY),
+            isTokenAutoRefreshEnabled: true 
+          });
+          console.log('[Firebase] Firebase App Check initialized successfully.');
+        } else {
+          console.warn('[Firebase] APP_CHECK_WARN: NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not set. App Check will not be initialized. Login and other Firebase operations requiring App Check may fail if App Check is enforced in the Firebase console.');
+          appCheck = null;
+        }
+      } catch (appCheckError) {
+        console.error('[Firebase] FIREBASE_APP_CHECK_INIT_ERROR: Error initializing Firebase App Check:', appCheckError);
+        appCheck = null;
+      }
+
     } else {
-      console.log('[Firebase] Firebase Analytics not initialized (server-side).');
+      console.log('[Firebase] Firebase Analytics & App Check not initialized (server-side).');
     }
 
   } else {
-     console.error("[Firebase] FIREBASE_APP_UNAVAILABLE: Firebase app object is not available (likely due to missing or invalid config, or a prior initialization error). Firestore, Auth, Storage, and Analytics will not be available.");
+     console.error("[Firebase] FIREBASE_APP_UNAVAILABLE: Firebase app object is not available (likely due to missing or invalid config, or a prior initialization error). Firebase services will not be available.");
      db = null;
      auth = null;
      storage = null;
      analytics = null;
+     appCheck = null;
   }
 }
 
 console.log('[Firebase Module End] Exporting db with value:', db === null ? 'null (Firestore NOT initialized or failed)' : 'VALID INSTANCE (Firestore SHOULD be working)');
-export { db, auth, storage, analytics };
+export { db, auth, storage, analytics, appCheck };
+
