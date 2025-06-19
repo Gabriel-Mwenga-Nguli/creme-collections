@@ -2,7 +2,7 @@
 # Firestore Data Setup for Creme Collections
 
 For your Creme Collections application to display products correctly, especially on category and subcategory pages, you need to have well-structured data in your Firestore database, specifically in a collection named `products`.
-
+all the reason to take th
 Your project now uses local images from the `/public/images/` directory. When adding products, ensure your image paths reflect this structure (e.g., `/images/products/my-product-image.png`). For the sample data below, we'll use some generic images from `/public/images/banners/` to get you started.
 
 Follow these steps to add sample product data through the Firebase Console:
