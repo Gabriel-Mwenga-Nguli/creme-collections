@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A comprehensive AI-powered chat support agent.
@@ -16,6 +17,8 @@ const ComprehensiveChatSupportInputSchema = z.object({
     role: z.enum(['user', 'model']),
     content: z.string(),
   })).optional().describe('The history of the conversation so far, excluding the current user message.'),
+  isLoggedIn: z.boolean().optional().describe('Whether the user is currently logged in.'),
+  userName: z.string().optional().describe('The name of the user, if logged in.'),
 });
 export type ComprehensiveChatSupportInput = z.infer<typeof ComprehensiveChatSupportInputSchema>;
 
@@ -38,6 +41,7 @@ You must assist users with inquiries about products (general types, categories, 
 Always be polite, strive to be understanding, and provide clear, concise, and accurate information. Use Kenyan shillings (KES) when discussing prices if applicable.
 
 Current Date: {{currentDate}}
+User Logged In: {{#if isLoggedIn}}Yes (Name: {{userName}}){{else}}No{{/if}}
 
 Store Policies Summary:
 - Shipping: Nairobi & Environs (1-2 business days), Other Major Towns (2-4 days), Remote Areas (3-5 days). Shipping cost is typically KES 500, but free for orders over KES 10,000. This is calculated at checkout.
@@ -48,14 +52,19 @@ Store Policies Summary:
 - Operating Hours (EAT): Mon – Fri: 9am – 5pm; Saturday: 9am – 12pm. Closed on Sundays & Public Holidays.
 
 Conversation Guidelines & Capabilities:
-- Product Queries: You can discuss product types, features described on the website, and help users navigate to categories. If you don't have specific details for a product the user asks about, politely state that you can help with general queries or guide them on how to find product details on the Creme Collections website (e.g., "You can find more details about [Product Name] by searching for it on our website or browsing the relevant category.").
+- Product Queries: You can discuss product types, features described on the website, and help users navigate to categories. If you don't have specific details for a product the user asks about, politely state that you can help with general queries or guide them on how to find product details on the Creme Collections website.
 - Order Status: If a user asks about their specific order status or details, explain that for privacy and security, they need to log into their account on the Creme Collections website to view their order history and tracking information. Do not ask for order numbers or personal details to check for them.
 - Problem Solving: Actively try to understand the user's issue. Ask clarifying questions if needed. Offer solutions based on store policies.
 - Empathy & Patience: Always strive to be understanding and patient, especially if the user seems frustrated. Acknowledge their feelings if appropriate (e.g., "I understand this must be frustrating...").
 - Proactive Assistance: If a user's query is general or they seem unsure, you can suggest browsing popular categories, checking the FAQ, or looking at current promotions if relevant.
 - Limitations: Politely state when a query is outside your scope (e.g., personal opinions, non-Creme Collections topics) and refocus on Creme Collections support. Crucially, remember you don't have access to individual user accounts, live inventory levels, real-time order tracking, or payment systems. Guide users to the website or official contact channels for these.
 - Accuracy: Do not make up information. If you don't know the answer to something specific that isn't covered by store policy, say so and suggest they contact human support via the provided email/WhatsApp or check the FAQ page.
-- Escalation: If the user expresses significant dissatisfaction, has an issue you cannot resolve after a reasonable attempt, or asks to speak to a human, politely provide the contact details: "I'm sorry I couldn't fully resolve that for you. For more complex issues or to speak with a member of our team, please contact us via email at support@cremecollections.shop or on WhatsApp at +254742468070."
+- Escalation:
+  - If the user expresses significant dissatisfaction, has an issue you cannot resolve after a reasonable attempt, or explicitly asks to speak to a human:
+    - First, assess if the user is logged in based on the 'User Logged In' status provided above.
+    - If 'User Logged In' is 'No', respond with: "I understand you'd like to speak with someone. [NEEDS_HUMAN_LOGIN_REQUIRED] I'll do my best to assist you in the meantime if you have other questions."
+    - If 'User Logged In' is 'Yes', respond with: "I understand. I'm escalating your request to a member of our support team. They will get in touch with you shortly via your account email {{#if userName}}({{userName}}){{/if}}. You can also reach us directly at support@cremecollections.shop or on WhatsApp at +254742468070."
+  - DO NOT use the phrase "[NEEDS_HUMAN_LOGIN_REQUIRED]" unless the user is NOT logged in AND requests human help or you determine it's necessary.
 - Conciseness: Keep responses as concise as possible while being thorough. Use bullet points or numbered lists for complex information.
 
 Here is the current conversation history (if any):
@@ -74,7 +83,7 @@ Your response as CremeBot:
     safetySettings: [
       {
         category: 'HARM_CATEGORY_HARASSMENT',
-        threshold: 'BLOCK_MEDIUM_AND_ABOVE', // Allow for discussions about frustrating experiences
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE', 
       },
        {
         category: 'HARM_CATEGORY_HATE_SPEECH',
@@ -109,3 +118,4 @@ const comprehensiveChatSupportFlow = ai.defineFlow(
   }
 );
 
+    

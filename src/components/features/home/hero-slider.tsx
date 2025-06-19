@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react'; // Added ShoppingBag
 
 interface Slide {
   id: number;
@@ -18,56 +18,94 @@ interface Slide {
   textAlign?: 'left' | 'center' | 'right';
   textColor?: string; 
   overlayColor?: string; 
+  titleSize?: string;
+  subtitleSize?: string;
 }
 
 const slidesData: Slide[] = [
   {
     id: 1,
-    image: '/images/banners/slide1.png',
-    dataAiHint: 'fashion model',
-    title: 'Summer Collection is Here!',
-    subtitle: 'Discover vibrant styles and fresh looks for the season.',
-    buttonText: 'Shop Now',
+    image: '/images/banners/slide1.png', // Fashion focused
+    dataAiHint: 'fashion model runway',
+    title: 'Step Into Style',
+    subtitle: 'Explore the latest trends in fashion. New arrivals weekly!',
+    buttonText: 'Shop Fashion',
     buttonLink: '/products/category/fashion', 
     textAlign: 'left',
     textColor: 'text-white',
-    overlayColor: 'bg-black/40'
+    overlayColor: 'bg-black/40',
+    titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
+    subtitleSize: 'text-lg sm:text-xl md:text-2xl'
   },
   {
     id: 2,
-    image: '/images/banners/slide2.png',
-    dataAiHint: 'modern tech',
-    title: 'Latest Tech Gadgets',
-    subtitle: 'Upgrade your life with cutting-edge technology.',
-    buttonText: 'Explore Tech',
+    image: '/images/banners/slide2.png', // Tech focused
+    dataAiHint: 'modern technology gadgets',
+    title: 'Future is Here',
+    subtitle: 'Cutting-edge electronics to elevate your lifestyle.',
+    buttonText: 'Discover Tech',
     buttonLink: '/products/category/electronics',
     textAlign: 'center',
     textColor: 'text-white',
-    overlayColor: 'bg-primary/30'
+    overlayColor: 'bg-primary/40',
+    titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
+    subtitleSize: 'text-lg sm:text-xl md:text-2xl'
   },
   {
     id: 3,
-    image: '/images/banners/slide3.png',
-    dataAiHint: 'cozy home',
-    title: 'Transform Your Home',
-    subtitle: 'Find elegant decor and furnishings for every room.',
-    buttonText: 'Discover Home Goods',
+    image: '/images/banners/slide3.png', // Home focused
+    dataAiHint: 'cozy home interior',
+    title: 'Home Sweet Home',
+    subtitle: 'Furnishings & decor that bring comfort and elegance.',
+    buttonText: 'Explore Home',
     buttonLink: '/products/category/home-living', 
     textAlign: 'right',
-    textColor: 'text-foreground',
-    overlayColor: 'bg-accent/20'
+    textColor: 'text-slate-800', // Darker text for lighter image
+    overlayColor: 'bg-amber-100/30', // Lighter overlay
+    titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
+    subtitleSize: 'text-lg sm:text-xl md:text-2xl'
   },
   {
     id: 4,
-    image: '/images/banners/promo1.png',
-    dataAiHint: 'store promotion',
-    title: 'Exclusive Member Deals',
-    subtitle: 'Sign up today and get access to special discounts.',
-    buttonText: 'Join Now',
-    buttonLink: '/register',
+    image: '/images/banners/promo1.png', // General Promotion
+    dataAiHint: 'shopping promotion sale',
+    title: 'MEGA DEALS DAILY!',
+    subtitle: 'Don\'t miss out on incredible savings. Limited stock available.',
+    buttonText: 'Grab Deals',
+    buttonLink: '/products?filter=sale', // Example link
     textAlign: 'left',
     textColor: 'text-white',
-    overlayColor: 'bg-slate-800/50'
+    overlayColor: 'bg-slate-800/50',
+    titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
+    subtitleSize: 'text-lg sm:text-xl md:text-2xl'
+  },
+  {
+    id: 5,
+    image: '/images/banners/electronics.png', // Specific category banner
+    dataAiHint: 'electronics devices sale',
+    title: 'Electronics Hub',
+    subtitle: 'Your one-stop shop for all things tech. Best prices guaranteed.',
+    buttonText: 'Shop Electronics',
+    buttonLink: '/products/category/electronics',
+    textAlign: 'center',
+    textColor: 'text-white',
+    overlayColor: 'bg-blue-700/40',
+    titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
+    subtitleSize: 'text-lg sm:text-xl md:text-2xl'
+  },
+   {
+    id: 6,
+    image: '/images/banners/beauty.png', // Beauty category
+    dataAiHint: 'beauty products cosmetics',
+    title: 'Glow Up Season',
+    subtitle: 'Discover premium beauty products for your radiant look.',
+    buttonText: 'Explore Beauty',
+    buttonLink: '/products/category/beauty-personal-care',
+    textAlign: 'right',
+    textColor: 'text-slate-800',
+    overlayColor: 'bg-pink-200/40',
+    titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
+    subtitleSize: 'text-lg sm:text-xl md:text-2xl'
   }
 ];
 
@@ -96,7 +134,7 @@ const HeroSlider = () => {
   };
 
   return (
-    <section className="relative w-full h-[calc(100vh-120px)] min-h-[400px] max-h-[700px] overflow-hidden group">
+    <section className="relative w-full h-[calc(100vh-100px)] min-h-[450px] max-h-[750px] overflow-hidden group bg-slate-200">
       {slidesData.map((slide, index) => (
         <div
           key={slide.id}
@@ -112,18 +150,19 @@ const HeroSlider = () => {
             priority={index === 0}
             className="transition-transform duration-[7000ms] ease-linear group-hover:scale-105"
             data-ai-hint={slide.dataAiHint}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
           />
           <div className={`absolute inset-0 ${slide.overlayColor || 'bg-black/30'}`} />
-          <div className={`absolute inset-0 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center ${textAlignClasses[slide.textAlign || 'left']} ${slide.textColor || 'text-white'} p-8 md:p-16`}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold drop-shadow-lg font-headline leading-tight">
+          <div className={`absolute inset-0 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center ${textAlignClasses[slide.textAlign || 'left']} ${slide.textColor || 'text-white'} p-6 md:p-12 lg:p-20`}>
+            <h1 className={`${slide.titleSize || 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl'} font-extrabold drop-shadow-lg font-headline leading-tight max-w-2xl`}>
               {slide.title}
             </h1>
-            <p className="mt-4 text-lg sm:text-xl md:text-2xl max-w-xl drop-shadow-md">
+            <p className={`${slide.subtitleSize || 'text-lg sm:text-xl md:text-2xl'} mt-4 max-w-lg drop-shadow-md`}>
               {slide.subtitle}
             </p>
-            <Button asChild size="lg" className="mt-8 w-fit">
+            <Button asChild size="lg" className="mt-6 md:mt-8 w-fit text-base md:text-lg px-6 md:px-8 py-3 md:py-4 font-semibold">
               <Link href={slide.buttonLink}>
-                {slide.buttonText}
+                {slide.buttonText} <ShoppingBag className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
@@ -135,28 +174,28 @@ const HeroSlider = () => {
         size="icon"
         onClick={prevSlide}
         aria-label="Previous slide"
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-background/50 hover:bg-background/80 text-foreground opacity-0 group-hover:opacity-100 transition-opacity rounded-full w-10 h-10 sm:w-12 sm:h-12"
+        className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-background/60 hover:bg-background/90 text-foreground opacity-0 group-hover:opacity-100 transition-opacity rounded-full w-10 h-10 sm:w-12 sm:h-12 focus:opacity-100"
       >
-        <ChevronLeft className="w-6 h-6 sm:w-7 sm:h-7" />
+        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
       </Button>
       <Button
         variant="outline"
         size="icon"
         onClick={nextSlide}
         aria-label="Next slide"
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-background/50 hover:bg-background/80 text-foreground opacity-0 group-hover:opacity-100 transition-opacity rounded-full w-10 h-10 sm:w-12 sm:h-12"
+        className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-background/60 hover:bg-background/90 text-foreground opacity-0 group-hover:opacity-100 transition-opacity rounded-full w-10 h-10 sm:w-12 sm:h-12 focus:opacity-100"
       >
-        <ChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />
+        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
       </Button>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2.5">
         {slidesData.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
             aria-label={`Go to slide ${index + 1}`}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentIndex ? 'bg-primary scale-125' : 'bg-white/50 hover:bg-white/80'
+            className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
+              index === currentIndex ? 'bg-primary scale-125' : 'bg-white/60 hover:bg-white/90'
             }`}
           />
         ))}
@@ -166,3 +205,5 @@ const HeroSlider = () => {
 };
 
 export default HeroSlider;
+
+    

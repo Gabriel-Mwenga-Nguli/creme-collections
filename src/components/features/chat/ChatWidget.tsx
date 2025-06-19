@@ -6,19 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BotIcon as BotMessageSquareIconInChat, Send, X, Loader2, User as UserIcon, Headphones } from 'lucide-react'; // Added Headphones, renamed BotMessageSquare for chat messages
+import { BotIcon as BotMessageSquareIconInChat, Send, X, Loader2, User as UserIcon, Headphones } from 'lucide-react';
 import { comprehensiveChatSupport, type ComprehensiveChatSupportInput, type ComprehensiveChatSupportOutput } from '@/ai/flows/comprehensive-chat-support';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
+import Link from 'next/link';
 
 interface ChatMessage {
   id: string;
   role: 'user' | 'model';
   content: string;
 }
+
+const AGENT_HANDOFF_PHRASE = "[NEEDS_HUMAN_LOGIN_REQUIRED]";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,38 +35,9 @@ export default function ChatWidget() {
   const router = useRouter();
   const { toast } = useToast();
 
-
-  const handleOpenChatRequest = useCallback(() => {
-    if (authLoading) {
-      return;
-    }
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to use chat support.",
-        action: (
-          <ToastAction
-            altText="Login"
-            onClick={() => router.push('/login?redirect=.')}
-          >
-            Login
-          </ToastAction>
-        ),
-        duration: 5000,
-      });
-      return;
-    }
-    setIsOpen(true);
-  }, [authLoading, user, toast, router]);
-
   const toggleChat = useCallback(() => {
-    if (isOpen) {
-      setIsOpen(false);
-    } else {
-      handleOpenChatRequest();
-    }
-  }, [isOpen, handleOpenChatRequest]);
-
+    setIsOpen(prev => !prev);
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
@@ -100,10 +74,32 @@ export default function ChatWidget() {
       const input: ComprehensiveChatSupportInput = {
         message: userMessageContent,
         chatHistory: historyForFlow,
+        isLoggedIn: !!user, // Pass login status to the flow
+        userName: user?.displayName || undefined,
       };
       const result: ComprehensiveChatSupportOutput = await comprehensiveChatSupport(input);
+      let aiResponseContent = result.response;
 
-      const aiResponse: ChatMessage = { id: `${Date.now()}-model`, role: 'model', content: result.response };
+      if (aiResponseContent.includes(AGENT_HANDOFF_PHRASE)) {
+        if (!user) {
+          aiResponseContent = aiResponseContent.replace(AGENT_HANDOFF_PHRASE, 
+            "To connect you with a support agent, please log in or create an account. You can also reach us via email at support@cremecollections.shop or WhatsApp at +254742468070."
+          );
+           toast({
+              title: "Login Required for Agent Support",
+              description: "Please log in to connect directly with a support agent.",
+              action: <ToastAction altText="Login" onClick={() => router.push('/login?redirect=.')}>Login</ToastAction>,
+              duration: 7000,
+            });
+        } else {
+          aiResponseContent = aiResponseContent.replace(AGENT_HANDOFF_PHRASE, 
+            "Thank you for confirming. I'm escalating your request to a human agent. Please wait a moment..."
+          );
+          // Here you would typically trigger a notification to your support system
+        }
+      }
+
+      const aiResponse: ChatMessage = { id: `${Date.now()}-model`, role: 'model', content: aiResponseContent };
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
       console.error("Chat API error:", error);
@@ -113,19 +109,16 @@ export default function ChatWidget() {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 0);
     }
-  }, [inputValue, messages]);
+  }, [inputValue, messages, user, router, toast]);
 
   useEffect(() => {
-    if (isOpen && user && messages.length === 0) {
-      setMessages([
-        { id: 'welcome-msg', role: 'model', content: `Hello ${user.displayName || 'there'}! I'm CremeBot, your virtual assistant for Creme Collections. How can I help you today?` }
-      ]);
+    if (isOpen && messages.length === 0) {
+      const welcomeMessage = user 
+        ? `Hello ${user.displayName || 'there'}! I'm CremeBot, your virtual assistant for Creme Collections. How can I help you today?`
+        : "Hello! I'm CremeBot, your virtual assistant for Creme Collections. How can I assist you?";
+      setMessages([{ id: 'welcome-msg', role: 'model', content: welcomeMessage }]);
     }
-    if (isOpen && !user && !authLoading) { 
-        setIsOpen(false); 
-        setMessages([]);
-    }
-  }, [isOpen, user, messages.length, authLoading]);
+  }, [isOpen, user, messages.length]);
 
 
   return (
@@ -133,16 +126,15 @@ export default function ChatWidget() {
       <Button
         variant="default"
         size="lg"
-        className="fixed bottom-6 right-6 rounded-full shadow-xl w-16 h-16 p-0 z-[60] flex items-center justify-center"
+        className="fixed bottom-6 right-6 rounded-full shadow-xl w-16 h-16 p-0 z-[60] flex items-center justify-center animate-bounce hover:animate-none"
         onClick={toggleChat}
         aria-label={isOpen ? "Close chat support" : "Open chat support"}
-        disabled={authLoading && !isOpen}
       >
-        {authLoading && !isOpen ? <Loader2 className="h-7 w-7 animate-spin" /> : isOpen ? <X className="h-7 w-7" /> : <Headphones className="h-7 w-7" strokeWidth={2.5} />}
+        {isOpen ? <X className="h-7 w-7" /> : <Headphones className="h-7 w-7" strokeWidth={2.5} />}
       </Button>
 
-      {isOpen && user && (
-        <div className="fixed bottom-24 right-6 w-full max-w-sm h-auto max-h-[calc(100vh-11rem)] shadow-2xl z-[60] flex flex-col rounded-lg overflow-hidden animate-in fade-in-0 slide-in-from-bottom-5 duration-300">
+      {isOpen && (
+        <div className="fixed bottom-24 right-6 w-full max-w-sm h-auto max-h-[calc(100vh-12rem)] shadow-2xl z-[60] flex flex-col rounded-lg overflow-hidden animate-in fade-in-0 slide-in-from-bottom-5 duration-300">
           <Card className="w-full h-full flex flex-col bg-card border border-border">
             <CardHeader className="p-4 border-b flex-shrink-0">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -209,3 +201,5 @@ export default function ChatWidget() {
     </>
   );
 }
+
+    
