@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Loader2 } from 'lucide-react';
-import { smartProductSearch, type SmartProductSearchInput } from '@/ai/flows/product-search'; // Assuming flow is adjusted or suitable
+import { smartProductSearch, type SmartProductSearchInput } from '@/ai/flows/product-search';
 
 export default function AISearchBar() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,48 +19,55 @@ export default function AISearchBar() {
 
     setIsLoading(true);
     try {
-      // Example of calling the AI flow.
-      // In a real scenario, you might want to display these results in a dropdown
-      // or use them to augment the search page.
-      const input: SmartProductSearchInput = { searchTerm: searchTerm.trim() };
-      const aiResults = await smartProductSearch(input);
-      console.log('AI Search Results:', aiResults); 
-      // For now, we'll just navigate to the search page with the query.
-      // The search page itself could then use this query for a more detailed AI search.
+      // The AI search flow is called, but for navigation, we primarily use query params.
+      // The search-page can then decide how to use the AI results or perform its own.
+      // const input: SmartProductSearchInput = { searchTerm: searchTerm.trim() };
+      // const aiResults = await smartProductSearch(input);
+      // console.log('AI Search Results (from header bar):', aiResults); 
+      
       router.push(`/search-page?q=${encodeURIComponent(searchTerm.trim())}`);
 
     } catch (error) {
-      console.error('AI search failed:', error);
-      // Fallback: just navigate to search page if AI fails
+      console.error('AI search from header bar failed:', error);
+      // Fallback: just navigate to search page if AI call fails
       router.push(`/search-page?q=${encodeURIComponent(searchTerm.trim())}`);
     } finally {
       setIsLoading(false);
+      // setSearchTerm(''); // Optionally clear search term after navigation
     }
   };
 
   return (
-    <form onSubmit={handleSearch} className="relative w-full">
+    <form onSubmit={handleSearch} className="relative w-full group">
       <Input
         type="search"
-        placeholder="Search for products, brands, or categories..."
-        className="w-full h-10 pl-10 pr-12 rounded-md border-border focus:border-primary focus:ring-primary bg-background"
+        placeholder="Search for products..."
+        className={
+          "w-full h-12 pl-5 pr-14 rounded-full " +
+          "bg-white dark:bg-slate-100 " +
+          "text-slate-800 dark:text-slate-700 " +
+          "placeholder:text-slate-400 dark:placeholder:text-slate-500 " +
+          "text-sm " + 
+          "border-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 focus-visible:border-transparent " +
+          "shadow-sm hover:shadow-md focus-within:shadow-md transition-shadow"
+        }
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         aria-label="Search products"
       />
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <Search className="h-5 w-5 text-muted-foreground" />
-      </div>
-      <Button
+      <button
         type="submit"
-        variant="ghost"
-        size="icon"
-        className="absolute inset-y-0 right-0 pr-2 flex items-center hover:bg-transparent text-primary disabled:opacity-75 h-full"
+        className={
+          "absolute inset-y-0 right-0 flex items-center justify-center w-12 h-12 " +
+          "text-slate-400 dark:text-slate-500 group-hover:text-primary dark:group-hover:text-primary " +
+          "focus:text-primary dark:focus:text-primary focus:outline-none " + 
+          "disabled:opacity-75 transition-colors rounded-r-full"
+        }
         disabled={isLoading}
         aria-label="Submit search"
       >
         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
-      </Button>
+      </button>
     </form>
   );
 }
