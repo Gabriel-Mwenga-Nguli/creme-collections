@@ -25,7 +25,7 @@ const promotionalBannersData = [
     description: "Massive discounts up to 50% off. Limited time only!", 
     image: "/images/promos/flash-sale.png", 
     dataAiHint: "flash sale discount", 
-    bgColor: "bg-red-600/90", 
+    overlayColor: "bg-black/40", // Darker overlay for red image
     textColor: "text-white", 
     href: "/products?filter=sale",
     buttonText: "Shop Flash Sale"
@@ -35,7 +35,7 @@ const promotionalBannersData = [
     description: "All your essentials for the new term. Notebooks, bags, & more!", 
     image: "/images/promos/back-to-school.png", 
     dataAiHint: "school supplies", 
-    bgColor: "bg-sky-500/90", 
+    overlayColor: "bg-slate-800/50", // Darker overlay for light image
     textColor: "text-white", 
     href: "/products/category/books-office-stationery/school-supplies",
     buttonText: "Get School Ready"
@@ -45,7 +45,7 @@ const promotionalBannersData = [
     description: "Discover the latest trends and freshest products added just for you.", 
     image: "/images/banners/promo1.png", 
     dataAiHint: "new products showcase", 
-    bgColor: "bg-green-500/90", 
+    overlayColor: "bg-black/50", // Stronger overlay for complex image
     textColor: "text-white", 
     href: "/products?filter=new",
     buttonText: "Explore New In"
@@ -55,7 +55,7 @@ const promotionalBannersData = [
     description: "Unique finds and special items you won't get anywhere else.", 
     image: "/images/banners/promo2.png", 
     dataAiHint: "exclusive items", 
-    bgColor: "bg-purple-600/90", 
+    overlayColor: "bg-black/40", // Darker overlay for purple image
     textColor: "text-white", 
     href: "/products?filter=exclusive",
     buttonText: "Discover Exclusives"
@@ -91,7 +91,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {categoryHighlights.map((category) => (
               <Link href={category.href} key={category.name} className="group block">
-                <Card className="overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-xl hover:border-primary transform group-hover:-translate-y-1">
+                <Card className="overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-xl hover:border-primary transform group-hover:-translate-y-1 bg-card">
                   <CardContent className="p-0">
                     <div className="aspect-w-16 aspect-h-9">
                       <Image
@@ -126,24 +126,27 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {promotionalBannersData.map((banner, index) => (
               <Link href={banner.href} key={banner.title} className="group block">
-                <Card className={`relative overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-2xl hover:ring-2 hover:ring-primary/50 ${banner.bgColor} min-h-[280px] sm:min-h-[320px] flex flex-col justify-between p-6 rounded-xl`}>
+                <Card className="relative overflow-hidden bg-card min-h-[280px] sm:min-h-[320px] flex flex-col rounded-xl transition-all duration-300 ease-in-out group-hover:shadow-2xl hover:ring-2 hover:ring-primary/50">
                   <div className="absolute inset-0 z-0">
                      <Image
                         src={banner.image}
                         alt={banner.title}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                         data-ai-hint={banner.dataAiHint}
                       />
+                      <div className={`absolute inset-0 ${banner.overlayColor}`} />
                   </div>
-                  <div className="relative z-10">
-                    <h3 className={`text-2xl md:text-3xl font-extrabold ${banner.textColor} font-headline drop-shadow-md`}>{banner.title}</h3>
-                    <p className={`mt-2 text-sm md:text-md ${banner.textColor} opacity-90 max-w-xs drop-shadow-sm`}>{banner.description}</p>
+                  <div className="relative z-10 flex flex-col justify-between flex-grow p-6">
+                    <div>
+                      <h3 className={`text-2xl md:text-3xl font-extrabold ${banner.textColor} font-headline drop-shadow-lg`}>{banner.title}</h3>
+                      <p className={`mt-2 text-sm md:text-md ${banner.textColor} opacity-90 max-w-xs drop-shadow-lg`}>{banner.description}</p>
+                    </div>
+                    <Button variant={index % 2 === 0 ? "default" : "secondary"} size="lg" className="mt-4 w-fit self-start text-sm" aria-label={banner.buttonText}>
+                       {banner.buttonText} <ShoppingBag className="ml-2 h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button variant={index % 2 === 0 ? "default" : "secondary"} size="lg" className="mt-4 w-fit relative z-10 text-sm" aria-label={banner.buttonText}>
-                     {banner.buttonText} <ShoppingBag className="ml-2 h-4 w-4" />
-                  </Button>
                 </Card>
               </Link>
             ))}
@@ -249,5 +252,3 @@ export default async function HomePage() {
     </div>
   );
 }
-
-    
