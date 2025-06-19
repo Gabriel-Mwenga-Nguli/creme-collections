@@ -11,7 +11,7 @@ import { getFeaturedProducts, getWeeklyDeals } from '@/services/productService';
 import { Input } from '@/components/ui/input';
 import NewsletterPopup from '@/components/features/home/NewsletterPopup';
 import ServicesHighlight from '@/components/features/home/ServicesHighlight';
-import BrandShowcase from '@/components/features/home/BrandShowcase';
+
 
 const categoryHighlights = [
   { name: "Electronics", image: "/images/banners/electronics.png", dataAiHint: "latest gadgets", href: "/products/category/electronics", icon: Smartphone },
@@ -25,7 +25,7 @@ const promotionalBannersData = [
     description: "Massive discounts up to 50% off. Limited time only!", 
     image: "/images/promos/flash-sale.png", 
     dataAiHint: "flash sale discount", 
-    overlayColor: "bg-black/40", // Darker overlay for red image
+    overlayColor: "bg-black/40", 
     textColor: "text-white", 
     href: "/products?filter=sale",
     buttonText: "Shop Flash Sale"
@@ -35,7 +35,7 @@ const promotionalBannersData = [
     description: "All your essentials for the new term. Notebooks, bags, & more!", 
     image: "/images/promos/back-to-school.png", 
     dataAiHint: "school supplies", 
-    overlayColor: "bg-slate-800/50", // Darker overlay for light image
+    overlayColor: "bg-slate-800/50", 
     textColor: "text-white", 
     href: "/products/category/books-office-stationery/school-supplies",
     buttonText: "Get School Ready"
@@ -45,7 +45,7 @@ const promotionalBannersData = [
     description: "Discover the latest trends and freshest products added just for you.", 
     image: "/images/banners/promo1.png", 
     dataAiHint: "new products showcase", 
-    overlayColor: "bg-black/50", // Stronger overlay for complex image
+    overlayColor: "bg-black/50", 
     textColor: "text-white", 
     href: "/products?filter=new",
     buttonText: "Explore New In"
@@ -55,7 +55,7 @@ const promotionalBannersData = [
     description: "Unique finds and special items you won't get anywhere else.", 
     image: "/images/banners/promo2.png", 
     dataAiHint: "exclusive items", 
-    overlayColor: "bg-black/40", // Darker overlay for purple image
+    overlayColor: "bg-black/40", 
     textColor: "text-white", 
     href: "/products?filter=exclusive",
     buttonText: "Discover Exclusives"
@@ -200,12 +200,6 @@ export default async function HomePage() {
         </div>
       </section>
       
-      <section className="py-8 md:py-12 bg-slate-100 dark:bg-slate-800/30 animate-in fade-in-0 slide-in-from-bottom-10 duration-500 ease-out delay-500" id="brands">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <BrandShowcase />
-        </div>
-      </section>
-
 
       <section className="py-8 md:py-12 bg-secondary/20 animate-in fade-in-0 slide-in-from-bottom-10 duration-500 ease-out delay-600" id="why-choose-us">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
