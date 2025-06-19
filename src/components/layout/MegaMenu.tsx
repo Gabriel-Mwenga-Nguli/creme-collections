@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { type NavLink } from '@/lib/constants';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator'; // Added Separator import
 
 interface MegaMenuProps {
   categories: NavLink[];
@@ -29,19 +30,20 @@ export default function MegaMenu({ categories, onClose }: MegaMenuProps) {
         </Button>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-8">
           {categories.map((category) => (
-            <div key={category.label} className="space-y-3">
+            <div key={category.label} className="space-y-2">
               <Link 
                 href={category.href} 
                 onClick={onClose} 
-                className="flex items-center gap-2 group"
+                className="flex items-center gap-2 group mb-1.5"
               >
-                {category.icon && <category.icon className="h-5 w-5 text-slate-100 group-hover:text-primary transition-colors" />}
+                {category.icon && <category.icon className="h-5 w-5 text-slate-100 group-hover:text-primary transition-colors shrink-0" />}
                 <h3 className="text-md font-semibold text-slate-100 group-hover:text-primary transition-colors">
                   {category.label}
                 </h3>
               </Link>
+              <Separator className="bg-slate-700" /> 
               {category.subLinks && category.subLinks.length > 0 && (
-                <ul className="space-y-1.5">
+                <ul className="space-y-1.5 pt-1.5">
                   {category.subLinks.map((subLink) => (
                     <li key={subLink.label}>
                       <Link
