@@ -11,6 +11,7 @@ import { getFeaturedProducts, getWeeklyDeals } from '@/services/productService';
 import { Input } from '@/components/ui/input';
 import NewsletterPopup from '@/components/features/home/NewsletterPopup';
 import ServicesHighlight from '@/components/features/home/ServicesHighlight';
+import PromotionalOfferSlider, { type PromoSlideProps } from '@/components/features/home/PromotionalOfferSlider';
 
 
 const categoryHighlights = [
@@ -67,6 +68,79 @@ const whyChooseUsFeatures = [
   { title: "Reliable & Fast Delivery", description: "Swift and dependable shipping services across Kenya.", icon: Truck, dataAiHint:"delivery truck" },
   { title: "Dedicated Customer Support", description: "Our friendly team is always ready to assist you with any queries.", icon: Users, dataAiHint:"customer support" },
 ];
+
+const samplePromoSliderData: PromoSlideProps[] = [
+  {
+    type: 'firstOrder',
+    title: 'Unlock Ksh 500',
+    subtitle: 'Off Your First Order',
+    code: 'KARIBU5',
+    terms: '*Minimum Spend: Ksh 1,500 | Valid Once Per User | T&C Apply',
+    backgroundImage: '/images/promos/promo-bg-dark-blue.png', // Placeholder
+    dataAiHint: 'first order discount',
+    foregroundColor: 'text-white',
+    accentColor: 'bg-red-500',
+    href: '/register'
+  },
+  {
+    type: 'tieredDiscount',
+    title: 'Buy More, Save More!',
+    tiers: [
+      { amount: 400, spend: 5000, maxSpend: 7999 },
+      { amount: 700, spend: 8000, maxSpend: 9999 },
+      { amount: 1000, spend: 10000, maxSpend: -1 },
+    ],
+    code: 'WHOA',
+    terms: '*Valid Once Per User | T&C Apply',
+    backgroundImage: '/images/promos/promo-bg-blue-gradient.png', // Placeholder
+    dataAiHint: 'tiered discount offer',
+    foregroundColor: 'text-white',
+    href: '/products'
+  },
+  {
+    type: 'revealCode',
+    title: 'Get Upto 10% Off',
+    subtitle: 'On Selected Products',
+    actionText: 'TAP TO REVEAL',
+    codePlaceholder: 'CODE',
+    productImage: '/images/banners/electronics.png', // Placeholder
+    dataAiHint: 'electronics discount',
+    backgroundColor: 'bg-amber-50',
+    foregroundColor: 'text-slate-700',
+    accentColor: 'text-red-600',
+    href: '/products/category/electronics'
+  },
+  {
+    type: 'revealCode',
+    title: 'Get Upto 10% Off',
+    subtitle: 'On Bundle Products',
+    actionText: 'TAP TO REVEAL',
+    codePlaceholder: 'CODE',
+    productImage: '/images/banners/home.png', // Placeholder
+    dataAiHint: 'home products bundle',
+    backgroundColor: 'bg-amber-50',
+    foregroundColor: 'text-slate-700',
+    accentColor: 'text-red-600',
+    href: '/products?filter=bundles' // Example link
+  },
+  {
+    type: 'freshSavers',
+    title: 'Freshness That Delivers!',
+    subtitle: 'Fruits, Veggies, Bakery, Meat & More',
+    items: [
+      { name: 'Apples', price: 349, oldPrice: 499, image: '/images/promos/green-apple.png', dataAiHint: 'green apple' },
+      { name: 'Lamb Leg', price: 1310, oldPrice: 1649, image: '/images/promos/fresh-meat.png', dataAiHint: 'lamb meat' },
+    ],
+    logoImage: '/images/promos/fresh-savers-logo.png', // Placeholder for "fresh SAVERS" logo
+    dataAiHint: 'fresh food grocery',
+    topColor: 'bg-red-600',
+    bottomColor: 'bg-sky-200',
+    foregroundColor: 'text-white',
+    priceColor: 'text-red-700',
+    href: '/products/category/groceries/fresh-produce' // Example link
+  },
+];
+
 
 export default async function HomePage() {
   const featuredProductsData = await getFeaturedProducts();
@@ -127,7 +201,7 @@ export default async function HomePage() {
             {promotionalBannersData.map((banner, index) => (
               <Link href={banner.href} key={banner.title} className="group block">
                 <Card className="relative overflow-hidden bg-card min-h-[280px] sm:min-h-[320px] flex flex-col rounded-xl transition-all duration-300 ease-in-out group-hover:shadow-2xl hover:ring-2 hover:ring-primary/50">
-                  <div className="absolute inset-0 z-0">
+                   <div className="absolute inset-0 z-0">
                      <Image
                         src={banner.image}
                         alt={banner.title}
@@ -136,7 +210,7 @@ export default async function HomePage() {
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                         data-ai-hint={banner.dataAiHint}
                       />
-                      <div className={`absolute inset-0 ${banner.overlayColor}`} />
+                      <div className={`absolute inset-0 ${banner.overlayColor || 'bg-black/30'}`} />
                   </div>
                   <div className="relative z-10 flex flex-col justify-between flex-grow p-6">
                     <div>
@@ -197,6 +271,15 @@ export default async function HomePage() {
               </Link>
             </Button>
           </div>
+        </div>
+      </section>
+
+      <section className="py-8 md:py-12 bg-slate-100 dark:bg-slate-800/30 animate-in fade-in-0 slide-in-from-bottom-10 duration-500 ease-out delay-500" id="promotions-slider">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground md:text-4xl font-headline mb-8 md:mb-10">
+            Promotions
+          </h2>
+          <PromotionalOfferSlider promos={samplePromoSliderData} />
         </div>
       </section>
       
