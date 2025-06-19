@@ -45,8 +45,8 @@ export default function AISearchBar() {
         className={
           "w-full h-12 pl-5 pr-14 rounded-full " +
           "bg-white dark:bg-slate-100 " +
-          "text-slate-800 dark:text-slate-700 " +
-          "placeholder:text-slate-400 dark:placeholder:text-slate-500 " +
+          "text-slate-900 dark:text-slate-900 " + // Ensure input text is dark on light bg
+          "placeholder:text-slate-600 dark:placeholder:text-slate-700 " + // Improved placeholder contrast
           "text-sm " + 
           "border-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 focus-visible:border-transparent " +
           "shadow-sm hover:shadow-md focus-within:shadow-md transition-shadow"
@@ -59,7 +59,7 @@ export default function AISearchBar() {
         type="submit"
         className={
           "absolute inset-y-0 right-0 flex items-center justify-center w-12 h-12 " +
-          "text-slate-400 dark:text-slate-500 group-hover:text-primary dark:group-hover:text-primary " +
+          "text-slate-500 dark:text-slate-600 group-hover:text-primary dark:group-hover:text-primary " + // Adjusted icon colors for consistency
           "focus:text-primary dark:focus:text-primary focus:outline-none " + 
           "disabled:opacity-75 transition-colors rounded-r-full"
         }
@@ -71,3 +71,4 @@ export default function AISearchBar() {
     </form>
   );
 }
+

@@ -140,17 +140,16 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         {/* Top Row */}
-        <div className="flex h-16 items-center justify-between gap-1 sm:gap-2 md:gap-4">
+        <div className="flex h-16 items-center justify-between gap-1 sm:gap-2">
           <div className="flex-shrink-0">
             <Logo />
           </div>
           
-          {/* AISearchBar - Always visible and flexible */}
-          <div className="flex-1 min-w-0 mx-1 sm:mx-2 md:mx-4">
+          <div className="flex-1 min-w-0 mx-1 sm:mx-2"> {/* Adjusted margin for mobile: mx-1 */}
             <AISearchBar />
           </div>
 
-          <div className="flex items-center gap-0.5 sm:gap-1">
+          <div className="flex items-center gap-0 sm:gap-0.5"> {/* Slightly reduced gap for mobile actions */}
             {isAdmin && !isMobile && (
               <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3 mr-1 md:mr-2 border-primary text-primary hover:bg-primary/10">
                 <Link href="/admin/dashboard">
@@ -172,13 +171,13 @@ export default function Header() {
             )}
             <Button asChild variant="ghost" size="icon" aria-label="Wishlist" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
               <Link href="/wishlist">
-                <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Heart className="h-4 w-4 sm:h-5 sm:h-5" />
               </Link>
             </Button>
             <Button asChild variant="ghost" size="icon" aria-label="Shopping Cart" className="relative text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
               <Link href="/cart">
                 <>
-                  <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <ShoppingCart className="h-4 w-4 sm:h-5 sm:h-5" />
                   {cartItemCount > 0 && (
                     <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 min-w-[0.75rem] p-[2px] text-[10px] flex items-center justify-center leading-none">
                       {cartItemCount}
@@ -206,8 +205,7 @@ export default function Header() {
                   </div>
 
                   <div className="p-4 flex-1 overflow-y-auto">
-                    {/* AISearchBar removed from here as it's now in the main header */}
-                    <nav className="flex flex-col gap-1 mb-4 mt-4"> {/* Added mt-4 for spacing since search bar is removed */}
+                    <nav className="flex flex-col gap-1 mb-4 mt-4">
                        {MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger).map((link) => (
                          <SheetClose asChild key={link.label}>
                             <Link
@@ -242,14 +240,22 @@ export default function Header() {
                       {CATEGORY_NAV_LINKS.map((category) => (
                         <AccordionItem value={category.label} key={category.label}>
                           <AccordionTrigger className="text-base font-medium hover:text-primary py-3 px-2" asChild>
-                            <SheetClose asChild>
-                                <Link href={category.href} className="flex items-center gap-2 w-full text-left" onClick={(e) => e.stopPropagation()}>
+                            {/* Removed SheetClose from AccordionTrigger itself */}
+                            <div className="flex items-center justify-between w-full cursor-pointer">
+                                <Link href={category.href} className="flex items-center gap-2 w-full text-left" onClick={(e) => {
+                                    // Allow normal navigation for parent, but don't close sheet if it has sublinks
+                                    if (category.subLinks && category.subLinks.length > 0) {
+                                        // This is handled by Accordion's own open/close state
+                                    } else {
+                                        setMobileSheetOpen(false); // Close sheet if it's a direct link
+                                    }
+                                }}>
                                    <span>
                                     {category.icon && <category.icon className="h-5 w-5 text-muted-foreground inline-block mr-2" />}
                                     {category.label}
                                    </span>
                                 </Link>
-                            </SheetClose>
+                            </div>
                           </AccordionTrigger>
                           <AccordionContent className="pl-6 pr-2">
                             <nav className="flex flex-col gap-1.5 mt-1">
@@ -306,7 +312,7 @@ export default function Header() {
               </Sheet>
             ) : (
               <Button asChild variant="ghost" size="icon" aria-label="User Account" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9" disabled={authLoading}>
-                <Link href={accountLink}><UserIconLucide className="h-4 w-4 sm:h-5 sm:w-5" /></Link>
+                <Link href={accountLink}><UserIconLucide className="h-4 w-4 sm:h-5 sm:h-5" /></Link>
               </Button>
             )}
           </div>
