@@ -1,4 +1,5 @@
 
+
 import HeroSlider from '@/components/features/home/hero-slider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import NewsletterPopup from '@/components/features/home/NewsletterPopup';
 import ServicesHighlight from '@/components/features/home/ServicesHighlight';
 import PromotionalOfferSlider, { type PromoSlideProps } from '@/components/features/home/PromotionalOfferSlider';
 import { cn } from '@/lib/utils';
+import BlackFridayDeals from '@/components/features/home/BlackFridayDeals';
 
 
 const categoryHighlights = [
@@ -158,6 +160,7 @@ export default async function HomePage() {
     <div className="flex flex-col">
       <NewsletterPopup />
       <HeroSlider />
+      <BlackFridayDeals />
 
       <section className="py-10 md:py-16 bg-background animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out">
         <ServicesHighlight />
@@ -309,7 +312,7 @@ export default async function HomePage() {
 
       <section className="py-12 md:py-20 bg-background animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out delay-700" id="newsletter-cta">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto text-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-8 md:p-12 lg:p-16 rounded-2xl shadow-xl border border-primary/20">
+          <div className="mx-auto text-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-8 md:p-12 lg:p-16 rounded-2xl shadow-xl border border-primary/20 max-w-none">
             <Mail className="w-12 h-12 sm:w-14 sm:h-14 text-primary mb-5 mx-auto" />
             <h2 className="text-3xl md:text-4xl font-bold text-foreground sm:text-5xl font-headline mb-4">
               Stay Updated with Creme Collections

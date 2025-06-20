@@ -99,4 +99,7 @@ body {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+  .animation-pause {
+    animation-play-state: paused;
+  }
 }

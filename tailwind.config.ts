@@ -89,10 +89,16 @@ const config = {
             height: '0',
           },
         },
+        'scroll-rtl': { // For continuous right-to-left marquee effect
+          '0%': { transform: 'translateX(0)' },
+          // Translate by -50% if the content is duplicated once and wrapper holds both
+          '100%': { transform: 'translateX(-50%)' }, 
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'scroll-rtl': 'scroll-rtl 60s linear infinite', // Adjust duration as needed
       },
     },
   },
@@ -109,6 +115,9 @@ const config = {
           '&::-webkit-scrollbar': {
             display: 'none',
           },
+        },
+        '.animation-pause': {
+            'animation-play-state': 'paused',
         },
       });
     },
