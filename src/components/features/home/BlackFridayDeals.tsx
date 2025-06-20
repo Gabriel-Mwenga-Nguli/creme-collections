@@ -32,11 +32,11 @@ const BlackFridayDeals: React.FC = () => {
             <Link href="/products?filter=black-friday" className="block w-full h-full">
               <div className="relative aspect-[1/1] w-full h-full overflow-hidden rounded-lg group">
                 <Image
-                  src="/images/promos/black-friday-banner.png"
+                  src="/images/banners/black-friday.png" // Updated image path
                   alt="Black Friday Sale Banner"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-contain group-hover:scale-105 transition-transform duration-500"
+                  className="object-contain group-hover:scale-105 transition-transform duration-500" // Ensure object-contain
                   data-ai-hint="black friday sale"
                 />
               </div>
@@ -48,7 +48,7 @@ const BlackFridayDeals: React.FC = () => {
             <div className="relative w-full overflow-hidden group/slider">
               <div
                 className="flex animate-scroll-rtl group-hover/slider:animation-pause py-4"
-                style={{ animationDuration: '60s' }} // Adjust duration for speed
+                style={{ animationDuration: '60s' }} 
               >
                 {duplicatedProducts.map((product, index) => (
                   <div key={`${product.id}-${index}`} className="flex-none w-60 sm:w-64 md:w-72 px-2">
@@ -56,7 +56,6 @@ const BlackFridayDeals: React.FC = () => {
                   </div>
                 ))}
               </div>
-               {/* Fade overlays for a smoother edge */}
               <div className="absolute inset-y-0 left-0 w-10 md:w-16 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent pointer-events-none"></div>
               <div className="absolute inset-y-0 right-0 w-10 md:w-16 bg-gradient-to-l from-slate-900 via-slate-900/80 to-transparent pointer-events-none"></div>
             </div>
@@ -76,31 +75,3 @@ const BlackFridayDeals: React.FC = () => {
 
 export default BlackFridayDeals;
 
-// Add to your global CSS or a style block if preferred:
-// @keyframes scroll-rtl {
-//   0% { transform: translateX(0); }
-//   100% { transform: translateX(-100%); } /* This needs to be -50% if content is duplicated once and parent is width of ONE set */
-// }
-// .animate-scroll-rtl {
-//   animation: scroll-rtl 60s linear infinite; /* Duration can be adjusted */
-// }
-// .animation-pause {
-//   animation-play-state: paused;
-// }
-// This implies that the inner div containing duplicated products is twice the width of its parent.
-// The keyframes in tailwind.config.ts should be:
-// 'scroll-rtl': {
-//   '0%': { transform: 'translateX(0)' },
-//   '100%': { transform: 'translateX(-50%)' }, // Moves by half its width (i.e., one full set of original items)
-// },
-// And the animation utility:
-// 'scroll-rtl': 'scroll-rtl 60s linear infinite',
-
-// For the hover effect on animation-play-state, Tailwind CSS doesn't have a built-in utility.
-// You can add this to your globals.css or tailwind.config.ts via a plugin if needed:
-// .group-hover\\/slider\\:animation-pause:hover .animate-scroll-rtl, (or direct child)
-// .group-hover\\/slider:hover .animate-scroll-rtl {
-//   animation-play-state: paused;
-// }
-// However, since direct CSS in JS is tricky with CDATA, I've added a class `group-hover/slider:animation-pause`
-// and will add the corresponding CSS to globals.css.
