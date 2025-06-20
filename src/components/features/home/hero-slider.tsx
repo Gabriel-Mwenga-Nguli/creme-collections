@@ -64,7 +64,7 @@ const slidesData: Slide[] = [
     buttonText: 'Explore Home',
     buttonLink: '/products/category/home-living',
     textAlign: 'right',
-    textColor: 'text-slate-800',
+    textColor: 'text-slate-800', // Kept as per previous update, assuming it's intentional
     overlayColor: 'bg-amber-100/30',
     titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
     subtitleSize: 'text-lg sm:text-xl md:text-2xl',
@@ -109,8 +109,8 @@ const slidesData: Slide[] = [
     buttonText: 'Explore Beauty',
     buttonLink: '/products/category/beauty-personal-care',
     textAlign: 'right',
-    textColor: 'text-white',
-    overlayColor: 'bg-black/30',
+    textColor: 'text-white', // Changed for better visibility
+    overlayColor: 'bg-black/30', // Changed for better visibility
     titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
     subtitleSize: 'text-lg sm:text-xl md:text-2xl',
     contentAnimation: 'animate-fade-in-left'
@@ -119,7 +119,7 @@ const slidesData: Slide[] = [
 
 const HeroSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [prevIndex, setPrevIndex] = useState(slidesData.length - 1); // For exit animation
+  const [prevIndex, setPrevIndex] = useState(slidesData.length - 1); 
 
   const nextSlide = useCallback(() => {
     setPrevIndex(currentIndex);
@@ -132,7 +132,7 @@ const HeroSlider = () => {
   }, [currentIndex]);
 
   useEffect(() => {
-    const slideInterval = setInterval(nextSlide, 7000);
+    const slideInterval = setInterval(nextSlide, 7000); 
     return () => clearInterval(slideInterval);
   }, [nextSlide]);
 
@@ -160,7 +160,7 @@ const HeroSlider = () => {
               style={{ objectFit: 'cover' }}
               priority={index === 0}
               className={cn(
-                "transition-transform duration-[7500ms] ease-linear",
+                "transition-transform duration-[7.5s] ease-linear", // Changed 7500ms to 7.5s
                 index === currentIndex ? 'scale-110 animate-kenburns' : 'scale-100'
               )}
               data-ai-hint={slide.dataAiHint}
@@ -172,7 +172,7 @@ const HeroSlider = () => {
             className={cn(
               `absolute inset-0 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center ${textAlignClasses[slide.textAlign || 'left']} ${slide.textColor || 'text-white'} p-6 md:p-12 lg:p-20`,
               index === currentIndex ? 'animate-fade-in opacity-100' : 'opacity-0',
-              index === prevIndex ? 'animate-fade-out' : '' // For smoother exit
+              index === prevIndex ? 'animate-fade-out' : '' 
             )}
             style={{ animationDelay: index === currentIndex ? '0.5s' : '0s' }}
           >
