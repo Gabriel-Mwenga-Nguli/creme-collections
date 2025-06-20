@@ -20,7 +20,6 @@ const dummyBlackFridayProducts: ProductCardProps[] = [
 ];
 
 const BlackFridayDeals: React.FC = () => {
-  // Duplicate products for seamless looping effect
   const duplicatedProducts = [...dummyBlackFridayProducts, ...dummyBlackFridayProducts];
 
   return (
@@ -30,14 +29,16 @@ const BlackFridayDeals: React.FC = () => {
           {/* Left: Banner */}
           <div className="md:col-span-4 lg:col-span-3 flex flex-col justify-center items-center bg-black rounded-xl shadow-2xl p-4 md:p-0">
             <Link href="/products?filter=black-friday" className="block w-full h-full">
-              <div className="relative aspect-[1/1] w-full h-full overflow-hidden rounded-lg group">
+              {/* The div below now relies on w-full and aspect-[1/1] for its dimensions. h-full was removed. */}
+              <div className="relative aspect-[1/1] w-full overflow-hidden rounded-lg group">
                 <Image
-                  src="/images/banners/black-friday.png" 
+                  src="/images/banners/black-friday.png"
                   alt="Black Friday Sale Banner"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
                   className="object-contain group-hover:scale-105 transition-transform duration-500"
                   data-ai-hint="black friday sale"
+                  priority 
                 />
               </div>
             </Link>
@@ -74,5 +75,3 @@ const BlackFridayDeals: React.FC = () => {
 };
 
 export default BlackFridayDeals;
-
-
