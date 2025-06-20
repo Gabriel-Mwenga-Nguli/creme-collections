@@ -64,7 +64,7 @@ const slidesData: Slide[] = [
     buttonText: 'Explore Home',
     buttonLink: '/products/category/home-living',
     textAlign: 'right',
-    textColor: 'text-slate-800', 
+    textColor: 'text-white', 
     overlayColor: 'bg-amber-100/30',
     titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
     subtitleSize: 'text-lg sm:text-xl md:text-2xl',
