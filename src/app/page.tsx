@@ -264,8 +264,6 @@ export default async function HomePage() {
                   dataAiHint={product.dataAiHint}
                   fixedOfferPrice={product.offerPrice}
                   fixedOriginalPrice={product.originalPrice}
-                  rating={product.rating}
-                  reviewsCount={product.reviewsCount}
                 />
               ))}
             </div>
@@ -311,7 +309,7 @@ export default async function HomePage() {
 
       <section className="py-12 md:py-20 bg-background animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out delay-700" id="newsletter-cta">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-xl md:max-w-2xl mx-auto text-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-8 md:p-12 lg:p-16 rounded-2xl shadow-xl border border-primary/20">
+          <div className="mx-auto text-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-8 md:p-12 lg:p-16 rounded-2xl shadow-xl border border-primary/20">
             <Mail className="w-12 h-12 sm:w-14 sm:h-14 text-primary mb-5 mx-auto" />
             <h2 className="text-3xl md:text-4xl font-bold text-foreground sm:text-5xl font-headline mb-4">
               Stay Updated with Creme Collections
@@ -319,7 +317,7 @@ export default async function HomePage() {
             <p className="text-muted-foreground mb-8 text-base md:text-lg">
               Get the latest deals, new arrivals, and special offers directly to your inbox.
             </p>
-            <form className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-lg mx-auto">
+            <form className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-2xl mx-auto">
               <Input
                 type="email"
                 placeholder="Enter your email address"
