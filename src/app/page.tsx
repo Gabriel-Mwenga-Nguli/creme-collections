@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingBag, Zap, Award, Truck, Users, Mail, ShieldCheck, Gift, Percent, Smartphone, Shirt, Home as HomeIconLucide, Briefcase, Package } from 'lucide-react';
+import { ShoppingBag, Zap, Award, Truck, Users, Mail, ShieldCheck, Gift, Percent, Smartphone, Shirt, Home as HomeIconLucide, Briefcase, Package, Power } from 'lucide-react';
 import ProductCard from '@/components/features/home/product-card';
 import WeeklyDealsSlider from '@/components/features/home/weekly-deals-slider';
 import { getFeaturedProducts, getWeeklyDeals } from '@/services/productService';
@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import NewsletterPopup from '@/components/features/home/NewsletterPopup';
 import ServicesHighlight from '@/components/features/home/ServicesHighlight';
 import PromotionalOfferSlider, { type PromoSlideProps } from '@/components/features/home/PromotionalOfferSlider';
+import { cn } from '@/lib/utils';
 
 
 const categoryHighlights = [
@@ -26,7 +27,7 @@ const promotionalBannersData = [
     description: "Massive discounts up to 50% off. Limited time only!",
     image: "/images/promos/flash-sale.png",
     dataAiHint: "flash sale discount",
-    overlayColor: "bg-red-600/60", // Adjusted for visibility
+    overlayColor: "bg-red-700/60", 
     textColor: "text-white",
     href: "/products?filter=sale",
     buttonText: "Shop Flash Sale"
@@ -36,7 +37,7 @@ const promotionalBannersData = [
     description: "All your essentials for the new term. Notebooks, bags, & more!",
     image: "/images/promos/back-to-school.png",
     dataAiHint: "school supplies",
-    overlayColor: "bg-sky-700/60", // Adjusted for visibility
+    overlayColor: "bg-sky-800/60", 
     textColor: "text-white",
     href: "/products/category/books-office-stationery/school-supplies",
     buttonText: "Get School Ready"
@@ -46,7 +47,7 @@ const promotionalBannersData = [
     description: "Discover the latest trends and freshest products added just for you.",
     image: "/images/banners/promo1.png",
     dataAiHint: "new products showcase",
-    overlayColor: "bg-slate-800/50",
+    overlayColor: "bg-slate-800/60",
     textColor: "text-white",
     href: "/products?filter=new",
     buttonText: "Explore New In"
@@ -56,7 +57,7 @@ const promotionalBannersData = [
     description: "Unique finds and special items you won't get anywhere else.",
     image: "/images/banners/promo2.png",
     dataAiHint: "exclusive items",
-    overlayColor: "bg-purple-700/50", // Adjusted for visibility
+    overlayColor: "bg-purple-800/50", 
     textColor: "text-white",
     href: "/products?filter=exclusive",
     buttonText: "Discover Exclusives"
@@ -76,12 +77,13 @@ const samplePromoSliderData: PromoSlideProps[] = [
     title: 'Unlock Ksh 500',
     subtitle: 'Off Your First Order',
     code: 'KARIBU5',
-    terms: '*Minimum Spend: Ksh 1,500 | Valid Once Per User | T&C Apply',
-    backgroundImage: '/images/promos/promo-bg-dark-blue.png',
+    terms: '*Min Spend: Ksh 1,500 | T&C Apply',
+    backgroundImage: '/images/promos/promo-bg-dark-blue.png', 
     dataAiHint: 'first order discount',
     foregroundColor: 'text-white',
-    accentColor: 'bg-red-500',
-    href: '/register'
+    accentColor: 'text-red-500', 
+    href: '/register',
+    buttonText: 'Sign Up & Save'
   },
   {
     type: 'tieredDiscount',
@@ -92,53 +94,58 @@ const samplePromoSliderData: PromoSlideProps[] = [
       { amount: 1000, spend: 10000, maxSpend: -1 },
     ],
     code: 'WHOA',
-    terms: '*Valid Once Per User | T&C Apply',
-    backgroundImage: '/images/promos/promo-bg-blue-gradient.png',
+    terms: '*Limited Time Offer | T&C Apply',
+    backgroundImage: '/images/promos/promo-bg-blue-gradient.png', 
     dataAiHint: 'tiered discount offer',
     foregroundColor: 'text-white',
-    href: '/products'
+    accentColor: 'text-yellow-400', 
+    href: '/products',
+    buttonText: 'Shop Now'
   },
   {
     type: 'revealCode',
     title: 'Get Upto 10% Off',
-    subtitle: 'On Selected Products',
+    subtitle: 'On Selected Electronics',
     actionText: 'TAP TO REVEAL',
     codePlaceholder: 'CODE',
     productImage: '/images/banners/electronics.png',
     dataAiHint: 'electronics discount',
     backgroundColor: 'bg-amber-50',
     foregroundColor: 'text-slate-700',
-    accentColor: 'text-red-600',
-    href: '/products/category/electronics'
+    accentColor: 'text-red-600 border-red-500', 
+    href: '/products/category/electronics',
+    buttonText: 'View Electronics'
   },
   {
     type: 'revealCode',
     title: 'Get Upto 10% Off',
-    subtitle: 'On Bundle Products',
+    subtitle: 'On Home Essentials',
     actionText: 'TAP TO REVEAL',
     codePlaceholder: 'CODE',
     productImage: '/images/banners/home.png',
     dataAiHint: 'home products bundle',
-    backgroundColor: 'bg-amber-50',
+    backgroundColor: 'bg-teal-50',
     foregroundColor: 'text-slate-700',
-    accentColor: 'text-red-600',
-    href: '/products?filter=bundles'
+    accentColor: 'text-green-600 border-green-500', 
+    href: '/products/category/home-living',
+    buttonText: 'Shop Home'
   },
   {
     type: 'freshSavers',
-    title: 'Freshness That Delivers!',
-    subtitle: 'Fruits, Veggies, Bakery, Meat & More',
+    title: 'Fresh Savers!',
+    subtitle: 'Fruits, Veggies, Bakery & More',
     items: [
       { name: 'Apples', price: 349, oldPrice: 499, image: '/images/promos/green-apple.png', dataAiHint: 'green apple' },
       { name: 'Lamb Leg', price: 1310, oldPrice: 1649, image: '/images/promos/fresh-meat.png', dataAiHint: 'lamb meat' },
     ],
-    logoImage: '/images/promos/fresh-savers-logo.png',
+    logoImage: '/images/promos/fresh-savers-logo.png', 
     dataAiHint: 'fresh food grocery',
     topColor: 'bg-red-600',
     bottomColor: 'bg-sky-200',
-    foregroundColor: 'text-white',
-    priceColor: 'text-red-700',
-    href: '/products/category/groceries/fresh-produce'
+    foregroundColor: 'text-white', 
+    priceColor: 'text-red-700', 
+    href: '/products/category/groceries/fresh-produce',
+    buttonText: 'Shop Groceries'
   },
 ];
 
@@ -209,12 +216,12 @@ export default async function HomePage() {
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                         data-ai-hint={banner.dataAiHint}
                       />
-                      <div className={`absolute inset-0 ${banner.overlayColor || 'bg-black/30'} transition-opacity duration-300 group-hover:opacity-90`} />
+                      <div className={cn("absolute inset-0 transition-opacity duration-300 group-hover:opacity-90", banner.overlayColor || 'bg-black/40')} />
                   </div>
                   <div className="relative z-10 flex flex-col justify-between flex-grow p-6 md:p-8">
                     <div>
-                      <h3 className={`text-3xl md:text-4xl font-extrabold ${banner.textColor} font-headline drop-shadow-lg leading-tight`}>{banner.title}</h3>
-                      <p className={`mt-3 text-base md:text-lg ${banner.textColor} opacity-90 max-w-xs drop-shadow-lg`}>{banner.description}</p>
+                      <h3 className={cn("text-3xl md:text-4xl font-extrabold font-headline drop-shadow-lg leading-tight", banner.textColor || 'text-white')}>{banner.title}</h3>
+                      <p className={cn("mt-3 text-base md:text-lg opacity-90 max-w-xs drop-shadow-lg", banner.textColor || 'text-white')}>{banner.description}</p>
                     </div>
                     <Button variant={index % 2 === 0 ? "default" : "secondary"} size="lg" className="mt-6 w-fit self-start text-base px-7 py-3.5 font-semibold group-hover:bg-opacity-90 transition-transform duration-300 group-hover:scale-105" aria-label={banner.buttonText}>
                        {banner.buttonText} <ShoppingBag className="ml-2.5 h-5 w-5" />
@@ -230,11 +237,11 @@ export default async function HomePage() {
       <section className="py-10 md:py-16 bg-primary/5 animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out delay-300" id="weekly-deals">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center mb-10 md:mb-14">
-            <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-primary mr-3 sm:mr-4" />
+            <Zap className="w-10 h-10 sm:w-12 sm:h-12 text-primary mr-3 sm:mr-4" />
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-center text-foreground md:text-5xl font-headline">
               Flash Deals of the Week!
             </h2>
-            <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-primary ml-3 sm:ml-4" />
+            <Zap className="w-10 h-10 sm:w-12 sm:h-12 text-primary ml-3 sm:ml-4" />
           </div>
           <WeeklyDealsSlider deals={weeklyDealsData} />
         </div>
@@ -257,6 +264,8 @@ export default async function HomePage() {
                   dataAiHint={product.dataAiHint}
                   fixedOfferPrice={product.offerPrice}
                   fixedOriginalPrice={product.originalPrice}
+                  rating={product.rating}
+                  reviewsCount={product.reviewsCount}
                 />
               ))}
             </div>
@@ -291,7 +300,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 text-center">
             {whyChooseUsFeatures.map((feature) => (
               <div key={feature.title} className="flex flex-col items-center p-6 md:p-8 bg-card rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:border-primary border-2 border-transparent">
-                <feature.icon className="w-12 h-12 sm:w-14 sm:h-14 text-primary mb-5" />
+                <feature.icon className="w-12 h-12 sm:w-14 sm:h-14 text-primary mb-5 transition-transform duration-300 group-hover:scale-110" />
                 <h3 className="text-xl md:text-2xl font-semibold text-foreground mb-2 font-headline">{feature.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
               </div>
@@ -303,7 +312,7 @@ export default async function HomePage() {
       <section className="py-12 md:py-20 bg-background animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out delay-700" id="newsletter-cta">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-xl md:max-w-2xl mx-auto text-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-8 md:p-12 lg:p-16 rounded-2xl shadow-xl border border-primary/20">
-            <Mail className="w-12 h-12 sm:w-14 sm:w-14 text-primary mb-5 mx-auto" />
+            <Mail className="w-12 h-12 sm:w-14 sm:h-14 text-primary mb-5 mx-auto" />
             <h2 className="text-3xl md:text-4xl font-bold text-foreground sm:text-5xl font-headline mb-4">
               Stay Updated with Creme Collections
             </h2>
