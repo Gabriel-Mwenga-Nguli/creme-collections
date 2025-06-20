@@ -32,11 +32,11 @@ const BlackFridayDeals: React.FC = () => {
             <Link href="/products?filter=black-friday" className="block w-full h-full">
               <div className="relative aspect-[1/1] w-full h-full overflow-hidden rounded-lg group">
                 <Image
-                  src="/images/banners/black-friday.png" // Updated image path
+                  src="/images/banners/black-friday.png" 
                   alt="Black Friday Sale Banner"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-contain group-hover:scale-105 transition-transform duration-500" // Ensure object-contain
+                  className="object-contain group-hover:scale-105 transition-transform duration-500"
                   data-ai-hint="black friday sale"
                 />
               </div>
@@ -74,4 +74,5 @@ const BlackFridayDeals: React.FC = () => {
 };
 
 export default BlackFridayDeals;
+
 
