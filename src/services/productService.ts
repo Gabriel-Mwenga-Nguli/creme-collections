@@ -4,14 +4,13 @@
 import type { ProductCardProps } from '@/components/features/home/product-card';
 import type { DealProduct } from '@/components/features/home/weekly-deals-slider';
 import { db } from '@/lib/firebase';
+import { getProductsFromLoyverse, getProductByIdFromLoyverse } from './loyverseService'; // Import Loyverse functions
 import { collection, query, where, getDocs, limit, doc, getDoc, addDoc, updateDoc, serverTimestamp, Timestamp, type DocumentSnapshot, type QueryDocumentSnapshot, orderBy } from 'firebase/firestore';
 
 // Initial check for db initialization
 if (!db) {
   const errorMessage = "[ProductService Critical Error] Firestore 'db' object is NULL or undefined at module load. This means Firebase did not initialize correctly in 'firebase.ts' or the import failed. Product service cannot function.";
   console.error(errorMessage);
-  // Throwing an error here will stop further execution and should be visible in server logs.
-  // This is preferable to functions failing silently or hanging later.
   throw new Error(errorMessage);
 }
 
@@ -40,14 +39,14 @@ export interface Product {
   isFeatured?: boolean;
   isWeeklyDeal?: boolean;
   createdAt?: Timestamp;
+  loyverseId?: string; // To store Loyverse item ID
+  sku?: string;
 }
 
 
 function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Product {
   const data = document.data();
   if (!data) {
-    // This case should ideally not be hit if document.exists() was checked before calling.
-    // If it's a QueryDocumentSnapshot, data() should always return valid data.
     console.error(`[mapDocToProduct] Document data is undefined for document ID: ${document.id}`);
     throw new Error(`Document data is undefined for document ID: ${document.id}`);
   }
@@ -56,10 +55,10 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
     name: data.name || 'Unnamed Product',
     description: data.description || '',
     longDescription: data.longDescription || data.description || 'No detailed description available for this product.',
-    image: data.image || '/images/banners/electronics.png', // Updated fallback
+    image: data.image || '/images/banners/electronics.png',
     images: data.images && Array.isArray(data.images) && data.images.length > 0
             ? data.images
-            : (data.image ? [data.image] : ['/images/banners/electronics.png']), // Updated fallback
+            : (data.image ? [data.image] : ['/images/banners/electronics.png']),
     dataAiHint: data.dataAiHint || 'product',
     offerPrice: typeof data.offerPrice === 'number' ? data.offerPrice : 0,
     originalPrice: typeof data.originalPrice === 'number' ? data.originalPrice : undefined,
@@ -75,96 +74,137 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
     isFeatured: typeof data.isFeatured === 'boolean' ? data.isFeatured : false,
     isWeeklyDeal: typeof data.isWeeklyDeal === 'boolean' ? data.isWeeklyDeal : false,
     createdAt: data.createdAt instanceof Timestamp ? data.createdAt : undefined,
+    loyverseId: data.loyverseId || undefined,
+    sku: data.sku || undefined,
   };
+}
+
+async function fetchProductsFromFirestore(
+  categorySlugParam?: string,
+  subCategorySlugParam?: string,
+  customQueryConstraints: any[] = [], // For isFeatured, isWeeklyDeal
+  limitParam?: number
+): Promise<Product[]> {
+  console.log('[fetchProductsFromFirestore Call] Value of db at function call:', db === null ? 'null (ERROR)' : 'VALID');
+  if (!db) {
+    console.error("Firestore 'db' object is not initialized. Cannot fetch products from Firestore.");
+    return [];
+  }
+  let queryDescription = "products from Firestore";
+  try {
+    const productsRef = collection(db, 'products');
+    let qConstraints = [orderBy('createdAt', 'desc')]; // Default sort
+    
+    if (categorySlugParam) {
+      qConstraints.push(where('categorySlug', '==', categorySlugParam));
+      queryDescription += ` with categorySlug='${categorySlugParam}'`;
+    }
+    if (subCategorySlugParam) {
+      qConstraints.push(where('subCategorySlug', '==', subCategorySlugParam));
+      queryDescription += ` and subCategorySlug='${subCategorySlugParam}'`;
+    }
+    
+    qConstraints.push(...customQueryConstraints); // Add constraints for featured/weekly deals
+    
+    if (limitParam) {
+      qConstraints.push(limit(limitParam));
+      queryDescription += ` limited to ${limitParam}`;
+    }
+
+    const q = query(productsRef, ...qConstraints);
+    console.log(`[fetchProductsFromFirestore Call] Constructed query for: ${queryDescription}`);
+    
+    const querySnapshot = await getDocs(q);
+    console.log(`[fetchProductsFromFirestore Call] Firestore query returned ${querySnapshot.docs.length} documents.`);
+    
+    const products = querySnapshot.docs.map(docSn => mapDocToProduct(docSn));
+    if (products.length === 0) {
+        console.warn(`[fetchProductsFromFirestore Call] No products found in Firestore for query: ${queryDescription}.`);
+    }
+    return products;
+  } catch (error: any) {
+    console.error(`[fetchProductsFromFirestore Call] Error fetching ${queryDescription}: `, error.message);
+    // Handle specific Firestore errors if needed
+    return [];
+  }
 }
 
 
 export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
-  console.log('[getFeaturedProducts Call] Value of db at function call:', db === null ? 'null (ERROR)' : 'VALID');
-  if (!db) {
-    // This check is now somewhat redundant due to the module-level check, but kept for safety in direct calls.
-    console.error("Firestore 'db' object is not initialized in getFeaturedProducts. Cannot fetch featured products.");
-    return [];
-  }
+  console.log('[getFeaturedProducts Call] Attempting to fetch from Loyverse first.');
   try {
-    const productsRef = collection(db, 'products');
-    const q = query(productsRef, where('isFeatured', '==', true), orderBy('createdAt', 'desc'), limit(8));
-    const querySnapshot = await getDocs(q);
-
-    const products = querySnapshot.docs.map(doc => {
-      const productData = mapDocToProduct(doc);
-      return {
-        id: productData.id,
-        name: productData.name,
-        description: productData.description,
-        image: productData.image,
-        dataAiHint: productData.dataAiHint,
-        fixedOfferPrice: productData.offerPrice,
-        fixedOriginalPrice: productData.originalPrice,
-      };
-    });
-    console.log(`[getFeaturedProducts Call] Successfully fetched ${products.length} featured products.`);
-    return products;
-  } catch (error: any) {
-    console.error("[getFeaturedProducts Call] Error fetching featured products: ", error.message);
-    if (error.code === 'permission-denied') {
-      console.error(`[getFeaturedProducts Call] FIREBASE PERMISSION DENIED. Please check your Firestore security rules to allow read access to the 'products' collection. Path: /products. Example rule: "allow read: if true;"`);
-    } else if (error.code === 'failed-precondition' && error.message.includes('index')) {
-      console.error("[getFeaturedProducts Call] Firestore query requires an index. Please create it using the link provided by Firebase in the error details, or check your Firestore console.");
-      console.error("[getFeaturedProducts Call] Original Firebase error message for index:", error.message);
+    const loyverseProducts = await getProductsFromLoyverse({ featured: true, limit: 8 });
+    if (loyverseProducts && loyverseProducts.length > 0) {
+      console.log(`[getFeaturedProducts Call] Fetched ${loyverseProducts.length} featured products from Loyverse.`);
+      return loyverseProducts.map(p => ({
+        id: p.id, name: p.name, description: p.description, image: p.image,
+        dataAiHint: p.dataAiHint, fixedOfferPrice: p.offerPrice, fixedOriginalPrice: p.originalPrice,
+        rating: p.rating, reviewsCount: p.reviewsCount,
+      }));
     }
-    return [];
+    console.log('[getFeaturedProducts Call] No featured products from Loyverse or service returned empty. Falling back to Firestore.');
+  } catch (e) {
+    console.error('[getFeaturedProducts Call] Error fetching from Loyverse, falling back to Firestore:', e);
   }
+
+  // Fallback to Firestore
+  const firestoreProducts = await fetchProductsFromFirestore(undefined, undefined, [where('isFeatured', '==', true)], 8);
+  return firestoreProducts.map(p => ({
+    id: p.id, name: p.name, description: p.description, image: p.image,
+    dataAiHint: p.dataAiHint, fixedOfferPrice: p.offerPrice, fixedOriginalPrice: p.originalPrice,
+    rating: p.rating, reviewsCount: p.reviewsCount,
+  }));
 }
 
 export async function getWeeklyDeals(): Promise<DealProduct[]> {
-  console.log('[getWeeklyDeals Call] Value of db at function call:', db === null ? 'null (ERROR)' : 'VALID');
-  if (!db) {
-    console.error("Firestore 'db' object is not initialized in getWeeklyDeals. Cannot fetch weekly deals.");
-    return [];
-  }
+  console.log('[getWeeklyDeals Call] Attempting to fetch from Loyverse first.');
   try {
-    const productsRef = collection(db, 'products');
-    const q = query(productsRef, where('isWeeklyDeal', '==', true), orderBy('createdAt', 'desc'), limit(8));
-    const querySnapshot = await getDocs(q);
-
-    const deals = querySnapshot.docs.map(doc => {
-      const productData = mapDocToProduct(doc);
-      return {
-        id: productData.id,
-        name: productData.name,
-        description: productData.description,
-        image: productData.image,
-        dataAiHint: productData.dataAiHint,
-        fixedOfferPrice: productData.offerPrice,
-        fixedOriginalPrice: productData.originalPrice || productData.offerPrice * 1.2,
-      };
-    });
-    console.log(`[getWeeklyDeals Call] Successfully fetched ${deals.length} weekly deals.`);
-    return deals;
-  } catch (error: any) {
-    console.error("[getWeeklyDeals Call] Error fetching weekly deals: ", error.message);
-    if (error.code === 'permission-denied') {
-      console.error(`[getWeeklyDeals Call] FIREBASE PERMISSION DENIED. Please check your Firestore security rules to allow read access to the 'products' collection. Path: /products. Example rule: "allow read: if true;"`);
-    } else if (error.code === 'failed-precondition' && error.message.includes('index')) {
-      console.error("[getWeeklyDeals Call] Firestore query requires an index. Please create it using the link provided by Firebase in the error details, or check your Firestore console.");
-      console.error("[getWeeklyDeals Call] Original Firebase error message for index:", error.message);
+    const loyverseProducts = await getProductsFromLoyverse({ weeklyDeal: true, limit: 8 });
+    if (loyverseProducts && loyverseProducts.length > 0) {
+      console.log(`[getWeeklyDeals Call] Fetched ${loyverseProducts.length} weekly deals from Loyverse.`);
+      return loyverseProducts.map(p => ({
+        id: p.id, name: p.name, description: p.description, image: p.image, dataAiHint: p.dataAiHint,
+        fixedOfferPrice: p.offerPrice, fixedOriginalPrice: p.originalPrice || p.offerPrice * 1.2,
+        rating: p.rating, reviewsCount: p.reviewsCount,
+      }));
     }
-    return [];
+    console.log('[getWeeklyDeals Call] No weekly deals from Loyverse or service returned empty. Falling back to Firestore.');
+  } catch (e) {
+    console.error('[getWeeklyDeals Call] Error fetching from Loyverse, falling back to Firestore:', e);
   }
+
+  // Fallback to Firestore
+  const firestoreProducts = await fetchProductsFromFirestore(undefined, undefined, [where('isWeeklyDeal', '==', true)], 8);
+  return firestoreProducts.map(p => ({
+    id: p.id, name: p.name, description: p.description, image: p.image, dataAiHint: p.dataAiHint,
+    fixedOfferPrice: p.offerPrice, fixedOriginalPrice: p.originalPrice || p.offerPrice * 1.2, // Ensure original price for deals
+    rating: p.rating, reviewsCount: p.reviewsCount,
+  }));
 }
 
-export interface ProductDetailsPageData extends Product {
-}
+export interface ProductDetailsPageData extends Product {}
 
 export async function getProductDetailsById(productId: string): Promise<ProductDetailsPageData | null> {
-  console.log('[getProductDetailsById Call] Value of db for ID', productId, ':', db === null ? 'null (ERROR)' : 'VALID');
-  if (!db) {
-    console.error("Firestore 'db' object is not initialized. Cannot fetch product details for ID:", productId);
-    return null;
-  }
+  console.log(`[getProductDetailsById Call - ID: ${productId}] Attempting to fetch from Loyverse first.`);
   if (!productId || typeof productId !== 'string') {
     console.error("Invalid productId provided to getProductDetailsById:", productId);
+    return null;
+  }
+  try {
+    const loyverseProduct = await getProductByIdFromLoyverse(productId);
+    if (loyverseProduct) {
+      console.log(`[getProductDetailsById Call - ID: ${productId}] Fetched product from Loyverse.`);
+      return loyverseProduct as ProductDetailsPageData;
+    }
+    console.log(`[getProductDetailsById Call - ID: ${productId}] Product not found in Loyverse or service returned null. Falling back to Firestore.`);
+  } catch (e) {
+    console.error(`[getProductDetailsById Call - ID: ${productId}] Error fetching from Loyverse, falling back to Firestore:`, e);
+  }
+
+  // Fallback to Firestore
+  console.log(`[getProductDetailsById Call - ID: ${productId}] Fetching from Firestore.`);
+  if (!db) {
+    console.error("Firestore 'db' object is not initialized. Cannot fetch product details for ID:", productId);
     return null;
   }
   try {
@@ -174,61 +214,60 @@ export async function getProductDetailsById(productId: string): Promise<ProductD
     if (productSnap.exists()) {
       return mapDocToProduct(productSnap) as ProductDetailsPageData;
     } else {
-      console.warn(`No such product document with ID: ${productId}`);
+      console.warn(`[getProductDetailsById Call - ID: ${productId}] No such product document in Firestore.`);
       return null;
     }
   } catch (error) {
-    console.error(`Error fetching product details for ID ${productId}: `, error);
+    console.error(`[getProductDetailsById Call - ID: ${productId}] Error fetching product details from Firestore: `, error);
     return null;
   }
 }
 
 export async function getAllProducts(categorySlugParam?: string, subCategorySlugParam?: string): Promise<Product[]> {
-  console.log('[getAllProducts Call] Value of db:', db === null ? 'null (ERROR)' : 'VALID');
-  console.log(`[getAllProducts Call] Received params: categorySlugParam='${categorySlugParam}', subCategorySlugParam='${subCategorySlugParam}'`);
+  console.log(`[getAllProducts Call] Params: category='${categorySlugParam}', subCategory='${subCategorySlugParam}'. Attempting Loyverse first.`);
+  // Note: Loyverse filtering for category/subcategory might be complex (e.g., by category_id).
+  // The conceptual getProductsFromLoyverse might not support this level of filtering yet.
+  // For now, if categorySlugParam exists, we might primarily rely on Firestore,
+  // or the Loyverse service would need to implement robust filtering.
+  // For this example, we'll assume getProductsFromLoyverse does its best and we post-filter or it handles it.
 
-  if (!db) {
-    console.error("Firestore 'db' object is not initialized. Cannot fetch products.");
-    return [];
-  }
-  let queryDescription = "all products";
+  let loyverseProducts: Product[] = [];
   try {
-    const productsRef = collection(db, 'products');
-    let q;
+    // A more advanced Loyverse service might take category/subcategory slugs as filters
+    loyverseProducts = await getProductsFromLoyverse({ 
+        // categoryId: categorySlugParam, // If Loyverse API supports filtering by slug or needs ID mapping
+        // subCategoryId: subCategorySlugParam 
+    });
 
-    if (categorySlugParam && subCategorySlugParam) {
-       queryDescription = `products with categorySlug='${categorySlugParam}' AND subCategorySlug='${subCategorySlugParam}'`;
-       q = query(productsRef, where('categorySlug', '==', categorySlugParam), where('subCategorySlug', '==', subCategorySlugParam), orderBy('name', 'asc'));
-    } else if (categorySlugParam) {
-      queryDescription = `products with categorySlug='${categorySlugParam}'`;
-      q = query(productsRef, where('categorySlug', '==', categorySlugParam), orderBy('name', 'asc'));
+    if (loyverseProducts && loyverseProducts.length > 0) {
+      console.log(`[getAllProducts Call] Fetched ${loyverseProducts.length} products from Loyverse.`);
+      // Apply filtering if not handled by the Loyverse service itself (conceptual)
+      let filteredLoyverseProducts = loyverseProducts;
+      if (categorySlugParam) {
+        filteredLoyverseProducts = filteredLoyverseProducts.filter(p => p.categorySlug === categorySlugParam);
+      }
+      if (subCategorySlugParam) {
+        filteredLoyverseProducts = filteredLoyverseProducts.filter(p => p.subCategorySlug === subCategorySlugParam);
+      }
+      if (filteredLoyverseProducts.length > 0) {
+        return filteredLoyverseProducts;
+      }
+      console.log('[getAllProducts Call] Loyverse products fetched, but none matched filters. Falling back to Firestore for specific category.');
     } else {
-      q = query(productsRef, orderBy('name', 'asc'));
+      console.log('[getAllProducts Call] No products from Loyverse or service returned empty. Falling back to Firestore.');
     }
-    console.log(`[getAllProducts Call] Constructed query for: ${queryDescription}`);
-
-    const querySnapshot = await getDocs(q);
-    console.log(`[getAllProducts Call] Query returned ${querySnapshot.docs.length} documents.`);
-
-    const products = querySnapshot.docs.map(docSn => mapDocToProduct(docSn));
-    if (products.length === 0) {
-        console.warn(`[getAllProducts Call] No products found for query: ${queryDescription}. Check Firestore data, slugs, and ensure necessary Firestore indexes are created if this is unexpected.`);
-    }
-    return products;
-  } catch (error: any) {
-    console.error(`[getAllProducts Call] Error fetching products for query "${queryDescription}": `, error.message);
-    if (error.code === 'permission-denied') {
-      console.error(`[getAllProducts Call] FIREBASE PERMISSION DENIED. Please check your Firestore security rules to allow read access to the 'products' collection. Path: /products. Example rule: "allow read: if true;"`);
-    } else if (error.code === 'failed-precondition' && error.message.includes('index')) {
-      console.error(`[getAllProducts Call] Firestore query requires an index. Link from Firebase: ${error.message.substring(error.message.indexOf('https://'))}`);
-      console.error("[getAllProducts Call] Please create the required composite index in your Firebase console.");
-    }
-    return [];
+  } catch (e) {
+    console.error('[getAllProducts Call] Error fetching from Loyverse, falling back to Firestore:', e);
   }
+
+  // Fallback to Firestore
+  return fetchProductsFromFirestore(categorySlugParam, subCategorySlugParam, [], undefined);
 }
 
 export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>): Promise<string | null> {
-    console.log('[addProduct Call] Value of db at function call:', db === null ? 'null (ERROR)' : 'VALID');
+    // For now, product additions/updates will go to Firestore.
+    // A full Loyverse integration would need to decide if products are also pushed to Loyverse.
+    console.log('[addProduct Call] Adding product to Firestore. Loyverse sync not implemented for add.');
     if (!db) {
         console.error("Firestore 'db' object is not initialized. Cannot add product.");
         return null;
@@ -247,13 +286,14 @@ export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>)
         const docRef = await addDoc(productsRef, newProductData);
         return docRef.id;
     } catch (error) {
-        console.error("Error adding product:", error);
+        console.error("Error adding product to Firestore:", error);
         return null;
     }
 }
 
 export async function updateProduct(productId: string, productData: Partial<Omit<Product, 'id' | 'createdAt'>>): Promise<boolean> {
-    console.log('[updateProduct Call] Value of db for ID', productId, ':', db === null ? 'null (ERROR)' : 'VALID');
+    // Similar to addProduct, updates go to Firestore. Loyverse sync would be an additional step.
+    console.log(`[updateProduct Call - ID: ${productId}] Updating product in Firestore. Loyverse sync not implemented for update.`);
     if (!db) {
         console.error("Firestore 'db' object is not initialized. Cannot update product.");
         return false;
@@ -273,9 +313,7 @@ export async function updateProduct(productId: string, productData: Partial<Omit
         await updateDoc(productRef, updateData);
         return true;
     } catch (error) {
-        console.error(`Error updating product ${productId}:`, error);
+        console.error(`Error updating product ${productId} in Firestore:`, error);
         return false;
     }
 }
-
-    
