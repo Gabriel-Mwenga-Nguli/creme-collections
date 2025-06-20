@@ -22,34 +22,55 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
   const [canScroll, setCanScroll] = useState(false);
 
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      const { scrollWidth, offsetWidth } = scrollContainerRef.current;
-      setCanScroll(scrollWidth > offsetWidth);
+    const container = scrollContainerRef.current;
+    if (container) {
+      const checkScrollability = () => {
+         setCanScroll(container.scrollWidth > container.clientWidth);
+      };
+      checkScrollability(); // Initial check
+      window.addEventListener('resize', checkScrollability); // Recheck on resize
+
+      // Observe changes to children in case deals are loaded dynamically
+      const observer = new MutationObserver(checkScrollability);
+      observer.observe(container, { childList: true, subtree: true });
+
+      return () => {
+        window.removeEventListener('resize', checkScrollability);
+        observer.disconnect();
+      };
     }
-  }, [deals]); 
+  }, [deals]); // Re-run if deals array itself changes
 
   const advanceSlide = useCallback(() => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const { scrollLeft, scrollWidth, offsetWidth } = container;
-      const maxScrollLeft = scrollWidth - offsetWidth;
+    const container = scrollContainerRef.current;
+    if (container) {
+        const firstCardWrapper = container.querySelector('div.snap-center'); // Target the card wrapper
+        if (!firstCardWrapper) return;
 
-      if (maxScrollLeft <= 0) return; 
+        const cardStyle = window.getComputedStyle(firstCardWrapper);
+        const cardWidth = firstCardWrapper.clientWidth; 
+        
+        // The slider uses `space-x-4`, which is 1rem (16px) for the gap.
+        // This could be made more dynamic if Tailwind config was accessible here.
+        const gap = 16; 
+        const scrollStep = cardWidth + gap; 
 
-      let targetScrollLeft = scrollLeft + offsetWidth; 
+        const { scrollLeft, scrollWidth, clientWidth } = container;
+        const maxScrollLeft = scrollWidth - clientWidth;
 
-      if (targetScrollLeft >= maxScrollLeft) {
-        if (scrollLeft >= maxScrollLeft -1 || scrollLeft === 0 && targetScrollLeft > maxScrollLeft) {
-          targetScrollLeft = 0; 
-        } else {
-          targetScrollLeft = maxScrollLeft; 
+        if (maxScrollLeft <= 1) return; 
+
+        let nextScrollPosition = scrollLeft + scrollStep;
+
+        // If current scroll is at or very near the end, loop to beginning
+        if (scrollLeft >= maxScrollLeft - gap/2 ) { 
+            nextScrollPosition = 0; 
+        } else if (nextScrollPosition > maxScrollLeft) {
+            // If overshooting, scroll to the very end to make last items visible before looping next time
+            nextScrollPosition = maxScrollLeft; 
         }
-      }
-      
-      container.scrollTo({
-        left: targetScrollLeft,
-        behavior: 'smooth',
-      });
+        
+        container.scrollTo({ left: nextScrollPosition, behavior: 'smooth' });
     }
   }, []);
 
@@ -65,7 +86,7 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
   }, [isHovering, advanceSlide]);
 
   useEffect(() => {
-    if (canScroll) {
+    if (canScroll && deals.length > 1) { // Only scroll if scrollable and more than one deal
       startAutoScroll();
     } else {
       if (intervalRef.current) {
@@ -77,22 +98,30 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [canScroll, startAutoScroll]);
+  }, [canScroll, startAutoScroll, deals.length]);
 
   const manualScroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = scrollContainerRef.current.offsetWidth * 0.75;
-      scrollContainerRef.current.scrollBy({
+    const container = scrollContainerRef.current;
+    if (container) {
+      const firstCardWrapper = container.querySelector('div.snap-center');
+      if (!firstCardWrapper) return;
+      const cardWidth = firstCardWrapper.clientWidth;
+      const gap = 16;
+      const scrollAmount = (cardWidth + gap) * 1; // Scroll by one item slot
+
+      container.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
       });
-      if (canScroll) {
-        startAutoScroll();
+      // Reset auto-scroll timer on manual interaction
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (canScroll && !isHovering && deals.length > 1) {
+         intervalRef.current = setInterval(advanceSlide, 7000); // Slightly longer delay after manual
       }
     }
   };
   
-  const showButtons = canScroll;
+  const showButtons = canScroll && deals.length > 1;
 
   return (
     <div 
@@ -114,6 +143,8 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
               dataAiHint={deal.dataAiHint}
               fixedOfferPrice={deal.fixedOfferPrice}
               fixedOriginalPrice={deal.fixedOriginalPrice}
+              rating={deal.rating}
+              reviewsCount={deal.reviewsCount}
             />
           </div>
         ))}
@@ -145,5 +176,3 @@ const WeeklyDealsSlider: React.FC<WeeklyDealsSliderProps> = ({ deals }) => {
 };
 
 export default WeeklyDealsSlider;
-
-    

@@ -64,7 +64,7 @@ const slidesData: Slide[] = [
     buttonText: 'Explore Home',
     buttonLink: '/products/category/home-living',
     textAlign: 'right',
-    textColor: 'text-slate-800', // Kept as per previous update, assuming it's intentional
+    textColor: 'text-slate-800', 
     overlayColor: 'bg-amber-100/30',
     titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
     subtitleSize: 'text-lg sm:text-xl md:text-2xl',
@@ -109,8 +109,8 @@ const slidesData: Slide[] = [
     buttonText: 'Explore Beauty',
     buttonLink: '/products/category/beauty-personal-care',
     textAlign: 'right',
-    textColor: 'text-white', // Changed for better visibility
-    overlayColor: 'bg-black/30', // Changed for better visibility
+    textColor: 'text-white', 
+    overlayColor: 'bg-black/30', 
     titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
     subtitleSize: 'text-lg sm:text-xl md:text-2xl',
     contentAnimation: 'animate-fade-in-left'
@@ -120,16 +120,32 @@ const slidesData: Slide[] = [
 const HeroSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState(slidesData.length - 1); 
+  const [isAnimating, setIsAnimating] = useState(false); // To prevent rapid clicks during animation
 
   const nextSlide = useCallback(() => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     setPrevIndex(currentIndex);
     setCurrentIndex((prev) => (prev === slidesData.length - 1 ? 0 : prev + 1));
-  }, [currentIndex]);
+    setTimeout(() => setIsAnimating(false), 1000); // Match opacity transition duration
+  }, [currentIndex, isAnimating]);
 
   const prevSlide = useCallback(() => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     setPrevIndex(currentIndex);
     setCurrentIndex((prev) => (prev === 0 ? slidesData.length - 1 : prev - 1));
-  }, [currentIndex]);
+    setTimeout(() => setIsAnimating(false), 1000); // Match opacity transition duration
+  }, [currentIndex, isAnimating]);
+  
+  const goToSlide = useCallback((index: number) => {
+    if (isAnimating || index === currentIndex) return;
+    setIsAnimating(true);
+    setPrevIndex(currentIndex);
+    setCurrentIndex(index);
+    setTimeout(() => setIsAnimating(false), 1000);
+  }, [currentIndex, isAnimating]);
+
 
   useEffect(() => {
     const slideInterval = setInterval(nextSlide, 7000); 
@@ -160,7 +176,7 @@ const HeroSlider = () => {
               style={{ objectFit: 'cover' }}
               priority={index === 0}
               className={cn(
-                "transition-transform duration-[7.5s] ease-linear", // Changed 7500ms to 7.5s
+                "transition-transform duration-[7.5s] ease-linear",
                 index === currentIndex ? 'scale-110 animate-kenburns' : 'scale-100'
               )}
               data-ai-hint={slide.dataAiHint}
@@ -170,23 +186,24 @@ const HeroSlider = () => {
           <div className={`absolute inset-0 ${slide.overlayColor || 'bg-black/30'}`} />
           <div
             className={cn(
-              `absolute inset-0 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center ${textAlignClasses[slide.textAlign || 'left']} ${slide.textColor || 'text-white'} p-6 md:p-12 lg:p-20`,
-              index === currentIndex ? 'animate-fade-in opacity-100' : 'opacity-0',
-              index === prevIndex ? 'animate-fade-out' : '' 
+              `absolute inset-0 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center ${textAlignClasses[slide.textAlign || 'left']} ${slide.textColor || 'text-white'} p-6 md:p-12 lg:p-20`
+              // Animations are now handled by Tailwind keyframes for content
             )}
-            style={{ animationDelay: index === currentIndex ? '0.5s' : '0s' }}
           >
-            <h1 className={cn(`${slide.titleSize || 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl'} font-extrabold drop-shadow-lg font-headline leading-tight max-w-2xl`, index === currentIndex && slide.contentAnimation)}>
+            <h1 className={cn(`${slide.titleSize || 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl'} font-extrabold drop-shadow-lg font-headline leading-tight max-w-2xl`, index === currentIndex ? slide.contentAnimation : 'opacity-0')}
+                style={{animationDelay: index === currentIndex ? '0.3s' : '0s' }}
+            >
               {slide.title}
             </h1>
-            <p className={cn(`${slide.subtitleSize || 'text-lg sm:text-xl md:text-2xl'} mt-4 max-w-lg drop-shadow-lg`, index === currentIndex && slide.contentAnimation)} style={{animationDelay: index === currentIndex ? '0.2s' : '0s' }}>
+            <p className={cn(`${slide.subtitleSize || 'text-lg sm:text-xl md:text-2xl'} mt-4 max-w-lg drop-shadow-lg`, index === currentIndex ? slide.contentAnimation : 'opacity-0')} 
+                style={{animationDelay: index === currentIndex ? '0.5s' : '0s' }}>
               {slide.subtitle}
             </p>
             <Button
               asChild
               size="lg"
-              className={cn("mt-6 md:mt-8 w-fit text-base md:text-lg px-6 md:px-8 py-3 md:py-4 font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95", index === currentIndex && slide.contentAnimation)}
-              style={{animationDelay: index === currentIndex ? '0.4s' : '0s' }}
+              className={cn("mt-6 md:mt-8 w-fit text-base md:text-lg px-6 md:px-8 py-3 md:py-4 font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95", index === currentIndex ? slide.contentAnimation : 'opacity-0')}
+              style={{animationDelay: index === currentIndex ? '0.7s' : '0s' }}
             >
               <Link href={slide.buttonLink}>
                 {slide.buttonText} <ShoppingBag className="ml-2 h-5 w-5" />
@@ -200,6 +217,7 @@ const HeroSlider = () => {
         variant="outline"
         size="icon"
         onClick={prevSlide}
+        disabled={isAnimating}
         aria-label="Previous slide"
         className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white border-none opacity-0 group-hover:opacity-100 transition-opacity rounded-full w-10 h-10 sm:w-12 sm:h-12 focus:opacity-100"
       >
@@ -209,6 +227,7 @@ const HeroSlider = () => {
         variant="outline"
         size="icon"
         onClick={nextSlide}
+        disabled={isAnimating}
         aria-label="Next slide"
         className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white border-none opacity-0 group-hover:opacity-100 transition-opacity rounded-full w-10 h-10 sm:w-12 sm:h-12 focus:opacity-100"
       >
@@ -219,10 +238,8 @@ const HeroSlider = () => {
         {slidesData.map((_, index) => (
           <button
             key={index}
-            onClick={() => {
-              setPrevIndex(currentIndex);
-              setCurrentIndex(index);
-            }}
+            onClick={() => goToSlide(index)}
+            disabled={isAnimating && currentIndex !== index}
             aria-label={`Go to slide ${index + 1}`}
             className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
               index === currentIndex ? 'bg-white scale-125 shadow-md' : 'bg-white/50 hover:bg-white/80'
@@ -233,51 +250,34 @@ const HeroSlider = () => {
       <style jsx global>{`
         @keyframes kenburns {
           0% {
-            transform: scale(1) translate(0, 0);
+            transform: scale(1.05) translate(0, 0); /* Start slightly zoomed */
           }
           100% {
-            transform: scale(1.1) translate(-1%, 1%);
+            transform: scale(1.15) translate(-1%, 1%); /* Zoom in more and pan slightly */
           }
         }
         .animate-kenburns {
           animation: kenburns 7.5s ease-in-out infinite alternate;
         }
-        .animate-fade-in-right {
-            animation: fadeInRight 0.8s ease-out forwards;
-        }
-        .animate-fade-in-left {
-            animation: fadeInLeft 0.8s ease-out forwards;
-        }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.8s ease-out forwards;
-        }
-         .animate-fade-out {
-            animation: fadeOut 0.5s ease-in forwards;
-        }
 
+        /* Content Animations (Tailwind will generate these from animate-in plugin) */
+        /* Ensure you have these keyframes if not using animate-in or similar */
         @keyframes fadeInRight {
-          from { opacity: 0; transform: translateX(30px); }
+          from { opacity: 0; transform: translateX(50px); }
           to { opacity: 1; transform: translateX(0); }
         }
         @keyframes fadeInLeft {
-          from { opacity: 0; transform: translateX(-30px); }
+          from { opacity: 0; transform: translateX(-50px); }
           to { opacity: 1; transform: translateX(0); }
         }
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px); }
+          from { opacity: 0; transform: translateY(50px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-         @keyframes fadeOut {
-          from { opacity: 1; }
-          to { opacity: 0; }
-        }
+        .animate-fade-in-right { animation: fadeInRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .animate-fade-in-left { animation: fadeInLeft 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+
       `}</style>
     </section>
   );

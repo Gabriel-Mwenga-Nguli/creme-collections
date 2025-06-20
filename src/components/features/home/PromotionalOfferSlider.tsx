@@ -1,13 +1,13 @@
 
 "use client";
 
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Ticket, ShoppingBag } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Added this import
+import { cn } from '@/lib/utils';
 
 interface TieredDiscount {
   amount: number;
@@ -53,17 +53,107 @@ interface PromotionalOfferSliderProps {
 
 const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const [canScroll, setCanScroll] = useState(false);
 
-  const scroll = useCallback((direction: 'left' | 'right') => {
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const checkScrollability = () => {
+        setCanScroll(container.scrollWidth > container.clientWidth);
+      };
+      checkScrollability();
+      window.addEventListener('resize', checkScrollability);
+      
+      // MutationObserver to detect changes in child elements (e.g., if promos are dynamically loaded/changed)
+      const observer = new MutationObserver(checkScrollability);
+      observer.observe(container, { childList: true, subtree: true });
+
+      return () => {
+        window.removeEventListener('resize', checkScrollability);
+        observer.disconnect();
+      };
+    }
+  }, [promos]);
+
+
+  const advanceSlide = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const firstCardWrapper = container.querySelector('div > a'); // Get the Link wrapper of the first card
+      if (!firstCardWrapper) return;
+      
+      const cardStyle = window.getComputedStyle(firstCardWrapper);
+      const cardWidth = firstCardWrapper.clientWidth;
+      const marginLeft = parseFloat(cardStyle.marginLeft) || 0;
+      const marginRight = parseFloat(cardStyle.marginRight) || 0;
+      // The effective width for scrolling includes the card and its horizontal margins/spacing.
+      // Since cards are direct children of the flex container with space-x, the gap is handled by flex,
+      // so we only need cardWidth. If there were explicit margins on the card wrapper, we'd add them.
+      // The `space-x-3 sm:space-x-4` classes on the container manage the gap.
+      // Let's try to find the gap from the container's child.
+      let gap = 12; // Default for space-x-3 (0.75rem)
+      if (container.classList.contains('sm:space-x-4')) gap = 16; // for space-x-4 (1rem)
+      
+      const scrollStep = cardWidth + gap;
+
+
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      const maxScrollLeft = scrollWidth - clientWidth;
+
+      if (maxScrollLeft <= 1) return; 
+
+      let nextScrollPosition = scrollLeft + scrollStep;
+
+      if (scrollLeft >= maxScrollLeft - (cardWidth / 2) ) { // If current scroll is already at or very near the end
+          nextScrollPosition = 0; // Loop to beginning
+      } else if (nextScrollPosition > maxScrollLeft) {
+          nextScrollPosition = maxScrollLeft; // Go to very end if overshooting but not looping
+      }
+      
+      container.scrollTo({ left: nextScrollPosition, behavior: 'smooth' });
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (canScroll && !isHovering && promos.length > 1) {
+      intervalRef.current = setInterval(advanceSlide, 5000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [canScroll, isHovering, advanceSlide, promos.length]);
+
+
+  const manualScroll = useCallback((direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const cardWidth = scrollContainerRef.current.querySelector('div > a > div')?.clientWidth || 250; 
-      const scrollAmount = cardWidth * 1; 
-      scrollContainerRef.current.scrollBy({
+      const container = scrollContainerRef.current;
+      const firstCardWrapper = container.querySelector('div > a');
+      if (!firstCardWrapper) return;
+      const cardWidth = firstCardWrapper.clientWidth;
+      let gap = 12; 
+      if (container.classList.contains('sm:space-x-4')) gap = 16;
+      const scrollAmount = cardWidth + gap;
+
+      container.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
       });
+      // Reset auto-scroll timer on manual interaction
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (canScroll && !isHovering && promos.length > 1) {
+        intervalRef.current = setInterval(advanceSlide, 7000); // Longer delay after manual scroll
+      }
     }
-  }, []);
+  }, [canScroll, isHovering, advanceSlide, promos.length]);
+
 
   if (!promos || promos.length === 0) {
     return null;
@@ -82,7 +172,7 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
             <div className="relative z-10 flex flex-col h-full">
               <h3 className="font-bold text-xl leading-tight tracking-tight">{promo.title}</h3>
               {promo.subtitle && <p className="text-xs opacity-90 mb-1.5 flex-grow">{promo.subtitle}</p>}
-              <div className={cn("bg-white p-2.5 rounded-md text-center shadow-md mt-auto transition-transform duration-300 group-hover/promocard:scale-105", defaultAccentColor.replace('bg-','text-'))}>
+              <div className={cn("bg-white p-2.5 rounded-md text-center shadow-md mt-auto transition-transform duration-300 group-hover/promocard:scale-105", defaultAccentColor.startsWith('text-') ? defaultAccentColor : defaultAccentColor.replace('bg-','text-'))}>
                 <span className="text-xs block font-medium opacity-80">Use Code:</span>
                 <span className="font-bold text-2xl block tracking-tight">{promo.code}</span>
               </div>
@@ -103,12 +193,12 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
                       <span className="text-lg">{tier.amount}</span> Ksh Off
                     </p>
                     <p className="text-[9px] opacity-80 leading-tight">
-                      Min Spend {tier.spend}{tier.maxSpend && tier.maxSpend !== -1 ? ` - ${tier.maxSpend}` : ''}
+                      Min Spend {tier.spend.toLocaleString()}{tier.maxSpend && tier.maxSpend !== -1 ? ` - ${tier.maxSpend.toLocaleString()}` : ''}
                     </p>
                   </div>
                 ))}
               </div>
-              <div className={cn("bg-white p-2 rounded-md text-center shadow-md mt-auto transition-transform duration-300 group-hover/promocard:scale-105", defaultAccentColor.replace('bg-','text-'))}>
+              <div className={cn("bg-white p-2 rounded-md text-center shadow-md mt-auto transition-transform duration-300 group-hover/promocard:scale-105", defaultAccentColor.startsWith('text-') ? defaultAccentColor : defaultAccentColor.replace('bg-','text-'))}>
                 <span className="text-xs block font-medium opacity-80">Use Code:</span>
                 <span className="font-bold text-xl block tracking-tight">{promo.code}</span>
               </div>
@@ -126,7 +216,7 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
             <div className="my-2 flex-grow flex items-center justify-center transition-transform duration-300 group-hover/promocard:scale-105">
               {promo.productImage && <Image src={promo.productImage} alt={promo.title || "Product"} width={90} height={90} className="object-contain max-h-[90px] rounded-md" data-ai-hint={promo.dataAiHint} />}
             </div>
-            <div className={cn("p-2 rounded-md text-center border-2 border-dashed transition-all duration-300 group-hover/promocard:bg-opacity-10", promo.accentColor ? promo.accentColor.replace('bg-','border-').replace('text-','border-') : 'border-red-500', promo.accentColor ? promo.accentColor.replace('bg-','text-') : 'text-red-600', promo.accentColor ? promo.accentColor.replace('text-','bg-')+' bg-opacity-10' : 'bg-red-500/10')}>
+            <div className={cn("p-2 rounded-md text-center border-2 border-dashed transition-all duration-300 group-hover/promocard:bg-opacity-10", promo.accentColor ? promo.accentColor.replace(/bg-(.*)$/, 'border-$1').replace(/text-(.*)$/, 'border-$1') : 'border-red-500', promo.accentColor ? promo.accentColor.replace(/bg-(.*)$/, 'text-$1') : 'text-red-600', promo.accentColor ? promo.accentColor.replace(/text-(.*)$/, 'bg-$1') + ' bg-opacity-10' : 'bg-red-500/10')}>
               <p className="text-xs font-medium">{promo.actionText}</p>
               <p className="font-bold text-lg tracking-tight">{promo.codePlaceholder}</p>
             </div>
@@ -147,7 +237,7 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
               {promo.items?.slice(0,2).map((item, i) => (
                 <div key={i} className="relative w-1/2 text-center flex flex-col items-center justify-end h-full">
                   {item.image && <Image src={item.image} alt={item.name} width={50} height={50} className="object-contain mx-auto mb-0.5 h-12 transition-transform duration-300 group-hover/promocard:scale-110" data-ai-hint={item.dataAiHint} />}
-                   <p className={cn("text-[10px] leading-tight font-medium mt-0.5", promo.foregroundColor ? promo.foregroundColor.replace('text-white','text-slate-700') : 'text-slate-700')}>{item.name}</p>
+                   <p className={cn("text-[10px] leading-tight font-medium mt-0.5", promo.foregroundColor === 'text-white' ? 'text-slate-700' : promo.foregroundColor || 'text-slate-700')}>{item.name}</p>
                   <div className={cn("absolute -top-3 left-1/2 -translate-x-1/2")}>
                     <div className={cn("text-white text-[10px] leading-none font-semibold p-1.5 rounded-full shadow-md min-w-[36px] transition-transform duration-300 group-hover/promocard:scale-105", promo.priceColor ? promo.priceColor.replace('text-','bg-') : 'bg-red-600')}>
                       {item.oldPrice && <span className="block line-through opacity-70 text-[8px]">{item.oldPrice}</span>}
@@ -163,9 +253,15 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
         return <div className="text-destructive">Unsupported promo type</div>;
     }
   };
+  
+  const showButtons = canScroll && promos.length > 1;
 
   return (
-    <div className="relative group">
+    <div 
+      className="relative group"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <div
         ref={scrollContainerRef}
         className="flex overflow-x-auto space-x-3 sm:space-x-4 py-4 scrollbar-hide scroll-smooth -mx-2 px-2"
@@ -177,12 +273,12 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
         ))}
       </div>
 
-      {promos.length > 2 && (
+      {showButtons && (
         <>
           <Button
             variant="outline"
             size="icon"
-            onClick={() => scroll('left')}
+            onClick={() => manualScroll('left')}
             aria-label="Scroll left"
             className="absolute left-0 sm:-left-1 top-1/2 -translate-y-1/2 z-20 bg-background/70 hover:bg-background/90 backdrop-blur-sm rounded-full shadow-lg h-9 w-9 sm:h-10 sm:w-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:opacity-100 disabled:opacity-30 border-border hover:border-primary"
           >
@@ -191,7 +287,7 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
           <Button
             variant="outline"
             size="icon"
-            onClick={() => scroll('right')}
+            onClick={() => manualScroll('right')}
             aria-label="Scroll right"
             className="absolute right-0 sm:-right-1 top-1/2 -translate-y-1/2 z-20 bg-background/70 hover:bg-background/90 backdrop-blur-sm rounded-full shadow-lg h-9 w-9 sm:h-10 sm:w-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:opacity-100 disabled:opacity-30 border-border hover:border-primary"
           >

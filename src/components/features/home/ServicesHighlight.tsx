@@ -41,10 +41,11 @@ export default function ServicesHighlight() {
         Our Commitment to You
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-        {services.map((service) => (
+        {services.map((service, index) => (
           <Card 
             key={service.title} 
-            className={`text-center overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-0 ${service.bgColor} rounded-xl group hover:scale-105 hover:border-primary/50 border-2 border-transparent`}
+            className={`text-center overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-0 ${service.bgColor} rounded-xl group hover:scale-105 hover:border-primary/50 border-2 border-transparent animate-in fade-in-0 slide-in-from-bottom-8`}
+            style={{ animationDelay: `${index * 100}ms` }}
           >
             <CardContent className="p-6 md:p-8 flex flex-col items-center">
               <div className={`p-4 rounded-full bg-card mb-5 shadow-md transition-transform duration-300 group-hover:scale-110`}>
