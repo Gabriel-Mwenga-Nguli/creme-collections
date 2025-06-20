@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BotIcon as BotMessageSquareIconInChat, Send, X, Loader2, User as UserIcon, Headphones } from 'lucide-react';
+import { BotIcon as BotMessageSquareIconInChat, Send, X, Loader2, User as UserIcon, MessageSquare } from 'lucide-react'; // Changed Headphones to MessageSquare
 import { comprehensiveChatSupport, type ComprehensiveChatSupportInput, type ComprehensiveChatSupportOutput } from '@/ai/flows/comprehensive-chat-support';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
@@ -74,7 +74,7 @@ export default function ChatWidget() {
       const input: ComprehensiveChatSupportInput = {
         message: userMessageContent,
         chatHistory: historyForFlow,
-        isLoggedIn: !!user, // Pass login status to the flow
+        isLoggedIn: !!user, 
         userName: user?.displayName || undefined,
       };
       const result: ComprehensiveChatSupportOutput = await comprehensiveChatSupport(input);
@@ -95,7 +95,6 @@ export default function ChatWidget() {
           aiResponseContent = aiResponseContent.replace(AGENT_HANDOFF_PHRASE, 
             "Thank you for confirming. I'm escalating your request to a human agent. Please wait a moment..."
           );
-          // Here you would typically trigger a notification to your support system
         }
       }
 
@@ -130,7 +129,7 @@ export default function ChatWidget() {
         onClick={toggleChat}
         aria-label={isOpen ? "Close chat support" : "Open chat support"}
       >
-        {isOpen ? <X className="h-7 w-7" /> : <Headphones className="h-7 w-7" strokeWidth={2.5} />}
+        {isOpen ? <X className="h-7 w-7" /> : <MessageSquare className="h-7 w-7" />}
       </Button>
 
       {isOpen && (

@@ -33,6 +33,7 @@ export async function comprehensiveChatSupport(input: ComprehensiveChatSupportIn
 
 const comprehensiveChatPrompt = ai.definePrompt({
   name: 'comprehensiveChatSupportPrompt',
+  model: 'googleai/gemini-2.0-flash-exp', // Explicitly use Gemini 2.0 Flash Experimental
   input: { schema: ComprehensiveChatSupportInputSchema },
   output: { schema: ComprehensiveChatSupportOutputSchema },
   prompt: `You are "CremeBot", a helpful AI assistant for "Creme Collections".
@@ -80,8 +81,8 @@ const comprehensiveChatSupportFlow = ai.defineFlow(
     outputSchema: ComprehensiveChatSupportOutputSchema,
   },
   async (input) => {
-    // Temporarily removed currentDate logic for simplification
     const { output } = await comprehensiveChatPrompt(input);
     return output!;
   }
 );
+
