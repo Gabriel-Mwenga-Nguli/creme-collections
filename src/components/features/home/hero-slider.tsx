@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ interface Slide {
   overlayColor?: string;
   titleSize?: string;
   subtitleSize?: string;
-  contentAnimation?: string; // e.g., 'animate-slide-in-left'
+  contentAnimation?: string; // e.g., 'animate-fade-in-left'
 }
 
 const slidesData: Slide[] = [
@@ -119,38 +119,45 @@ const slidesData: Slide[] = [
 
 const HeroSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [prevIndex, setPrevIndex] = useState(slidesData.length - 1); 
   const [isAnimating, setIsAnimating] = useState(false); // To prevent rapid clicks during animation
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const resetTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, []);
 
   const nextSlide = useCallback(() => {
     if (isAnimating) return;
     setIsAnimating(true);
-    setPrevIndex(currentIndex);
     setCurrentIndex((prev) => (prev === slidesData.length - 1 ? 0 : prev + 1));
     setTimeout(() => setIsAnimating(false), 1000); // Match opacity transition duration
-  }, [currentIndex, isAnimating]);
+  }, [isAnimating]);
+
+  useEffect(() => {
+    resetTimeout();
+    timeoutRef.current = setTimeout(nextSlide, 7000);
+    return () => {
+      resetTimeout();
+    };
+  }, [currentIndex, nextSlide, resetTimeout]);
+
 
   const prevSlide = useCallback(() => {
     if (isAnimating) return;
     setIsAnimating(true);
-    setPrevIndex(currentIndex);
     setCurrentIndex((prev) => (prev === 0 ? slidesData.length - 1 : prev - 1));
-    setTimeout(() => setIsAnimating(false), 1000); // Match opacity transition duration
-  }, [currentIndex, isAnimating]);
+    setTimeout(() => setIsAnimating(false), 1000); 
+  }, [isAnimating]);
   
   const goToSlide = useCallback((index: number) => {
     if (isAnimating || index === currentIndex) return;
     setIsAnimating(true);
-    setPrevIndex(currentIndex);
     setCurrentIndex(index);
     setTimeout(() => setIsAnimating(false), 1000);
   }, [currentIndex, isAnimating]);
 
-
-  useEffect(() => {
-    const slideInterval = setInterval(nextSlide, 7000); 
-    return () => clearInterval(slideInterval);
-  }, [nextSlide]);
 
   const textAlignClasses = {
     left: 'items-start text-left',
@@ -176,8 +183,8 @@ const HeroSlider = () => {
               style={{ objectFit: 'cover' }}
               priority={index === 0}
               className={cn(
-                "transition-transform duration-[7.5s] ease-linear",
-                index === currentIndex ? 'scale-110 animate-kenburns' : 'scale-100'
+                "transition-transform duration-[7s] ease-linear", // Ken burns duration
+                index === currentIndex ? 'scale-110 animate-kenburns' : 'scale-100' // Apply animation only to current slide
               )}
               data-ai-hint={slide.dataAiHint}
               sizes="100vw"
@@ -187,23 +194,22 @@ const HeroSlider = () => {
           <div
             className={cn(
               `absolute inset-0 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center ${textAlignClasses[slide.textAlign || 'left']} ${slide.textColor || 'text-white'} p-6 md:p-12 lg:p-20`
-              // Animations are now handled by Tailwind keyframes for content
             )}
           >
             <h1 className={cn(`${slide.titleSize || 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl'} font-extrabold drop-shadow-lg font-headline leading-tight max-w-2xl`, index === currentIndex ? slide.contentAnimation : 'opacity-0')}
-                style={{animationDelay: index === currentIndex ? '0.3s' : '0s' }}
+                style={{animationDelay: index === currentIndex ? '0.3s' : '0s', animationDuration: '0.8s' }}
             >
               {slide.title}
             </h1>
             <p className={cn(`${slide.subtitleSize || 'text-lg sm:text-xl md:text-2xl'} mt-4 max-w-lg drop-shadow-lg`, index === currentIndex ? slide.contentAnimation : 'opacity-0')} 
-                style={{animationDelay: index === currentIndex ? '0.5s' : '0s' }}>
+                style={{animationDelay: index === currentIndex ? '0.5s' : '0s', animationDuration: '0.8s' }}>
               {slide.subtitle}
             </p>
             <Button
               asChild
               size="lg"
               className={cn("mt-6 md:mt-8 w-fit text-base md:text-lg px-6 md:px-8 py-3 md:py-4 font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95", index === currentIndex ? slide.contentAnimation : 'opacity-0')}
-              style={{animationDelay: index === currentIndex ? '0.7s' : '0s' }}
+              style={{animationDelay: index === currentIndex ? '0.7s' : '0s', animationDuration: '0.8s' }}
             >
               <Link href={slide.buttonLink}>
                 {slide.buttonText} <ShoppingBag className="ml-2 h-5 w-5" />
@@ -247,38 +253,6 @@ const HeroSlider = () => {
           />
         ))}
       </div>
-      <style jsx global>{`
-        @keyframes kenburns {
-          0% {
-            transform: scale(1.05) translate(0, 0); /* Start slightly zoomed */
-          }
-          100% {
-            transform: scale(1.15) translate(-1%, 1%); /* Zoom in more and pan slightly */
-          }
-        }
-        .animate-kenburns {
-          animation: kenburns 7.5s ease-in-out infinite alternate;
-        }
-
-        /* Content Animations (Tailwind will generate these from animate-in plugin) */
-        /* Ensure you have these keyframes if not using animate-in or similar */
-        @keyframes fadeInRight {
-          from { opacity: 0; transform: translateX(50px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes fadeInLeft {
-          from { opacity: 0; transform: translateX(-50px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(50px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-right { animation: fadeInRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-        .animate-fade-in-left { animation: fadeInLeft 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-        .animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-
-      `}</style>
     </section>
   );
 };

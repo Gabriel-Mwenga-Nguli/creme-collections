@@ -20,15 +20,16 @@ const dummyBlackFridayProducts: ProductCardProps[] = [
 ];
 
 const BlackFridayDeals: React.FC = () => {
+  // Duplicate products for a smoother infinite scroll effect
   const duplicatedProducts = [...dummyBlackFridayProducts, ...dummyBlackFridayProducts];
 
   return (
     <section className="py-10 md:py-16 bg-slate-900 text-white animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-12 gap-6 md:gap-8 items-center"> {/* Changed items-stretch to items-center */}
+        <div className="grid md:grid-cols-12 gap-6 md:gap-8 items-center">
           {/* Left: Banner */}
           <div className="md:col-span-4 lg:col-span-3 flex flex-col justify-center items-center bg-black rounded-xl shadow-2xl p-4 md:p-0">
-            <Link href="/products?filter=black-friday" className="block w-full"> {/* Removed h-full from Link */}
+            <Link href="/products?filter=black-friday" className="block w-full">
               <div className="relative aspect-[1/1] w-full overflow-hidden rounded-lg group">
                 <Image
                   src="/images/banners/black-friday.png"
@@ -48,7 +49,7 @@ const BlackFridayDeals: React.FC = () => {
             <div className="relative w-full overflow-hidden group/slider">
               <div
                 className="flex animate-scroll-rtl group-hover/slider:animation-pause py-4"
-                style={{ animationDuration: '60s' }} 
+                // The animation duration is controlled by `tailwind.config.ts`
               >
                 {duplicatedProducts.map((product, index) => (
                   <div key={`${product.id}-${index}`} className="flex-none w-60 sm:w-64 md:w-72 px-2">
@@ -56,10 +57,11 @@ const BlackFridayDeals: React.FC = () => {
                   </div>
                 ))}
               </div>
+              {/* Edge fades for better visual integration */}
               <div className="absolute inset-y-0 left-0 w-10 md:w-16 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent pointer-events-none"></div>
               <div className="absolute inset-y-0 right-0 w-10 md:w-16 bg-gradient-to-l from-slate-900 via-slate-900/80 to-transparent pointer-events-none"></div>
             </div>
-             <div className="text-center mt-6 md:hidden">
+             <div className="text-center mt-6 md:hidden"> {/* Show button on mobile */}
                 <Button asChild variant="default" size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     <Link href="/products?filter=black-friday">
                         Shop All Black Friday Deals <ShoppingBag className="ml-2 h-5 w-5" />
