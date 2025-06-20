@@ -6,7 +6,16 @@ import type { DealProduct } from '@/components/features/home/weekly-deals-slider
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, limit, doc, getDoc, addDoc, updateDoc, serverTimestamp, Timestamp, type DocumentSnapshot, type QueryDocumentSnapshot, orderBy } from 'firebase/firestore';
 
-console.log('[ProductService Module Load] Value of db imported from firebase.ts:', db === null ? 'null (Firebase not initialized)' : 'VALID INSTANCE (Firebase should be working)');
+// Initial check for db initialization
+if (!db) {
+  const errorMessage = "[ProductService Critical Error] Firestore 'db' object is NULL or undefined at module load. This means Firebase did not initialize correctly in 'firebase.ts' or the import failed. Product service cannot function.";
+  console.error(errorMessage);
+  // Throwing an error here will stop further execution and should be visible in server logs.
+  // This is preferable to functions failing silently or hanging later.
+  throw new Error(errorMessage);
+}
+
+console.log('[ProductService Module Load] Value of db imported from firebase.ts:', db === null ? 'null (ERROR - Should have been caught by check above)' : 'VALID INSTANCE (Firebase should be working)');
 
 
 export interface Product {
@@ -73,6 +82,7 @@ function mapDocToProduct(document: DocumentSnapshot | QueryDocumentSnapshot): Pr
 export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
   console.log('[getFeaturedProducts Call] Value of db at function call:', db === null ? 'null (ERROR)' : 'VALID');
   if (!db) {
+    // This check is now somewhat redundant due to the module-level check, but kept for safety in direct calls.
     console.error("Firestore 'db' object is not initialized in getFeaturedProducts. Cannot fetch featured products.");
     return [];
   }
@@ -267,3 +277,5 @@ export async function updateProduct(productId: string, productData: Partial<Omit
         return false;
     }
 }
+
+    
