@@ -26,11 +26,11 @@ const services = [
     iconColor: "text-purple-600 dark:text-purple-400",
   },
   {
-    icon: Package,
-    title: "Easy Returns",
-    description: "Hassle-free returns and exchanges for your peace of mind.",
-    bgColor: "bg-orange-50 dark:bg-orange-900/20",
-    iconColor: "text-orange-500 dark:text-orange-400",
+    icon: Award, // Changed icon
+    title: "Earn & Redeem Points", // Changed title
+    description: "Get rewarded! Earn points on purchases & activities, redeem for discounts.", // Changed description
+    bgColor: "bg-yellow-50 dark:bg-yellow-900/20", // New color scheme
+    iconColor: "text-yellow-500 dark:text-yellow-400", // New color scheme
   },
 ];
 
