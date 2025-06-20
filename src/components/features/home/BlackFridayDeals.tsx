@@ -25,11 +25,10 @@ const BlackFridayDeals: React.FC = () => {
   return (
     <section className="py-10 md:py-16 bg-slate-900 text-white animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-12 gap-6 md:gap-8 items-stretch">
+        <div className="grid md:grid-cols-12 gap-6 md:gap-8 items-center"> {/* Changed items-stretch to items-center */}
           {/* Left: Banner */}
           <div className="md:col-span-4 lg:col-span-3 flex flex-col justify-center items-center bg-black rounded-xl shadow-2xl p-4 md:p-0">
-            <Link href="/products?filter=black-friday" className="block w-full h-full">
-              {/* The div below now relies on w-full and aspect-[1/1] for its dimensions. h-full was removed. */}
+            <Link href="/products?filter=black-friday" className="block w-full"> {/* Removed h-full from Link */}
               <div className="relative aspect-[1/1] w-full overflow-hidden rounded-lg group">
                 <Image
                   src="/images/banners/black-friday.png"
