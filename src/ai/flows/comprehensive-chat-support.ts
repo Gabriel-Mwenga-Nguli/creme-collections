@@ -34,34 +34,13 @@ export async function comprehensiveChatSupport(input: ComprehensiveChatSupportIn
 
 const comprehensiveChatPrompt = ai.definePrompt({
   name: 'comprehensiveChatSupportPrompt',
-  model: 'googleai/gemini-2.0-flash-exp', // Explicitly use Gemini 2.0 Flash Experimental
-  input: { schema: ComprehensiveChatSupportInputSchema }, // Schema now only expects 'message'
+  model: 'googleai/gemini-2.0-flash', // Changed model to default flash
+  input: { schema: ComprehensiveChatSupportInputSchema }, 
   output: { schema: ComprehensiveChatSupportOutputSchema },
   prompt: `You are "CremeBot", a helpful AI assistant for "Creme Collections".
 User says: {{{message}}}
 Respond very simply.
 `,
-  // Temporarily removed safety settings for troubleshooting
-  // config: {
-  //   safetySettings: [
-  //     {
-  //       category: 'HARM_CATEGORY_HARASSMENT',
-  //       threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-  //     },
-  //      {
-  //       category: 'HARM_CATEGORY_HATE_SPEECH',
-  //       threshold: 'BLOCK_ONLY_HIGH',
-  //     },
-  //      {
-  //       category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-  //       threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-  //     },
-  //      {
-  //       category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-  //       threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-  //     }
-  //   ]
-  // }
 });
 
 const comprehensiveChatSupportFlow = ai.defineFlow(
@@ -71,7 +50,6 @@ const comprehensiveChatSupportFlow = ai.defineFlow(
     outputSchema: ComprehensiveChatSupportOutputSchema,
   },
   async (input) => {
-    // Only pass the message to the prompt, as other fields are removed from the schema
     const { output } = await comprehensiveChatPrompt({ message: input.message });
     return output!;
   }
