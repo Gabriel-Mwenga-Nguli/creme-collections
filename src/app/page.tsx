@@ -27,7 +27,7 @@ const promotionalBannersData = [
     description: "Massive discounts up to 50% off. Limited time only!",
     image: "/images/promos/flash-sale.png",
     dataAiHint: "flash sale discount",
-    overlayColor: "bg-red-700/60", 
+    overlayColor: "bg-red-700/60",
     textColor: "text-white",
     href: "/products?filter=sale",
     buttonText: "Shop Flash Sale"
@@ -37,7 +37,7 @@ const promotionalBannersData = [
     description: "All your essentials for the new term. Notebooks, bags, & more!",
     image: "/images/promos/back-to-school.png",
     dataAiHint: "school supplies",
-    overlayColor: "bg-sky-800/60", 
+    overlayColor: "bg-sky-800/60",
     textColor: "text-white",
     href: "/products/category/books-office-stationery/school-supplies",
     buttonText: "Get School Ready"
@@ -57,7 +57,7 @@ const promotionalBannersData = [
     description: "Unique finds and special items you won't get anywhere else.",
     image: "/images/banners/promo2.png",
     dataAiHint: "exclusive items",
-    overlayColor: "bg-purple-800/50", 
+    overlayColor: "bg-purple-800/50",
     textColor: "text-white",
     href: "/products?filter=exclusive",
     buttonText: "Discover Exclusives"
@@ -78,10 +78,10 @@ const samplePromoSliderData: PromoSlideProps[] = [
     subtitle: 'Off Your First Order',
     code: 'KARIBU5',
     terms: '*Min Spend: Ksh 1,500 | T&C Apply',
-    backgroundImage: '/images/promos/promo-bg-dark-blue.png', 
+    backgroundImage: '/images/promos/promo-bg-dark-blue.png',
     dataAiHint: 'first order discount',
     foregroundColor: 'text-white',
-    accentColor: 'text-red-500', 
+    accentColor: 'text-red-500',
     href: '/register',
     buttonText: 'Sign Up & Save'
   },
@@ -95,10 +95,10 @@ const samplePromoSliderData: PromoSlideProps[] = [
     ],
     code: 'WHOA',
     terms: '*Limited Time Offer | T&C Apply',
-    backgroundImage: '/images/promos/promo-bg-blue-gradient.png', 
+    backgroundImage: '/images/promos/promo-bg-blue-gradient.png',
     dataAiHint: 'tiered discount offer',
     foregroundColor: 'text-white',
-    accentColor: 'text-yellow-400', 
+    accentColor: 'text-yellow-400',
     href: '/products',
     buttonText: 'Shop Now'
   },
@@ -112,7 +112,7 @@ const samplePromoSliderData: PromoSlideProps[] = [
     dataAiHint: 'electronics discount',
     backgroundColor: 'bg-amber-50',
     foregroundColor: 'text-slate-700',
-    accentColor: 'text-red-600 border-red-500', 
+    accentColor: 'text-red-600 border-red-500',
     href: '/products/category/electronics',
     buttonText: 'View Electronics'
   },
@@ -126,7 +126,7 @@ const samplePromoSliderData: PromoSlideProps[] = [
     dataAiHint: 'home products bundle',
     backgroundColor: 'bg-teal-50',
     foregroundColor: 'text-slate-700',
-    accentColor: 'text-green-600 border-green-500', 
+    accentColor: 'text-green-600 border-green-500',
     href: '/products/category/home-living',
     buttonText: 'Shop Home'
   },
@@ -138,12 +138,12 @@ const samplePromoSliderData: PromoSlideProps[] = [
       { name: 'Apples', price: 349, oldPrice: 499, image: '/images/promos/green-apple.png', dataAiHint: 'green apple' },
       { name: 'Lamb Leg', price: 1310, oldPrice: 1649, image: '/images/promos/fresh-meat.png', dataAiHint: 'lamb meat' },
     ],
-    logoImage: '/images/promos/fresh-savers-logo.png', 
+    logoImage: '/images/promos/fresh-savers-logo.png',
     dataAiHint: 'fresh food grocery',
     topColor: 'bg-red-600',
     bottomColor: 'bg-sky-200',
-    foregroundColor: 'text-white', 
-    priceColor: 'text-red-700', 
+    foregroundColor: 'text-white',
+    priceColor: 'text-red-700',
     href: '/products/category/groceries/fresh-produce',
     buttonText: 'Shop Groceries'
   },
@@ -173,12 +173,12 @@ export default async function HomePage() {
               <Link href={category.href} key={category.name} className="group block">
                 <Card className="overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-2xl hover:border-primary transform group-hover:-translate-y-1.5 bg-card rounded-xl">
                   <CardContent className="p-0">
-                    <div className="aspect-w-16 aspect-h-9 overflow-hidden">
+                    <div className="aspect-[16/9] overflow-hidden relative">
                       <Image
                         src={category.image}
                         alt={category.name}
-                        width={400}
-                        height={225}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                         data-ai-hint={category.dataAiHint}
                       />
@@ -197,7 +197,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      
+
       <section className="py-10 md:py-16 bg-background animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out delay-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-center text-foreground md:text-5xl font-headline mb-10 md:mb-14">
@@ -246,7 +246,7 @@ export default async function HomePage() {
           <WeeklyDealsSlider deals={weeklyDealsData} />
         </div>
       </section>
-      
+
        <section className="py-10 md:py-16 bg-background animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out delay-400" id="featured-products">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-center text-foreground md:text-5xl font-headline mb-10 md:mb-14">
@@ -290,7 +290,7 @@ export default async function HomePage() {
           <PromotionalOfferSlider promos={samplePromoSliderData} />
         </div>
       </section>
-      
+
 
       <section className="py-10 md:py-16 bg-secondary/20 animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out delay-600" id="why-choose-us">
          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -308,7 +308,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      
+
       <section className="py-12 md:py-20 bg-background animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out delay-700" id="newsletter-cta">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-xl md:max-w-2xl mx-auto text-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-8 md:p-12 lg:p-16 rounded-2xl shadow-xl border border-primary/20">
@@ -320,10 +320,10 @@ export default async function HomePage() {
               Get the latest deals, new arrivals, and special offers directly to your inbox.
             </p>
             <form className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-lg mx-auto">
-              <Input 
-                type="email" 
-                placeholder="Enter your email address" 
-                className="h-12 sm:h-14 text-base sm:text-lg sm:flex-grow rounded-lg" 
+              <Input
+                type="email"
+                placeholder="Enter your email address"
+                className="h-12 sm:h-14 text-base sm:text-lg sm:flex-grow rounded-lg"
                 aria-label="Email address for newsletter"
               />
               <Button type="submit" size="lg" className="h-12 sm:h-14 sm:w-auto text-base sm:text-lg px-8 rounded-lg">
