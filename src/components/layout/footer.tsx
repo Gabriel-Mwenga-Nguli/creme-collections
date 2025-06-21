@@ -1,7 +1,8 @@
+
 import Link from 'next/link';
 import { SITE_NAME, FOOTER_COMPANY_LINKS, FOOTER_SUPPORT_LINKS } from '@/lib/constants';
 import Logo from '@/components/logo';
-import { MapPin, Mail, MessageSquare, Clock, Facebook, Instagram, Power } from 'lucide-react';
+import { MapPin, Mail, MessageSquare, Clock, Facebook, Instagram, Landmark } from 'lucide-react';
 
 const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -18,6 +19,28 @@ const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const MpesaIcon = () => (
+    <svg role="img" viewBox="0 0 256 160" className="h-8 w-auto rounded" xmlns="http://www.w3.org/2000/svg">
+      <rect fill="#4CAF50" width="256" height="160" rx="20"/>
+      <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="60" fontWeight="bold" fontFamily="sans-serif">M-PESA</text>
+    </svg>
+);
+  
+const VisaIcon = () => (
+    <svg role="img" viewBox="0 0 77.37 25" xmlns="http://www.w3.org/2000/svg" className="h-6 w-auto">
+        <path d="M62.94,25.06H72.3s.59-.28.34-.78L65.23,1.35C65,.76,64.21,0,62.65,0H49.82c-1.33,0-2.31.6-2.65,1.88L36.8,24.28c-.34.78.34,1.27.34,1.27h9.54s.59.09.83-.59l1.64-4.89h9.2l1.17,4.89c.25.68.83,1.08.83,1.08Z" fill="#1a1f71"/>
+        <path d="M22.06.3h-9.54C11.45.3,11,.66,10,1.88L2.65,24.28c-.34.78.34,1.27.34,1.27h9.54s.59.09.83-.59l4.57-12.7L22.2,25c.25.68.83.59.83.59h8.3s.59-.09.34-.59L22.9,1.1c-.25-.8-.73-1.05-1.08-1.05Z" fill="#1a1f71"/>
+        <path d="M77.37,1.1a1.2,1.2,0,0,0-1.25-.83H72.1c-.5,0-.83.25-1.08.75L65.5,14.6l-1.56-6.42c-.42-1.33-1.42-2-2.83-2H51.4L49.82,0H41.89s-1.08.25-.83,1.08l6.9,23.49c.34.59.92.75.92.75h9.2s1.17-.34.92-1.27L56.1,13.82,60.36,1.2zM28.7,14.07l-6.81,4.24L26.79,6.42,28.43.92A.51.51,0,0,1,29,.3h6.58c1.33,0,2.15.5,2.31,1.56L42,24.45c.16.59.58,1.1,1.33,1.1h.25c.59,0,1-.25,1.08-.5.59-1.17.34-10.79.34-10.79,0-5.74-3.32-8.4-7.56-8.4-2.23,0-4.32.76-5.83,2.05Z" fill="#f7b600"/>
+    </svg>
+);
+  
+const MastercardIcon = () => (
+    <svg role="img" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto">
+        <circle cx="12" cy="12" r="12" fill="#EA001B" />
+        <circle cx="26" cy="12" r="12" fill="#FF5F00" opacity="0.9" />
+    </svg>
+);
+
 
 export default function Footer() {
   return (
@@ -25,7 +48,7 @@ export default function Footer() {
       <div className="container mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
 
-          {/* Column 1: Logo, Location & Social */}
+          {/* Column 1: Logo, Location, Social, & Payments */}
           <div className="space-y-6">
             <div>
               <Logo className="text-3xl" />
@@ -53,6 +76,17 @@ export default function Footer() {
                     <social.icon className="w-6 h-6" />
                   </a>
                 ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">We Accept</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <MpesaIcon />
+                <VisaIcon />
+                <MastercardIcon />
+                <div className="flex items-center justify-center h-8 px-2 bg-gray-200 rounded text-gray-700" title="Direct Bank Transfer">
+                  <Landmark className="h-5 w-5" />
+                </div>
               </div>
             </div>
           </div>
