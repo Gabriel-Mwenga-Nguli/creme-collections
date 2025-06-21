@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { SITE_NAME, FOOTER_COMPANY_LINKS, FOOTER_SUPPORT_LINKS } from '@/lib/constants';
 import Logo from '@/components/logo';
@@ -156,9 +155,6 @@ export default function Footer() {
         <div className="mt-12 border-t border-slate-700 pt-8 text-center">
           <p className="text-sm text-slate-400">
             &copy; {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
-          </p>
-          <p className="text-xs text-slate-500 mt-1 flex items-center justify-center">
-            <Power className="w-3.5 h-3.5 mr-1.5 text-slate-600" /> Powered by Google Cloud
           </p>
         </div>
       </div>
