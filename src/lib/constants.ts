@@ -2,7 +2,7 @@
 import type { NavLink as BaseNavLink } from '@/lib/types';
 import { 
   Smartphone, Shirt, Home as HomeIcon, Tv, Laptop, Headphones, Heart, ShoppingCart, User, Search, Percent, Info, MessageSquare, Phone, Sparkles, Zap, HelpCircle, Package, BookOpen, Users, ShieldCheck, Menu as MenuIcon, ShoppingBasket, Apple, Leaf, Beaker, Baby, Sprout, VenetianMask,
-  Bike, ToyBrick, Car, BookMarked, HeartPulse, Dumbbell, Tent, Gamepad2, PencilRuler, Stethoscope, Popcorn, Coffee, Cookie, Gavel
+  Bike, ToyBrick, Car, BookMarked, HeartPulse, Dumbbell, Tent, Gamepad2, PencilRuler, Stethoscope, Popcorn, Coffee, Cookie, Gavel, Store
 } from 'lucide-react';
 
 export const SITE_NAME = "Creme Collections";
@@ -173,6 +173,7 @@ export const CATEGORY_NAV_LINKS: NavLink[] = [
 
 export const FOOTER_COMPANY_LINKS: NavLink[] = [
   { href: "/about", label: "About Us", icon: Users },
+  { href: "/sell-on-creme", label: "Sell on Creme Collections", icon: Store },
   { href: "/terms", label: "Terms & Conditions", icon: BookOpen },
   { href: "/privacy", label: "Privacy Policy", icon: ShieldCheck },
   { href: "/cookies", label: "Cookie Policy", icon: Cookie },

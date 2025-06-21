@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { SITE_NAME, FOOTER_COMPANY_LINKS, FOOTER_SUPPORT_LINKS } from '@/lib/constants';
 import Logo from '@/components/logo';
@@ -38,7 +39,7 @@ export default function Footer() {
       <div className="container mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-8">
 
-          {/* Column 1: Logo, Location, Social, & Payments */}
+          {/* Column 1: Logo, Location, Social, & Map */}
           <div className="space-y-6">
             <div>
               <Logo className="text-3xl" />
@@ -47,12 +48,18 @@ export default function Footer() {
               </p>
             </div>
             <div>
-              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-3 flex items-center">
-                <MapPin className="w-5 h-5 mr-2 text-primary" /> Our Location
-              </h3>
-              <address className="text-sm text-slate-400 not-italic">
-                Taveta Rd, Nairobi, Kenya.
-              </address>
+                <div className="aspect-video w-full overflow-hidden rounded-lg shadow-lg">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.817628119932!2d36.82303937521541!3d-1.2832769987045247!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f11bfdd229f0f%3A0x1bb6f341ce62e64e!2sCreme%20Collections!5e0!3m2!1sen!2ske!4v1750484155537!5m2!1sen!2ske" 
+                        width="100%" 
+                        height="100%" 
+                        style={{border:0}} 
+                        allowFullScreen={true} 
+                        loading="lazy" 
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Creme Collections Location"
+                    ></iframe>
+                </div>
             </div>
             <div>
               <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">Connect With Us</h3>
@@ -68,16 +75,7 @@ export default function Footer() {
                 ))}
               </div>
             </div>
-            <div>
-              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">We Accept</h3>
-              <div className="flex flex-wrap items-center gap-2">
-                <MpesaIcon />
-                <MastercardIcon />
-                <div className="flex items-center justify-center h-8 px-2 bg-gray-200 rounded text-gray-700" title="Direct Bank Transfer">
-                  <Landmark className="h-5 w-5" />
-                </div>
-              </div>
-            </div>
+            
           </div>
 
           {/* Column 2: Shop & Support Links */}
@@ -106,6 +104,16 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
+            </div>
+            <div className="sm:col-span-2">
+                 <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">We Accept</h3>
+                <div className="flex flex-wrap items-center gap-2">
+                    <MpesaIcon />
+                    <MastercardIcon />
+                    <div className="flex items-center justify-center h-8 px-2 bg-gray-200 rounded text-gray-700" title="Direct Bank Transfer">
+                    <Landmark className="h-5 w-5" />
+                    </div>
+                </div>
             </div>
           </div>
 
