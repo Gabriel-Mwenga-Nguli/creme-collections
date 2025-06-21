@@ -9,20 +9,11 @@ import { Button } from '@/components/ui/button';
 import { ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const dummyBlackFridayProducts: ProductCardProps[] = [
-  { id: 'bf001', name: 'UltraHD 4K Smart TV', description: 'Experience stunning visuals with this 55-inch 4K TV.', image: 'https://placehold.co/600x400.png', dataAiHint: 'smart tv electronics', fixedOfferPrice: 45999, fixedOriginalPrice: 65000 },
-  { id: 'bf002', name: 'Pro Gaming Laptop', description: 'High-performance laptop for serious gamers.', image: 'https://placehold.co/600x400.png', dataAiHint: 'gaming laptop', fixedOfferPrice: 89999, fixedOriginalPrice: 120000 },
-  { id: 'bf003', name: 'Designer Leather Handbag', description: 'Elegant and stylish handbag for all occasions.', image: 'https://placehold.co/600x400.png', dataAiHint: 'leather handbag fashion', fixedOfferPrice: 7500, fixedOriginalPrice: 12500 },
-  { id: 'bf004', name: 'Noise-Cancelling Headphones', description: 'Immersive audio experience, block out distractions.', image: 'https://placehold.co/600x400.png', dataAiHint: 'headphones audio', fixedOfferPrice: 8999, fixedOriginalPrice: 15000 },
-  { id: 'bf005', name: 'Smart Fitness Watch', description: 'Track your fitness goals with this advanced smartwatch.', image: 'https://placehold.co/600x400.png', dataAiHint: 'smartwatch fitness', fixedOfferPrice: 6500, fixedOriginalPrice: 9999 },
-  { id: 'bf006', name: 'Robotic Vacuum Cleaner', description: 'Keep your home spotless effortlessly.', image: 'https://placehold.co/600x400.png', dataAiHint: 'vacuum cleaner home', fixedOfferPrice: 18000, fixedOriginalPrice: 25000 },
-  { id: 'bf007', name: 'Premium Coffee Maker', description: 'Brew delicious coffee like a pro.', image: 'https://placehold.co/600x400.png', dataAiHint: 'coffee maker kitchen', fixedOfferPrice: 5500, fixedOriginalPrice: 8000 },
-  { id: 'bf008', name: 'Air Purifier Pro', description: 'Breathe cleaner air at home.', image: 'https://placehold.co/600x400.png', dataAiHint: 'air purifier appliance', fixedOfferPrice: 12000, fixedOriginalPrice: 17500 },
-];
+interface BlackFridayDealsProps {
+  deals: ProductCardProps[];
+}
 
-const duplicatedProducts = [...dummyBlackFridayProducts, ...dummyBlackFridayProducts];
-
-const BlackFridayDeals: React.FC = () => {
+const BlackFridayDeals: React.FC<BlackFridayDealsProps> = ({ deals }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [canScroll, setCanScroll] = useState(false);
@@ -57,7 +48,6 @@ const BlackFridayDeals: React.FC = () => {
     const firstCardItem = container.querySelector('div.flex-none') as HTMLElement;
     if (!firstCardItem) return;
 
-    // Card width + gap (px-2 on each side of card item = 0.5rem + 0.5rem = 1rem = 16px total gap)
     const cardWidth = firstCardItem.offsetWidth;
     const gap = 16; 
     const scrollAmount = cardWidth + gap;
@@ -69,6 +59,12 @@ const BlackFridayDeals: React.FC = () => {
   }, [canScroll]);
 
   const showButtons = canScroll && isHovering;
+
+  if (!deals || deals.length === 0) {
+    return null; // Don't render the section if there are no deals
+  }
+
+  const duplicatedProducts = [...deals, ...deals];
 
   return (
     <section className="py-10 md:py-16 bg-slate-900 text-white animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out">
@@ -83,7 +79,7 @@ const BlackFridayDeals: React.FC = () => {
                   alt="Black Friday Sale Banner"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-contain group-hover:scale-105 transition-transform duration-500"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                   data-ai-hint="black friday sale"
                   priority 
                 />
@@ -108,11 +104,9 @@ const BlackFridayDeals: React.FC = () => {
                   </div>
                 ))}
               </div>
-              {/* Edge fades for better visual integration */}
               <div className="absolute inset-y-0 left-0 w-10 md:w-16 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent pointer-events-none"></div>
               <div className="absolute inset-y-0 right-0 w-10 md:w-16 bg-gradient-to-l from-slate-900 via-slate-900/80 to-transparent pointer-events-none"></div>
 
-              {/* Scroll Buttons */}
               {showButtons && (
                 <>
                   <Button
@@ -136,7 +130,7 @@ const BlackFridayDeals: React.FC = () => {
                 </>
               )}
             </div>
-             <div className="text-center mt-6 md:hidden"> {/* Show button on mobile */}
+             <div className="text-center mt-6 md:hidden">
                 <Button asChild variant="default" size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     <Link href="/products?filter=black-friday">
                         Shop All Black Friday Deals <ShoppingBag className="ml-2 h-5 w-5" />

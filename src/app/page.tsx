@@ -139,7 +139,7 @@ export default async function HomePage() {
     <div className="flex flex-col">
       <NewsletterPopup />
       <HeroSlider />
-      <BlackFridayDeals />
+      <BlackFridayDeals deals={weeklyDealsData} />
 
       <section className="py-10 md:py-16 bg-background animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out">
         <ServicesHighlight />
