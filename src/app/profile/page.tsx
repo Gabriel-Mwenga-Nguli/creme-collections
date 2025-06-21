@@ -82,41 +82,42 @@ export default function ProfilePage() {
         setPreviewUrl(user.photoURL);
       }
 
-      const fetchUserFirestoreData = async () => {
-        const userDocRef = doc(db, 'users', user.uid);
-        try {
-          const docSnap = await getDoc(userDocRef);
-          if (docSnap.exists()) {
-            const userData = docSnap.data();
-            setPhone(userData.phone || '');
-            setLoyaltyPoints(userData.loyaltyPoints || 0);
-            if (userData.firstName) setFirstName(userData.firstName);
-            if (userData.lastName) setLastName(userData.lastName);
-          } else {
-            const currentFirstName = nameParts[0] || '';
-            const currentLastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-            const newDisplayName = `${currentFirstName} ${currentLastName}`.trim() || user.displayName;
-            await setDoc(userDocRef, {
-              email: user.email,
-              displayName: newDisplayName,
-              firstName: currentFirstName,
-              lastName: currentLastName,
-              loyaltyPoints: 0,
-              createdAt: serverTimestamp(),
-              photoURL: user.photoURL || null,
-            }, { merge: true });
-             setLoyaltyPoints(0);
-          }
-        } catch (firestoreError) {
-            console.error("Error fetching/creating user data from Firestore:", firestoreError);
-            toast({
-                title: "Error",
-                description: "Could not fetch or initialize profile details. Please try refreshing.",
-                variant: "destructive"
-            });
+      const userDocRef = doc(db, 'users', user.uid);
+      const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          setPhone(userData.phone || '');
+          setLoyaltyPoints(userData.loyaltyPoints || 0);
+          if (userData.firstName) setFirstName(userData.firstName);
+          if (userData.lastName) setLastName(userData.lastName);
+        } else {
+          // If doc doesn't exist, create it. This can happen on first login.
+          const currentFirstName = nameParts[0] || '';
+          const currentLastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+          const newDisplayName = `${currentFirstName} ${currentLastName}`.trim() || user.displayName;
+          
+          setDoc(userDocRef, {
+            email: user.email,
+            displayName: newDisplayName,
+            firstName: currentFirstName,
+            lastName: currentLastName,
+            loyaltyPoints: 0,
+            createdAt: serverTimestamp(),
+            photoURL: user.photoURL || null,
+          }, { merge: true }).catch(e => console.error("Error creating user doc:", e));
+          
+          setLoyaltyPoints(0);
         }
-      };
-      fetchUserFirestoreData();
+      }, (firestoreError) => {
+        console.error("Error fetching/creating user data from Firestore:", firestoreError);
+        toast({
+          title: "Error",
+          description: "Could not fetch or initialize profile details. Please try refreshing.",
+          variant: "destructive"
+        });
+      });
+      
+      return () => unsubscribe();
     }
   }, [user, loading, router, toast]); 
 
@@ -165,7 +166,7 @@ export default function ProfilePage() {
           userId: user.uid,
           activityType: 'profile_update',
         });
-        setLoyaltyPoints(loyaltyResult.newTotalPoints); 
+        // The onSnapshot listener will automatically update the loyaltyPoints state.
         toast({
           title: "Points Awarded!",
           description: `You've earned ${loyaltyResult.pointsChange} loyalty points for updating your profile! New total: ${loyaltyResult.newTotalPoints}.`,

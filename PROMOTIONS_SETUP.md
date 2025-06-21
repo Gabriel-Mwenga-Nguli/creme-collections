@@ -1,3 +1,4 @@
+
 # Firestore Data Setup for Promotions
 
 For the "Today's Best Promotions" slider on your homepage to display correctly, you need to have a `promotions` collection in your Firestore database.

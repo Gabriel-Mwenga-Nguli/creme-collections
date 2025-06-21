@@ -61,11 +61,11 @@ Based on the activity, calculate the points to be awarded or deducted.
 - Signup: Award 100 points for new user signup.
 - Referral: Award 200 points for successful referral.
 - Milestone: (e.g., 1 year anniversary, 10th purchase) - Award 150 points.
-- Profile Update: Award 2 points for updating profile information.
+- Profile Update: Award 25 points for updating profile information.
 - Manual Adjustment: Use the activityValue directly as pointsToAwardOrDeduct if reason is provided.
 
 Prioritize 'manual_adjustment' if reason is present and a specific 'activityValue' is provided for it.
-If 'activityType' is 'profile_update', award exactly 2 points. The 'activityValue' for 'profile_update' can be ignored.
+If 'activityType' is 'profile_update', award exactly 25 points. The 'activityValue' for 'profile_update' can be ignored.
 If activityValue is not applicable for other activity types (e.g. review, signup), use a default point value for that activity.
 Provide a brief reasoning for your calculation.
 `,
@@ -118,15 +118,6 @@ const loyaltyPointsFlow = ai.defineFlow(
       await setDoc(userDocRef, {
         loyaltyPoints: newTotalPoints,
         lastLoyaltyUpdate: serverTimestamp(),
-        // Optionally log this specific transaction if a more detailed history is needed
-        // This might be better in a subcollection if history grows large
-        loyaltyHistory: { 
-            timestamp: serverTimestamp(),
-            activity: input.activityType,
-            pointsChange: pointsChange,
-            reason: aiDecision.calculationReasoning,
-            value: input.activityValue,
-        }
       }, { merge: true });
     } catch (error) {
       console.error(`Error updating loyalty points for user ${input.userId} in Firestore:`, error);

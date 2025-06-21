@@ -13,7 +13,7 @@ export interface NavLink {
 export interface TieredDiscount {
   amount: number;
   spend: number;
-  maxSpend?: number;
+  maxSpend?: number; // Optional max spend for a tier
 }
 
 export interface PromoSlideProps {
