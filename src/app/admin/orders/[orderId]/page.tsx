@@ -9,10 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, ChevronLeft, ShoppingBag, MapPin, Package, User as UserIcon, CreditCard, Edit } from 'lucide-react';
+import { Loader2, ChevronLeft, ShoppingBag, MapPin, Package, User as UserIcon, CreditCard, Edit, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getOrderDetails, updateOrderStatus, type Order, type OrderStatus } from '@/services/orderService';
 import { format } from 'date-fns';
+import { generateInvoiceEmail, type GenerateInvoiceInput } from '@/ai/flows/generate-invoice-flow';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { auth } from '@/lib/firebase';
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
@@ -23,6 +26,7 @@ export default function AdminOrderDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [newStatus, setNewStatus] = useState<OrderStatus | ''>('');
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isSendingInvoice, setIsSendingInvoice] = useState(false);
 
   const orderId = typeof params.orderId === 'string' ? params.orderId : null;
   
@@ -69,6 +73,61 @@ export default function AdminOrderDetailPage() {
       setIsUpdatingStatus(false);
     }
   };
+
+  const handleSendInvoice = async () => {
+    if (!order || !order.userEmail) {
+        toast({ title: "Missing Information", description: "Cannot send invoice, customer email is missing.", variant: "destructive"});
+        return;
+    }
+    if (!auth.app) {
+        toast({ title: "Firebase Error", description: "Firebase is not initialized correctly.", variant: "destructive"});
+        return;
+    }
+    setIsSendingInvoice(true);
+    toast({ title: "Processing...", description: "Generating branded invoice email."});
+
+    try {
+        const invoiceInput: GenerateInvoiceInput = {
+            orderId: order.orderId || order.id,
+            customerName: order.shippingAddress.name,
+            customerEmail: order.userEmail,
+            items: order.items.map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                priceAtPurchase: item.priceAtPurchase
+            })),
+            totalAmount: order.totalAmount,
+            orderDate: format(order.orderDate.toDate(), 'PPpp'),
+            shippingAddress: `${order.shippingAddress.name}, ${order.shippingAddress.addressLine1}, ${order.shippingAddress.city}, ${order.shippingAddress.postalCode}`
+        };
+
+        const invoiceEmail = await generateInvoiceEmail(invoiceInput);
+
+        toast({ title: "Generated!", description: "Sending email to customer..."});
+
+        const functions = getFunctions(auth.app);
+        const sendBrandedEmail = httpsCallable(functions, 'sendBrandedEmail');
+        
+        await sendBrandedEmail({
+            to: invoiceEmail.customerEmail,
+            subject: invoiceEmail.subject,
+            html: invoiceEmail.htmlBody,
+        });
+
+        toast({ title: "Invoice Sent!", description: `Confirmation email sent to ${order.userEmail}.` });
+
+        // Update order status to 'Processing' after sending invoice
+        await updateOrderStatus(order.id, 'Processing');
+        setOrder(prev => prev ? { ...prev, status: 'Processing' } : null);
+        setNewStatus('Processing');
+
+    } catch (error: any) {
+        console.error("Error sending invoice:", error);
+        toast({ title: "Invoice Failed", description: error.message || "Could not generate or send the invoice.", variant: "destructive"});
+    } finally {
+        setIsSendingInvoice(false);
+    }
+  };
   
   const getStatusColorClass = (status: OrderStatus) => {
     switch (status) {
@@ -89,6 +148,8 @@ export default function AdminOrderDetailPage() {
   if (!order) {
     return <p className="text-center text-muted-foreground">Order not found.</p>;
   }
+  
+  const canSendInvoice = order.status === 'Pending';
 
   return (
     <div className="space-y-6">
@@ -140,11 +201,18 @@ export default function AdminOrderDetailPage() {
                 </CardContent>
             </Card>
              <Card>
-                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><CreditCard className="h-5 w-5 text-primary"/>Payment &amp; Order Notes</CardTitle></CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Payment Status: Paid (Details TBD)</p>
+                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><CreditCard className="h-5 w-5 text-primary"/>Payment &amp; Actions</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">Payment Status: <span className="font-semibold text-foreground">Paid (Simulated)</span></p>
                     <p className="text-sm text-muted-foreground mt-1">Payment Method: M-Pesa (Details TBD)</p>
-                    {/* Add order notes section here if needed */}
+                    <Separator />
+                     <div className="flex flex-wrap gap-2">
+                        <Button onClick={handleSendInvoice} disabled={isSendingInvoice || !canSendInvoice}>
+                            {isSendingInvoice ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
+                            Confirm Payment & Send Invoice
+                        </Button>
+                     </div>
+                     { !canSendInvoice && <p className="text-xs text-muted-foreground">Invoice can only be sent for 'Pending' orders. This order is already '{order.status}'.</p> }
                 </CardContent>
             </Card>
         </div>
