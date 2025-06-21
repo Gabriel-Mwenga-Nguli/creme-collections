@@ -2,6 +2,7 @@
 'use server';
 /**
  * @fileOverview An AI flow for generating branded invoices and email notifications.
+ * This flow also saves an invoice record to the user's profile in Firestore.
  *
  * - generateInvoiceEmail - A function that creates the invoice and email content.
  * - GenerateInvoiceInput - The input type for the function.
@@ -11,6 +12,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { SITE_NAME } from '@/lib/constants';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const InvoiceItemSchema = z.object({
   name: z.string().describe("The name of the product."),
@@ -20,6 +23,7 @@ const InvoiceItemSchema = z.object({
 
 export const GenerateInvoiceInputSchema = z.object({
   orderId: z.string().describe("The unique identifier for the order."),
+  userId: z.string().describe("The unique Firestore user ID for the customer."),
   customerName: z.string().describe("The name of the customer."),
   customerEmail: z.string().email().describe("The email address of the customer."),
   items: z.array(InvoiceItemSchema).describe("An array of items in the order."),
@@ -32,6 +36,7 @@ export type GenerateInvoiceInput = z.infer<typeof GenerateInvoiceInputSchema>;
 export const GenerateInvoiceOutputSchema = z.object({
   subject: z.string().describe("The subject line for the confirmation email."),
   htmlBody: z.string().describe("The full HTML content of the email, including the branded invoice."),
+  customerEmail: z.string().email(), // Pass email through for convenience
 });
 export type GenerateInvoiceOutput = z.infer<typeof GenerateInvoiceOutputSchema>;
 
@@ -56,7 +61,8 @@ Your task is to generate a branded order confirmation email in HTML format.
 5.  Include the final total amount.
 6.  Include the customer's shipping address.
 7.  Use inline CSS for styling to ensure maximum compatibility with email clients. The branding should be modern and clean, using a color palette of orange (primary: #f97316), dark gray (text: #333333), and light gray (backgrounds: #f7f7f7).
-8.  The entire output must be a single block of HTML code for the email body.
+8.  The entire output must be a single block of HTML code for the 'htmlBody' field.
+9. Also return the customerEmail field from the input.
 
 **Order Details:**
 - Order ID: {{{orderId}}}
@@ -104,11 +110,39 @@ const generateInvoiceEmailFlow = ai.defineFlow(
   },
   async (input) => {
     console.log("Generating invoice email for order:", input.orderId);
-    const { output } = await invoicePrompt(input);
-    if (!output) {
+    
+    // Generate the email content
+    const { output: emailOutput } = await invoicePrompt(input);
+    if (!emailOutput) {
       throw new Error("AI could not generate an invoice email.");
     }
+    
+    // Save invoice record to Firestore
+    if (db && input.userId) {
+      try {
+        const invoicesRef = collection(db, 'users', input.userId, 'invoices');
+        const simpleInvoiceId = `INV-${Date.now().toString().slice(-6)}`;
+        await addDoc(invoicesRef, {
+          invoiceId: simpleInvoiceId,
+          orderId: input.orderId,
+          userId: input.userId,
+          customerEmail: input.customerEmail,
+          totalAmount: input.totalAmount,
+          invoiceDate: serverTimestamp(),
+          status: 'Paid', // Assuming this flow is triggered on payment confirmation
+          subject: emailOutput.subject,
+        });
+        console.log(`Successfully saved invoice record for user ${input.userId} and order ${input.orderId}`);
+      } catch (error) {
+        console.error(`Error saving invoice record to Firestore for user ${input.userId}:`, error);
+        // We don't throw here, as sending the email is still the primary goal.
+        // We just log the error.
+      }
+    } else {
+      console.warn("Firestore not available or userId missing. Skipping saving invoice record.");
+    }
+
     console.log("Successfully generated invoice email content.");
-    return output;
+    return emailOutput;
   }
 );

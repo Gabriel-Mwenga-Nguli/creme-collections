@@ -75,8 +75,8 @@ export default function AdminOrderDetailPage() {
   };
 
   const handleSendInvoice = async () => {
-    if (!order || !order.userEmail) {
-        toast({ title: "Missing Information", description: "Cannot send invoice, customer email is missing.", variant: "destructive"});
+    if (!order || !order.userEmail || !order.userId) {
+        toast({ title: "Missing Information", description: "Cannot send invoice, customer email or ID is missing.", variant: "destructive"});
         return;
     }
     if (!auth.app) {
@@ -89,6 +89,7 @@ export default function AdminOrderDetailPage() {
     try {
         const invoiceInput: GenerateInvoiceInput = {
             orderId: order.orderId || order.id,
+            userId: order.userId,
             customerName: order.shippingAddress.name,
             customerEmail: order.userEmail,
             items: order.items.map(item => ({
@@ -259,3 +260,4 @@ export default function AdminOrderDetailPage() {
     </div>
   );
 }
+
