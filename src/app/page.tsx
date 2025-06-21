@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { ShoppingBag, Zap, Award, Truck, Users, Mail, ShieldCheck, Gift, Percent, Smartphone, Shirt, Home as HomeIconLucide, Briefcase, Package, Power } from 'lucide-react';
 import ProductCard from '@/components/features/home/product-card';
 import WeeklyDealsSlider from '@/components/features/home/weekly-deals-slider';
-import { getFeaturedProducts, getWeeklyDeals } from '@/services/productService';
+import { getFeaturedProducts, getWeeklyDeals, getPromotions } from '@/services/productService'; // Added getPromotions
 import { Input } from '@/components/ui/input';
 import NewsletterPopup from '@/components/features/home/NewsletterPopup';
 import ServicesHighlight from '@/components/features/home/ServicesHighlight';
@@ -73,67 +73,11 @@ const whyChooseUsFeatures = [
   { title: "Secure Online Shopping", description: "Shop with confidence using our secure payment gateways.", icon: ShieldCheck, dataAiHint:"secure payment" },
 ];
 
-const samplePromoSliderData: PromoSlideProps[] = [
-    {
-      type: 'firstOrder',
-      title: 'Ksh 500 Off!',
-      subtitle: 'Your First Creme Collections Order',
-      code: 'KARIBU500',
-      terms: '*Min. spend Ksh 2,500. T&Cs apply.',
-      dataAiHint: 'first order discount',
-      foregroundColor: 'text-primary-foreground',
-      accentColor: 'text-white',
-      backgroundColor: 'bg-gradient-to-br from-primary to-accent',
-      href: '/register',
-    },
-    {
-      type: 'tieredDiscount',
-      title: 'Buy More, Save More!',
-      tiers: [
-        { amount: 400, spend: 5000 },
-        { amount: 700, spend: 8000 },
-        { amount: 1000, spend: 10000 },
-      ],
-      code: 'SAVEMORE',
-      terms: '*Limited Time Offer. T&Cs Apply.',
-      dataAiHint: 'tiered discount offer',
-      foregroundColor: 'text-white',
-      accentColor: 'text-primary',
-      backgroundColor: 'bg-gradient-to-tr from-slate-900 to-slate-700',
-      href: '/products',
-    },
-    {
-      type: 'revealCode',
-      title: 'Fashion Finds',
-      subtitle: 'Up to 20% Off Select Apparel',
-      actionText: 'TAP TO REVEAL',
-      codePlaceholder: 'CODE',
-      productImage: '/images/banners/fashion.png',
-      dataAiHint: 'fashion apparel sale',
-      backgroundColor: 'bg-secondary',
-      foregroundColor: 'text-secondary-foreground',
-      accentColor: 'text-primary border-primary',
-      href: '/products/category/fashion',
-    },
-    {
-      type: 'revealCode',
-      title: 'Home Essentials',
-      subtitle: 'Save Big on Decor & More',
-      actionText: 'TAP TO REVEAL',
-      codePlaceholder: 'CODE',
-      productImage: '/images/banners/home.png',
-      dataAiHint: 'home decor sale',
-      backgroundColor: 'bg-card',
-      foregroundColor: 'text-card-foreground',
-      accentColor: 'text-primary border-primary',
-      href: '/products/category/home-living',
-    },
-  ];
-
 
 export default async function HomePage() {
   const featuredProductsData = await getFeaturedProducts();
   const weeklyDealsData = await getWeeklyDeals();
+  const promotionsData = await getPromotions(); // Fetch promotions from Firestore
 
   return (
     <div className="flex flex-col">
@@ -244,8 +188,8 @@ export default async function HomePage() {
                   description={product.description}
                   image={product.image}
                   dataAiHint={product.dataAiHint}
-                  fixedOfferPrice={product.offerPrice}
-                  fixedOriginalPrice={product.originalPrice}
+                  fixedOfferPrice={product.fixedOfferPrice}
+                  fixedOriginalPrice={product.fixedOriginalPrice}
                 />
               ))}
             </div>
@@ -267,7 +211,7 @@ export default async function HomePage() {
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground md:text-5xl font-headline mb-10 md:mb-14 text-center">
             Today's Best Promotions
           </h2>
-          <PromotionalOfferSlider promos={samplePromoSliderData} />
+          <PromotionalOfferSlider promos={promotionsData} />
         </div>
       </section>
 

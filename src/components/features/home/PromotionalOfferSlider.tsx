@@ -8,44 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Ticket, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface TieredDiscount {
-  amount: number;
-  spend: number;
-  maxSpend?: number;
-}
-
-interface FreshSaverItem {
-  name: string;
-  price: number;
-  oldPrice?: number;
-  image: string;
-  dataAiHint: string;
-}
-
-export interface PromoSlideProps {
-  type: 'firstOrder' | 'tieredDiscount' | 'revealCode';
-  title: string;
-  subtitle?: string;
-  code?: string;
-  terms?: string;
-  backgroundImage?: string;
-  backgroundColor?: string;
-  productImage?: string;
-  logoImage?: string;
-  items?: FreshSaverItem[];
-  tiers?: TieredDiscount[];
-  actionText?: string;
-  codePlaceholder?: string;
-  dataAiHint: string;
-  foregroundColor?: string;
-  accentColor?: string;
-  topColor?: string;
-  bottomColor?: string;
-  priceColor?: string;
-  href: string;
-  buttonText?: string;
-}
+import type { PromoSlideProps } from '@/lib/types'; // Import from shared types
 
 interface PromotionalOfferSliderProps {
   promos: PromoSlideProps[];
@@ -143,7 +106,11 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
   }, [canScroll, isHovering, advanceSlide, promos.length]);
 
   if (!promos || promos.length === 0) {
-    return null;
+    return (
+        <div className="text-center py-8 text-muted-foreground">
+            <p>No active promotions at the moment. Check back soon!</p>
+        </div>
+    );
   }
 
   const renderCardContent = (promo: PromoSlideProps) => {
@@ -154,8 +121,7 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
     switch (promo.type) {
       case 'firstOrder':
         return (
-          <div className={cn(baseCardClasses, defaultFgColor, promo.backgroundImage ? '' : 'bg-gradient-to-br from-primary to-accent')} style={promo.backgroundImage ? { backgroundImage: `url(${promo.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
-            {promo.backgroundImage && <div className="absolute inset-0 bg-black/40 z-0 group-hover/promocard:bg-black/50 transition-colors duration-300"></div>}
+          <div className={cn(baseCardClasses, defaultFgColor, promo.backgroundColor || 'bg-gradient-to-br from-primary to-accent')}>
             <div className="relative z-10 flex flex-col h-full">
               <h3 className="font-bold text-xl leading-tight tracking-tight">{promo.title}</h3>
               {promo.subtitle && <p className="text-xs opacity-90 mb-1.5 flex-grow">{promo.subtitle}</p>}
@@ -169,7 +135,7 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
         );
       case 'tieredDiscount':
         return (
-            <div className={cn(baseCardClasses, defaultFgColor, 'bg-gradient-to-tr from-slate-900 to-slate-700')}>
+            <div className={cn(baseCardClasses, defaultFgColor, promo.backgroundColor || 'bg-gradient-to-tr from-slate-900 to-slate-700')}>
             <div className="relative z-10 flex flex-col h-full">
               <h3 className="font-bold text-lg mb-1.5 leading-tight tracking-tight">{promo.title}</h3>
               <div className="space-y-1 mb-1.5 flex-grow">
@@ -200,7 +166,18 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
               {promo.subtitle && <p className="text-xs opacity-80">{promo.subtitle}</p>}
             </div>
             <div className="my-2 flex-grow flex items-center justify-center transition-transform duration-300 group-hover/promocard:scale-105">
-              {promo.productImage && <Image src={promo.productImage} alt={promo.title || "Product"} width={90} height={90} className="object-contain max-h-[90px] rounded-md" data-ai-hint={promo.dataAiHint} />}
+              {promo.productImage && (
+                <div className="relative w-32 h-32">
+                  <Image 
+                    src={promo.productImage} 
+                    alt={promo.title || "Product"} 
+                    fill
+                    className="object-cover rounded-md shadow-inner" 
+                    sizes="128px"
+                    data-ai-hint={promo.dataAiHint} 
+                  />
+                </div>
+              )}
             </div>
             <div className={cn("p-2 rounded-md text-center border-2 border-dashed transition-all duration-300 group-hover/promocard:bg-opacity-10", promo.accentColor || 'border-primary text-primary bg-primary/10')}>
               <p className="text-xs font-medium">{promo.actionText}</p>
@@ -226,7 +203,7 @@ const PromotionalOfferSlider: React.FC<PromotionalOfferSliderProps> = ({ promos 
         className="flex overflow-x-auto space-x-3 sm:space-x-4 py-4 scrollbar-hide scroll-smooth -mx-2 px-2"
       >
         {promos.map((promo, index) => (
-          <div key={index} className="snap-center shrink-0"> 
+          <div key={promo.title + index} className="snap-center shrink-0"> 
             <Link href={promo.href} className="block transform transition-transform duration-300 ease-out hover:-translate-y-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl">
               {renderCardContent(promo)}
             </Link>

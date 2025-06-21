@@ -6,6 +6,8 @@ import type { DealProduct } from '@/components/features/home/weekly-deals-slider
 import { db } from '@/lib/firebase';
 import { getProductsFromLoyverse, getProductByIdFromLoyverse } from './loyverseService'; // Import Loyverse functions
 import { collection, query, where, getDocs, limit, doc, getDoc, addDoc, updateDoc, serverTimestamp, Timestamp, type DocumentSnapshot, type QueryDocumentSnapshot, orderBy } from 'firebase/firestore';
+import type { PromoSlideProps } from '@/lib/types';
+
 
 // Initial check for db initialization
 if (!db) {
@@ -227,7 +229,7 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
   console.log(`[getAllProducts Call] Params: category='${categorySlugParam}', subCategory='${subCategorySlugParam}'. Attempting Loyverse first.`);
   // Note: Loyverse filtering for category/subcategory might be complex (e.g., by category_id).
   // The conceptual getProductsFromLoyverse might not support this level of filtering yet.
-  // For now, if categorySlugParam exists, we might primarily rely on Firestore,
+  // For this example, if categorySlugParam exists, we might primarily rely on Firestore,
   // or the Loyverse service would need to implement robust filtering.
   // For this example, we'll assume getProductsFromLoyverse does its best and we post-filter or it handles it.
 
@@ -316,4 +318,44 @@ export async function updateProduct(productId: string, productData: Partial<Omit
         console.error(`Error updating product ${productId} in Firestore:`, error);
         return false;
     }
+}
+
+export async function getPromotions(): Promise<PromoSlideProps[]> {
+  if (!db) {
+    console.error("Firestore 'db' object is not initialized. Cannot fetch promotions.");
+    return [];
+  }
+  try {
+    const promotionsRef = collection(db, 'promotions');
+    const q = query(promotionsRef, where('isActive', '==', true), orderBy('displayOrder', 'asc'));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+        console.warn("No active promotions found in Firestore.");
+        return [];
+    }
+
+    const promotions = querySnapshot.docs.map(doc => ({
+      ...doc.data(),
+    } as PromoSlideProps));
+    
+    return promotions;
+  } catch (error) {
+    console.error("Error fetching promotions from Firestore: ", error);
+    // In case of an error, return a default set of promotions to avoid breaking the page
+    return [
+        {
+          type: 'firstOrder', title: 'Ksh 500 Off!', subtitle: 'Your First Order', code: 'KARIBU500',
+          terms: '*Min. spend Ksh 2,500.', dataAiHint: 'first order discount',
+          backgroundColor: 'bg-gradient-to-br from-primary to-accent', href: '/register',
+          displayOrder: 1, isActive: true
+        },
+        {
+          type: 'revealCode', title: 'Fashion Finds', subtitle: 'Up to 20% Off',
+          productImage: '/images/banners/fashion.png', dataAiHint: 'fashion sale',
+          backgroundColor: 'bg-secondary', href: '/products/category/fashion',
+          displayOrder: 2, isActive: true
+        },
+    ];
+  }
 }
