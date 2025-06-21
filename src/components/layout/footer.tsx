@@ -26,12 +26,6 @@ const MpesaIcon = () => (
     </svg>
 );
   
-const VisaIcon = () => (
-    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-4 w-auto">
-        <path d="M7.525.002L4.63 15.25H2.935L5.83.002h1.695zm8.932 12.358c.683-.497.994-1.168.994-2.025 0-1.634-1.025-2.73-2.64-3.41-1.614-.682-2.14-.993-2.14-1.503 0-.37.339-.71.933-.71.496 0 1.258.153 1.88.438l.37.184.496-1.503a5.964 5.964 0 00-2.318-.468c-1.348 0-2.288.74-2.288 1.935 0 1.503 1.025 2.513 2.514 3.193 1.584.682 2.015 1.024 2.015 1.564 0 .588-.496.864-.994.864-.807 0-1.47-.21-2.045-.528l-.407-.184-.496 1.533a6.565 6.565 0 002.575.62c1.533 0 2.41-.74 2.41-1.995zm8.13-12.36h-1.594l-2.19 10.632-1.47-10.632h-1.595l2.44 15.248h1.378L24.587.002zM.005.002L0 1.195l1.025 12.86h1.594L.933.002H.005z" fill="#1434CB"/>
-    </svg>
-);
-  
 const MastercardIcon = () => (
     <svg role="img" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto">
         <circle cx="12" cy="12" r="12" fill="#EA001B" />
@@ -80,7 +74,6 @@ export default function Footer() {
               <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">We Accept</h3>
               <div className="flex flex-wrap items-center gap-2">
                 <MpesaIcon />
-                <VisaIcon />
                 <MastercardIcon />
                 <div className="flex items-center justify-center h-8 px-2 bg-gray-200 rounded text-gray-700" title="Direct Bank Transfer">
                   <Landmark className="h-5 w-5" />
