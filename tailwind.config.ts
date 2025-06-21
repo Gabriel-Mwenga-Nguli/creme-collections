@@ -89,16 +89,35 @@ const config = {
             height: '0',
           },
         },
-        'scroll-rtl': { // For continuous right-to-left marquee effect
+        'scroll-rtl': { 
           '0%': { transform: 'translateX(0)' },
-          // Translate by -50% if the content is duplicated once and wrapper holds both
           '100%': { transform: 'translateX(-50%)' }, 
+        },
+        'kenburns': { // Explicit Ken Burns definition
+          '0%': { transform: 'scale(1.05) translate(0, 0)' },
+          '100%': { transform: 'scale(1.15) translate(-1%, 1%)' },
+        },
+        'fade-in-right': { // Explicit fade-in-right
+          'from': { opacity: '0', transform: 'translateX(50px)' },
+          'to': { opacity: '1', transform: 'translateX(0)' },
+        },
+        'fade-in-left': { // Explicit fade-in-left
+          'from': { opacity: '0', transform: 'translateX(-50px)' },
+          'to': { opacity: '1', transform: 'translateX(0)' },
+        },
+        'fade-in-up': { // Explicit fade-in-up
+          'from': { opacity: '0', transform: 'translateY(50px)' },
+          'to': { opacity: '1', transform: 'translateY(0)' },
         },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'scroll-rtl': 'scroll-rtl 60s linear infinite', // Adjust duration as needed
+        'scroll-rtl': 'scroll-rtl 60s linear infinite', 
+        'kenburns': 'kenburns 7.5s ease-in-out infinite alternate',
+        'fade-in-right': 'fade-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+        'fade-in-left': 'fade-in-left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+        'fade-in-up': 'fade-in-up 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
       },
     },
   },

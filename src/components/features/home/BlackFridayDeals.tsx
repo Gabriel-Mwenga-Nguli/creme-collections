@@ -20,8 +20,9 @@ const dummyBlackFridayProducts: ProductCardProps[] = [
   { id: 'bf008', name: 'Air Purifier Pro', description: 'Breathe cleaner air at home.', image: 'https://placehold.co/600x400.png', dataAiHint: 'air purifier appliance', fixedOfferPrice: 12000, fixedOriginalPrice: 17500 },
 ];
 
+const duplicatedProducts = [...dummyBlackFridayProducts, ...dummyBlackFridayProducts];
+
 const BlackFridayDeals: React.FC = () => {
-  const duplicatedProducts = [...dummyBlackFridayProducts, ...dummyBlackFridayProducts];
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [canScroll, setCanScroll] = useState(false);
@@ -47,7 +48,7 @@ const BlackFridayDeals: React.FC = () => {
       };
     }
     return () => window.removeEventListener('resize', updateScrollability);
-  }, [duplicatedProducts, updateScrollability]);
+  }, [updateScrollability]);
 
   const manualScroll = useCallback((direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
