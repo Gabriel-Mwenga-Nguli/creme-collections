@@ -1,4 +1,3 @@
-
 # Firestore Data Setup for Creme Collections
 
 For your Creme Collections application to display products correctly, especially on category and subcategory pages, you need to have well-structured data in your Firestore database, specifically in a collection named `products`.
