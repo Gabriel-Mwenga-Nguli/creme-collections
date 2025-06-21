@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { User, ShoppingBag, Heart, MapPin, LogOut, Loader2, Award, Mail, Trash2, Edit3, Camera, ListOrdered, PlusCircle, SlidersHorizontal } from 'lucide-react';
+import { User, ShoppingBag, Heart, MapPin, LogOut, Loader2, Award, Mail, Trash2, Edit3, Camera, ListOrdered, PlusCircle, SlidersHorizontal, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth, db, storage } from '@/lib/firebase'; 
@@ -21,14 +21,15 @@ import InboxView from '@/components/features/profile/InboxView';
 import { manageLoyaltyPoints } from '@/ai/flows/loyalty-points-flow';
 import ProductCard, { type ProductCardProps } from '@/components/features/home/product-card';
 import { getProductDetailsById } from '@/services/productService';
-import type { Order } from '@/services/orderService'; 
+import type { Order, Address } from '@/services/orderService'; 
 import { getUserOrders } from '@/services/orderService';
-import type { Address } from '@/services/addressService';
 import { getUserAddresses, addUserAddress } from '@/services/addressService';
+import type { Invoice } from '@/services/invoiceService';
+import { getUserInvoices } from '@/services/invoiceService';
 import { format } from 'date-fns';
 import { Sheet, SheetTrigger, SheetContent, SheetClose } from '@/components/ui/sheet'; // For mobile sidebar
 
-type ProfileSection = "personal" | "orders" | "wishlist" | "addresses" | "inbox";
+type ProfileSection = "personal" | "orders" | "wishlist" | "addresses" | "inbox" | "invoices";
 
 export default function ProfilePage() {
   const [user, loading, error] = useAuthState(auth);
@@ -51,6 +52,9 @@ export default function ProfilePage() {
 
   const [userOrders, setUserOrders] = useState<Order[]>([]);
   const [isOrdersLoading, setIsOrdersLoading] = useState(false);
+
+  const [userInvoices, setUserInvoices] = useState<Invoice[]>([]);
+  const [isInvoicesLoading, setIsInvoicesLoading] = useState(false);
 
   const [userAddresses, setUserAddresses] = useState<Address[]>([]);
   const [isAddressesLoading, setIsAddressesLoading] = useState(false);
@@ -281,6 +285,16 @@ export default function ProfilePage() {
     }
   }, [activeSection, user, toast]);
 
+   useEffect(() => {
+    if (activeSection === 'invoices' && user && db) {
+      setIsInvoicesLoading(true);
+      getUserInvoices(user.uid)
+        .then(setUserInvoices)
+        .catch(err => toast({ title: "Error", description: "Could not fetch invoices.", variant: "destructive" }))
+        .finally(() => setIsInvoicesLoading(false));
+    }
+  }, [activeSection, user, toast]);
+
   useEffect(() => {
     if (activeSection === 'addresses' && user && db) {
       setIsAddressesLoading(true);
@@ -381,7 +395,7 @@ export default function ProfilePage() {
         </CardHeader>
         <Separator />
         <CardContent className="p-2 sm:p-4 space-y-0.5 sm:space-y-1">
-          {(['personal', 'inbox', 'orders', 'wishlist', 'addresses'] as ProfileSection[]).map(section => (
+          {(['personal', 'orders', 'invoices', 'wishlist', 'addresses', 'inbox'] as ProfileSection[]).map(section => (
             <SheetClose asChild key={section}>
               <Button 
                 variant="ghost" 
@@ -389,10 +403,11 @@ export default function ProfilePage() {
                 className={`w-full justify-start text-sm md:text-base px-2 sm:px-3 py-1.5 sm:py-2 h-auto ${activeSection === section ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}
               >
                 {section === 'personal' && <User className="mr-2 h-4 w-4" />}
-                {section === 'inbox' && <Mail className="mr-2 h-4 w-4" />}
                 {section === 'orders' && <ShoppingBag className="mr-2 h-4 w-4" />}
+                {section === 'invoices' && <FileText className="mr-2 h-4 w-4" />}
                 {section === 'wishlist' && <Heart className="mr-2 h-4 w-4" />}
                 {section === 'addresses' && <MapPin className="mr-2 h-4 w-4" />}
+                {section === 'inbox' && <Mail className="mr-2 h-4 w-4" />}
                 {section.charAt(0).toUpperCase() + section.slice(1)}
               </Button>
             </SheetClose>
@@ -441,7 +456,7 @@ export default function ProfilePage() {
                   <ul className="space-y-3 md:space-y-4">
                     {userOrders.map(order => (
                       <li key={order.id} className="p-3 md:p-4 border rounded-md hover:shadow-md transition-shadow">
-                        <Link href={`/profile/orders/${order.orderId || order.id}`}>
+                        <Link href={`/profile/orders/${order.id}`}>
                           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                             <div>
                               <p className="font-semibold text-primary text-sm sm:text-base">Order ID: {order.orderId || order.id}</p>
@@ -457,6 +472,32 @@ export default function ProfilePage() {
                     ))}
                   </ul>
                 ) : <p className="text-muted-foreground text-center py-10">You have no orders yet.</p>}
+            </CardContent>
+          </Card>
+        );
+      case 'invoices':
+        return (
+          <Card className="shadow-lg">
+            <CardHeader><CardTitle className="flex items-center gap-2 text-xl md:text-2xl"><FileText />My Invoices</CardTitle><CardDescription>View your past invoices.</CardDescription></CardHeader>
+            <CardContent>
+              {isInvoicesLoading ? <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                : userInvoices.length > 0 ? (
+                  <ul className="space-y-3 md:space-y-4">
+                    {userInvoices.map(invoice => (
+                      <li key={invoice.id} className="p-3 md:p-4 border rounded-md hover:shadow-md transition-shadow flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                          <div>
+                            <p className="font-semibold text-primary text-sm sm:text-base">Invoice ID: {invoice.invoiceId}</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground">For Order: {invoice.orderId}</p>
+                             <p className="text-xs sm:text-sm text-muted-foreground">Date: {invoice.invoiceDate ? format(invoice.invoiceDate.toDate(), 'PPP') : 'N/A'}</p>
+                          </div>
+                          <div className="text-left sm:text-right mt-1 sm:mt-0">
+                            <p className="font-semibold text-sm sm:text-base">KES {invoice.totalAmount.toLocaleString()}</p>
+                            <p className={`text-xs sm:text-sm font-medium ${invoice.status === 'Paid' ? 'text-green-600' : 'text-yellow-600'}`}>{invoice.status}</p>
+                          </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p className="text-muted-foreground text-center py-10">You have no invoices yet.</p>}
             </CardContent>
           </Card>
         );

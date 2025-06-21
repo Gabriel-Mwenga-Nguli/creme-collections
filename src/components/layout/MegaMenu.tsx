@@ -64,4 +64,3 @@ export default function MegaMenu({ categories, onClose }: MegaMenuProps) {
     </div>
   );
 }
-

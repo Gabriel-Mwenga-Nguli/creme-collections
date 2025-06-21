@@ -103,7 +103,7 @@ const draftSupportMessageFlow = ai.defineFlow(
 
     if (input.userEmail) {
          output.draftMessage = output.draftMessage.replace(/\[user's email if provided, otherwise omit this line or use a placeholder\]/gi, `My email is ${input.userEmail}.`);
-         output.draftMessage = output.draftMessage.replace(/My email is \[user's email if provided\]./gi, `My email is ${input.userEmail}.`);
+         output.draftMessage = output.draftMessage.replace(/My email is \[user's email if provided\]\./gi, `My email is ${input.userEmail}.`);
     } else {
         // Remove the email line if no email provided
         output.draftMessage = output.draftMessage.replace(/My email is \[user's email if provided, otherwise omit this line or use a placeholder\]\.\s*\n?/gi, '');

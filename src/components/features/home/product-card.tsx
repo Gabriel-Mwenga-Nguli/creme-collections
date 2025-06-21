@@ -13,6 +13,7 @@ import { auth, db } from '@/lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { doc, setDoc, deleteDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 export interface ProductCardProps {
   id: string;
@@ -32,6 +33,7 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
   const { addToCart } = useCart();
   const { toast } = useToast();
   const [user, authLoading] = useAuthState(auth);
+  const router = useRouter();
 
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isWishlistProcessing, setIsWishlistProcessing] = useState(false);
@@ -75,7 +77,7 @@ export default function ProductCard({ id, name, description, image, dataAiHint, 
       setIsWishlistProcessing(false);
     });
     return () => unsubscribe();
-  }, [user, id, authLoading, db]);
+  }, [user, id, authLoading]);
 
   const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();

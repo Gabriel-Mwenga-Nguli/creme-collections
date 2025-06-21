@@ -1,11 +1,10 @@
 
-// console.log('[Firebase Module Load] Attempting to load and initialize Firebase services...'); // Removed this line
 
 import { initializeApp, getApps, getApp, type FirebaseApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
-import { getAnalytics, type Analytics } from "firebase/analytics";
+import { getAnalytics, type Analytics, isSupported } from "firebase/analytics";
 import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from 'firebase/app-check';
 
 const firebaseConfigValues = {
@@ -42,14 +41,11 @@ if (
     projectIdStatusDetail = 'MISSING (empty or not set in .env.local)';
   } else if (firebaseConfigValues.projectId.toUpperCase().includes("YOUR_PROJECT_ID")) {
     projectIdStatusDetail = `PLACEHOLDER ('${firebaseConfigValues.projectId}') - Please replace with your actual Firebase Project ID.`;
-  } else {
-    projectIdStatusDetail = firebaseConfigValues.projectId; 
   }
   
   if (projectIdIsMissingOrPlaceholder) {
      projectIdStatusDetail = `MISSING or PLACEHOLDER ('${firebaseConfigValues.projectId || 'NOT SET'}') - Please set NEXT_PUBLIC_FIREBASE_PROJECT_ID in .env.local to your actual Firebase Project ID.`;
   }
-
 
   console.error(
     `[Firebase] CRITICAL_CONFIG_MISSING: Firebase initialization failed due to missing or placeholder configuration values. ` +
@@ -113,12 +109,16 @@ if (
     }
 
     if (typeof window !== 'undefined') {
-      try {
-        analytics = getAnalytics(app);
-      } catch (analyticsError) {
-        console.error('[Firebase] FIREBASE_ANALYTICS_INIT_ERROR: Error initializing Firebase Analytics:', analyticsError);
-        analytics = null;
-      }
+       isSupported().then(supported => {
+        if (supported) {
+          try {
+            analytics = getAnalytics(app);
+          } catch (analyticsError) {
+            console.error('[Firebase] FIREBASE_ANALYTICS_INIT_ERROR: Error initializing Firebase Analytics:', analyticsError);
+            analytics = null;
+          }
+        }
+      });
       try {
         if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
           appCheck = initializeAppCheck(app, {

@@ -21,7 +21,7 @@ const InvoiceItemSchema = z.object({
   priceAtPurchase: z.number().describe("The price of a single unit of the product at the time of purchase."),
 });
 
-export const GenerateInvoiceInputSchema = z.object({
+const GenerateInvoiceInputSchema = z.object({
   orderId: z.string().describe("The unique identifier for the order."),
   userId: z.string().describe("The unique Firestore user ID for the customer."),
   customerName: z.string().describe("The name of the customer."),
@@ -33,7 +33,7 @@ export const GenerateInvoiceInputSchema = z.object({
 });
 export type GenerateInvoiceInput = z.infer<typeof GenerateInvoiceInputSchema>;
 
-export const GenerateInvoiceOutputSchema = z.object({
+const GenerateInvoiceOutputSchema = z.object({
   subject: z.string().describe("The subject line for the confirmation email."),
   htmlBody: z.string().describe("The full HTML content of the email, including the branded invoice."),
   customerEmail: z.string().email(), // Pass email through for convenience

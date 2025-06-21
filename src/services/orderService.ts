@@ -39,6 +39,22 @@ export interface Order {
   shippingAddress: OrderShippingAddress; 
 }
 
+export interface Address {
+  id: string; // Firestore document ID
+  userId: string;
+  name: string; // e.g., "Home", "Work"
+  firstName: string;
+  lastName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  postalCode: string;
+  country: string; // Default to 'Kenya'
+  phone: string;
+  isDefault?: boolean;
+}
+
+
 export interface OrderAdminItem extends Order {
     userEmail?: string;
 }
