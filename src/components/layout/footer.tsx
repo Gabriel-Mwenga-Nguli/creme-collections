@@ -2,19 +2,39 @@
 import Link from 'next/link';
 import { SITE_NAME, FOOTER_COMPANY_LINKS, FOOTER_SUPPORT_LINKS } from '@/lib/constants';
 import Logo from '@/components/logo';
-import { MapPin, Mail, MessageSquare, Clock, Facebook, Instagram, Landmark } from 'lucide-react';
+import { MapPin, Mail, MessageSquare, Clock, Landmark } from 'lucide-react';
+
+const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true" {...props}>
+      <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.494v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/>
+    </svg>
+);
+
+const InstagramIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <defs>
+        <radialGradient id="insta-gradient" cx="0.3" cy="1.2" r="1.2">
+          <stop offset="0" stopColor="#fdf497" />
+          <stop offset="0.1" stopColor="#fdf497" />
+          <stop offset="0.25" stopColor="#fd5949" />
+          <stop offset="0.5" stopColor="#d6249f" />
+          <stop offset="0.75" stopColor="#285AEB" />
+        </radialGradient>
+      </defs>
+      <path fill="url(#insta-gradient)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664 4.771 4.919-4.919 1.266-.057 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.059-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.441 1.441 1.441 1.441-.645 1.441-1.441-.645-1.44-1.441-1.44z"/>
+    </svg>
+);
 
 const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 1200 1227"
-    fill="none"
     aria-hidden="true"
     {...props}
   >
     <path
       d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.163 519.284ZM569.165 687.828L521.697 619.934L144.011 79.6909H308.863L612.434 513.728L659.902 581.621L1076.01 1143.85H911.161L569.165 687.828Z"
-      fill="currentColor"
+      className="fill-black dark:fill-white"
     />
   </svg>
 );
@@ -64,15 +84,15 @@ export default function Footer() {
             <div>
               <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">Connect With Us</h3>
               <div className="flex space-x-5">
-                {[
-                  { href: "https://facebook.com/cremecollections", label: "Facebook", icon: Facebook },
-                  { href: "https://instagram.com/cremecollections", label: "Instagram", icon: Instagram },
-                  { href: "https://x.com/cremecollections", label: "X", icon: XIcon },
-                ].map(social => (
-                  <a href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label} key={social.label} className="text-slate-400 hover:text-primary transition-transform duration-200 hover:scale-110">
-                    <social.icon className="w-6 h-6" />
-                  </a>
-                ))}
+                <a href="https://facebook.com/cremecollections" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:opacity-80 transition-all duration-200 hover:scale-110">
+                  <FacebookIcon className="w-6 h-6" />
+                </a>
+                <a href="https://instagram.com/cremecollections" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:opacity-80 transition-all duration-200 hover:scale-110">
+                  <InstagramIcon className="w-6 h-6" />
+                </a>
+                <a href="https://x.com/cremecollections" target="_blank" rel="noopener noreferrer" aria-label="X" className="hover:opacity-80 transition-all duration-200 hover:scale-110">
+                  <XIcon className="w-6 h-6" />
+                </a>
               </div>
             </div>
             
