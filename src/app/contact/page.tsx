@@ -51,8 +51,7 @@ export default function ContactPage() {
             <div className="mt-8 p-6 bg-card rounded-lg shadow-md">
               <h3 className="text-xl font-semibold text-foreground mb-4 font-headline flex items-center"><MapPin className="w-5 h-5 mr-2 text-primary" /> Our Office</h3>
               <address className="text-sm text-muted-foreground not-italic space-y-1">
-                <p>123 Creme Collections St, Suite 100</p>
-                <p>Commerce City, EC 54321, Kenya</p>
+                <p>Taveta Road, Nairobi, Kenya</p>
                 <p className="mt-2">Email: <a href="mailto:support@cremecollections.shop" className="text-primary hover:underline">support@cremecollections.shop</a></p>
               </address>
               <div className="mt-4">
@@ -94,4 +93,3 @@ export default function ContactPage() {
     </div>
   );
 }
-

@@ -25,17 +25,16 @@ export default function HelpSection() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10 hover:text-primary" asChild>
-                <a href="tel:+2542018881106"> {/* Use a generic number or one from constants */}
+                <a href="tel:+254742468070"> 
                   <Phone className="mr-2 h-5 w-5" /> CALL US
                 </a>
               </Button>
             </div>
             <p className="text-xs md:text-sm text-muted-foreground pt-2">
-              You can also reach us on <a href="tel:+2542018881106" className="text-primary hover:underline font-medium">02018881106</a> from Monday to Friday (8 am to 5 pm).
-              Public Holidays between 9 am and 5 pm.
+              Our main line is <a href="tel:+254742468070" className="text-primary hover:underline font-medium">+254 742 468070</a>.
             </p>
              <p className="text-xs md:text-sm text-muted-foreground">
-              Alternative Numbers: <a href="tel:+254742468070" className="text-primary hover:underline font-medium">+254 742 468070</a>, <a href="tel:+254743117211" className="text-primary hover:underline font-medium">+254 743 117211</a>, <a href="tel:+254717988700" className="text-primary hover:underline font-medium">+254 717 988700</a>.
+              Alternative Numbers: <a href="tel:+254743117211" className="text-primary hover:underline font-medium">+254 743 117211</a>, <a href="tel:+254717988700" className="text-primary hover:underline font-medium">+254 717 988700</a>.
             </p>
           </div>
           <div className="hidden md:flex justify-center items-center">

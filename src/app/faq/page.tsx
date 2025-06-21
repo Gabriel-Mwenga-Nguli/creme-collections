@@ -37,7 +37,7 @@ const faqs = [
   {
     question: 'How do I contact customer support?',
     answer:
-      'You can contact our customer support team via email at support@cremecollections.shop, by phone at +1 (234) 567-890, or through our live chat support on the website during business hours. Visit our Contact Us page for more details.',
+      'You can contact our customer support team via email at support@cremecollections.shop, by phone at +254 742 468070, or through our live chat support on the website during business hours. Visit our Contact Us page for more details.',
   },
   {
     question: 'Do you ship internationally?',
