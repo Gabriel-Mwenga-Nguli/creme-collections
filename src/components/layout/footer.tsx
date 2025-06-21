@@ -2,7 +2,23 @@
 import Link from 'next/link';
 import { SITE_NAME, FOOTER_COMPANY_LINKS, FOOTER_SUPPORT_LINKS } from '@/lib/constants';
 import Logo from '@/components/logo';
-import { MapPin, Mail, MessageSquare, Clock, Facebook, Instagram, Twitter, Linkedin, Youtube, Power } from 'lucide-react';
+import { MapPin, Mail, MessageSquare, Clock, Facebook, Instagram, Power } from 'lucide-react';
+
+const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1200 1227"
+    fill="none"
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.163 519.284ZM569.165 687.828L521.697 619.934L144.011 79.6909H308.863L612.434 513.728L659.902 581.621L1076.01 1143.85H911.161L569.165 687.828Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 
 export default function Footer() {
   return (
@@ -32,9 +48,7 @@ export default function Footer() {
                 {[
                   { href: "https://facebook.com/cremecollections", label: "Facebook", icon: Facebook },
                   { href: "https://instagram.com/cremecollections", label: "Instagram", icon: Instagram },
-                  { href: "https://twitter.com/cremecollections", label: "Twitter", icon: Twitter },
-                  { href: "https://linkedin.com/company/cremecollections", label: "LinkedIn", icon: Linkedin },
-                  { href: "https://youtube.com/cremecollections", label: "YouTube", icon: Youtube },
+                  { href: "https://x.com/cremecollections", label: "X", icon: XIcon },
                 ].map(social => (
                   <a href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label} key={social.label} className="text-slate-400 hover:text-primary transition-transform duration-200 hover:scale-110">
                     <social.icon className="w-6 h-6" />
@@ -56,7 +70,7 @@ export default function Footer() {
               </ul>
             </div>
             <div>
-              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">Company</h3>
+              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">Company & Legal</h3>
               <ul role="list" className="space-y-2.5">
                 {FOOTER_COMPANY_LINKS.map((link) => (
                   <li key={link.label}>

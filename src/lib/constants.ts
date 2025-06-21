@@ -2,7 +2,7 @@
 import type { NavLink as BaseNavLink } from '@/lib/types';
 import { 
   Smartphone, Shirt, Home as HomeIcon, Tv, Laptop, Headphones, Heart, ShoppingCart, User, Search, Percent, Info, MessageSquare, Phone, Sparkles, Zap, HelpCircle, Package, BookOpen, Users, ShieldCheck, Menu as MenuIcon, ShoppingBasket, Apple, Leaf, Beaker, Baby, Sprout, VenetianMask,
-  Bike, ToyBrick, Car, BookMarked, HeartPulse, Dumbbell, Tent, Gamepad2, PencilRuler, Stethoscope, Popcorn, Coffee
+  Bike, ToyBrick, Car, BookMarked, HeartPulse, Dumbbell, Tent, Gamepad2, PencilRuler, Stethoscope, Popcorn, Coffee, Cookie, Gavel
 } from 'lucide-react';
 
 export const SITE_NAME = "Creme Collections";
@@ -173,12 +173,14 @@ export const CATEGORY_NAV_LINKS: NavLink[] = [
 
 export const FOOTER_COMPANY_LINKS: NavLink[] = [
   { href: "/about", label: "About Us", icon: Users },
-  { href: "/contact", label: "Contact Us", icon: Phone },
   { href: "/terms", label: "Terms & Conditions", icon: BookOpen },
   { href: "/privacy", label: "Privacy Policy", icon: ShieldCheck },
+  { href: "/cookies", label: "Cookie Policy", icon: Cookie },
+  { href: "/legal", label: "Legal Notice", icon: Gavel },
 ];
 
 export const FOOTER_SUPPORT_LINKS: NavLink[] = [
+  { href: "/contact", label: "Contact Us", icon: Phone },
   { href: "/chat-support", label: "Chat Support", icon: MessageSquare },
   { href: "/faq", label: "FAQ", icon: HelpCircle },
   { href: "/shipping", label: "Shipping & Returns", icon: Package },

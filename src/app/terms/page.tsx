@@ -1,19 +1,13 @@
 
 "use client";
-import type { Metadata } from 'next';
 import { useState, useEffect } from 'react';
-
-// export const metadata: Metadata = { // Cannot be used in client components this way
-//   title: 'Terms & Conditions - Creme Collections',
-//   description: 'Read the Terms and Conditions for using the Creme Collections website and services.',
-// };
 
 export default function TermsPage() {
   const [lastUpdatedDate, setLastUpdatedDate] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Terms & Conditions - Creme Collections';
-    setLastUpdatedDate(new Date().toLocaleDateString());
+    setLastUpdatedDate(new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' }));
   }, []);
 
   return (
@@ -23,76 +17,60 @@ export default function TermsPage() {
         
         <div className="prose prose-lg dark:prose-invert max-w-none text-foreground space-y-6">
           <p className="lead">
-            Welcome to Creme Collections! These terms and conditions outline the rules and regulations for the use of Creme Collections's Website, located at https://cremelite.com (or your actual domain).
-          </p>
-          <p>
-            By accessing this website we assume you accept these terms and conditions. Do not continue to use Creme Collections if you do not agree to take all of the terms and conditions stated on this page.
+            Welcome to Creme Collections. If you continue to browse and use this website, you are agreeing to comply with and be bound by the following terms and conditions of use, which together with our privacy policy govern Creme Collections's relationship with you in relation to this website.
           </p>
 
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">1. Definitions</h2>
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">1. Introduction</h2>
           <p>
-            The following terminology applies to these Terms and Conditions, Privacy Statement and Disclaimer Notice and all Agreements: "Client", "You" and "Your" refers to you, the person log on this website and compliant to the Company’s terms and conditions. "The Company", "Ourselves", "We", "Our" and "Us", refers to our Company, Creme Collections. "Party", "Parties", or "Us", refers to both the Client and ourselves. 
+            The term 'Creme Collections' or 'us' or 'we' refers to the owner of the website. The term 'you' refers to the user or viewer of our website. These Terms and Conditions apply to all users of the site, including without limitation users who are browsers, vendors, customers, merchants, and/or contributors of content.
           </p>
 
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">2. Cookies</h2>
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">2. Your Account</h2>
           <p>
-            We employ the use of cookies. By accessing Creme Collections, you agreed to use cookies in agreement with the Creme Collections's Privacy Policy. Most interactive websites use cookies to let us retrieve the user’s details for each visit. Cookies are used by our website to enable the functionality of certain areas to make it easier for people visiting our website. Some of our affiliate/advertising partners may also use cookies.
+            To access certain services, you may be required to create an account. You are responsible for maintaining the confidentiality of your account and password, and you agree to accept responsibility for all activities that occur under your account. Creme Collections reserves the right to refuse service, terminate accounts, remove or edit content, or cancel orders in its sole discretion.
           </p>
+          <p>You must be at least 18 years of age to use this website. By using this website and by agreeing to these terms and conditions, you warrant and represent that you are at least 18 years of age.</p>
 
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">3. License</h2>
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">3. Product Information and Orders</h2>
           <p>
-            Unless otherwise stated, Creme Collections and/or its licensors own the intellectual property rights for all material on Creme Collections. All intellectual property rights are reserved. You may access this from Creme Collections for your own personal use subjected to restrictions set in these terms and conditions.
-          </p>
-          <p>You must not:</p>
-          <ul className="list-disc pl-5">
-            <li>Republish material from Creme Collections</li>
-            <li>Sell, rent or sub-license material from Creme Collections</li>
-            <li>Reproduce, duplicate or copy material from Creme Collections</li>
-            <li>Redistribute content from Creme Collections</li>
-          </ul>
-          <p>This Agreement shall begin on the date hereof.</p>
-
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">4. User Account</h2>
-          <p>
-            If you create an account on Creme Collections, you are responsible for maintaining the security of your account and you are fully responsible for all activities that occur under the account and any other actions taken in connection with it. You must immediately notify us of any unauthorized uses of your account or any other breaches of security. We will not be liable for any acts or omissions by You, including any damages of any kind incurred as a result of such acts or omissions.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">5. Product Information and Pricing</h2>
-          <p>
-            We strive to ensure that all details, descriptions, and prices which appear on this Website are accurate, however, errors may occur. If we discover an error in the price of any goods which you have ordered, we will inform you of this as soon as possible and give you the option of reconfirming your order at the correct price or cancelling it. If we are unable to contact you we will treat the order as cancelled. If you cancel and you have already paid for the goods, you will receive a full refund.
-          </p>
-          <p>All prices are inclusive of VAT (where applicable) at the current rates and are correct at the time of entering the information onto the system. Shipping costs will be charged in addition; such additional charges are clearly displayed where applicable and included in the 'Total Cost'.</p>
-
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">6. Orders and Payment</h2>
-          <p>
-            All orders are subject to availability and confirmation of the order price. Dispatch times may vary according to availability and any guarantees or representations made as to delivery times are subject to any delays resulting from postal delays or force majeure for which we will not be responsible.
+            We endeavor to display as accurately as possible the colors and images of our products. We cannot guarantee that your computer monitor's display of any color will be accurate.
           </p>
           <p>
-            In order to contract with Creme Collections you must be over 18 years of age and possess a valid credit or debit card issued by a bank acceptable to us, or a valid mobile money account. Creme Collections retains the right to refuse any request made by you.
+            All descriptions of products or product pricing are subject to change at any time without notice, at our sole discretion. We reserve the right to discontinue any product at any time. Any offer for any product or service made on this site is void where prohibited.
+          </p>
+          <p>
+            We reserve the right to refuse any order you place with us. We may, in our sole discretion, limit or cancel quantities purchased per person, per household, or per order.
           </p>
 
-
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">7. Limitation of Liability</h2>
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">4. Intellectual Property</h2>
           <p>
-            In no event shall Creme Collections, nor any of its officers, directors and employees, be held liable for anything arising out of or in any way connected with your use of this Website whether such liability is under contract. Creme Collections, including its officers, directors and employees shall not be held liable for any indirect, consequential or special liability arising out of or in any way related to your use of this Website.
+            This website contains material which is owned by or licensed to us. This material includes, but is not limited to, the design, layout, look, appearance, and graphics. Reproduction is prohibited other than in accordance with the copyright notice, which forms part of these terms and conditions. All trademarks reproduced in this website which are not the property of, or licensed to, the operator are acknowledged on the website.
           </p>
 
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">8. Indemnification</h2>
-          <p>You hereby indemnify to the fullest extent Creme Collections from and against any and/or all liabilities, costs, demands, causes of action, damages and expenses arising in any way related to your breach of any of the provisions of these Terms.</p>
-          
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">9. Severability</h2>
-          <p>If any provision of these Terms is found to be invalid under any applicable law, such provisions shall be deleted without affecting the remaining provisions herein.</p>
-
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">10. Governing Law & Jurisdiction</h2>
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">5. Limitation of Liability</h2>
           <p>
-            These Terms will be governed by and interpreted in accordance with the laws of Kenya, and you submit to the non-exclusive jurisdiction of the courts located in Kenya for the resolution of any disputes.
+            To the fullest extent permitted by applicable Kenyan law, Creme Collections shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses, resulting from (a) your access to or use of or inability to access or use the services; (b) any conduct or content of any third party on the services; (c) any content obtained from the services; and (d) unauthorized access, use, or alteration of your transmissions or content.
           </p>
 
-          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">11. Changes to Terms</h2>
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">6. Indemnification</h2>
           <p>
-            Creme Collections reserves the right to revise these terms and conditions at any time as it sees fit, and by using this Website you are expected to review these terms on a regular basis.
+            You agree to indemnify, defend, and hold harmless Creme Collections and our parent, subsidiaries, affiliates, partners, officers, directors, agents, contractors, licensors, service providers, subcontractors, suppliers, interns, and employees, from any claim or demand, including reasonable attorneys’ fees, made by any third-party due to or arising out of your breach of these Terms of Service or the documents they incorporate by reference, or your violation of any law or the rights of a third-party.
+          </p>
+
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">7. Governing Law</h2>
+          <p>
+            These Terms of Service and any separate agreements whereby we provide you Services shall be governed by and construed in accordance with the laws of the Republic of Kenya.
+          </p>
+
+          <h2 className="text-2xl font-semibold text-foreground font-headline pt-4">8. Changes to Terms of Service</h2>
+          <p>
+            You can review the most current version of the Terms of Service at any time on this page. We reserve the right, at our sole discretion, to update, change or replace any part of these Terms of Service by posting updates and changes to our website. It is your responsibility to check our website periodically for changes.
           </p>
           
+          <div className="mt-8 border-t pt-6 text-sm text-muted-foreground">
+            <p><strong>Disclaimer:</strong> This is a sample Terms & Conditions document. It is not legal advice. You should consult with a legal professional to ensure your terms are compliant and tailored to your specific business needs.</p>
+          </div>
+
           {lastUpdatedDate && (
             <p className="text-sm text-muted-foreground pt-6">Last updated: {lastUpdatedDate}</p>
           )}
