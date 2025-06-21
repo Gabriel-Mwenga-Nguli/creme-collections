@@ -31,7 +31,7 @@ const promotionalBannersData = [
     dataAiHint: "flash sale discount",
     overlayColor: "bg-red-700/60",
     textColor: "text-white",
-    href: "/products?filter=sale",
+    href: "/products/category/electronics",
     buttonText: "Shop Flash Sale"
   },
   {
@@ -51,7 +51,7 @@ const promotionalBannersData = [
     dataAiHint: "new products showcase",
     overlayColor: "bg-slate-800/60",
     textColor: "text-white",
-    href: "/products?filter=new",
+    href: "/products/category/beauty-personal-care/fragrances",
     buttonText: "Explore New In"
   },
   {
@@ -61,7 +61,7 @@ const promotionalBannersData = [
     dataAiHint: "exclusive items",
     overlayColor: "bg-purple-800/50",
     textColor: "text-white",
-    href: "/products?filter=exclusive",
+    href: "/products/category/fashion/bags-luggage",
     buttonText: "Discover Exclusives"
   },
 ];
