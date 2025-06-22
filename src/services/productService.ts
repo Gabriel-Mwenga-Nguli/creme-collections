@@ -126,8 +126,20 @@ async function fetchProductsFromFirestore(
     }
     return products;
   } catch (error: any) {
-    console.error(`[fetchProductsFromFirestore Call] Error fetching ${queryDescription}: `, error.message);
-    // Handle specific Firestore errors if needed
+    if (error.code === 'permission-denied') {
+        const errorMessage = `
+--------------------------------------------------------------------------------------
+!!! FIREBASE PERMISSION ERROR !!!
+Your Firestore Security Rules are blocking access to the 'products' collection.
+This is the expected default behavior for a new Firebase project.
+
+SOLUTION: Update your rules in the Firebase Console.
+Please see the file 'FIRESTORE_RULES.md' for instructions and the rules to copy.
+--------------------------------------------------------------------------------------`;
+        console.error(errorMessage);
+    } else {
+        console.error(`[fetchProductsFromFirestore Call] Error fetching ${queryDescription}: `, error);
+    }
     return [];
   }
 }
@@ -343,23 +355,19 @@ export async function getPromotions(): Promise<PromoSlideProps[]> {
     
     console.log(`[getPromotions Call] Successfully fetched ${promotions.length} active promotions.`);
     return promotions;
-  } catch (error) {
-    console.error("!!! [getPromotions Call] CRITICAL ERROR fetching promotions from Firestore: ", error);
-    console.error("!!! This often means your Firestore Security Rules are blocking access or a required Composite Index is missing. Check your browser's developer console for a link to create the index.");
-    // In case of an error, return a default set of promotions to avoid breaking the page
-    return [
-        {
-          type: 'firstOrder', title: 'Ksh 500 Off!', subtitle: 'Your First Order', code: 'KARIBU500',
-          terms: '*Min. spend Ksh 2,500.', dataAiHint: 'first order discount',
-          backgroundColor: 'bg-gradient-to-br from-primary to-accent', href: '/register',
-          displayOrder: 1, isActive: true
-        },
-        {
-          type: 'revealCode', title: 'Fashion Finds', subtitle: 'Up to 20% Off',
-          productImage: '/images/banners/fashion.png', dataAiHint: 'fashion sale',
-          backgroundColor: 'bg-secondary', href: '/products/category/fashion',
-          displayOrder: 2, isActive: true
-        },
-    ];
+  } catch (error: any) {
+    const baseErrorMessage = "!!! CRITICAL ERROR fetching promotions from Firestore: ";
+    let suggestion = "This often means your Firestore Security Rules are blocking access (see FIRESTORE_RULES.md).";
+    if (error.code === 'failed-precondition') {
+      suggestion = "This usually means a required Composite Index is missing. Check your browser's developer console for a link to create the index automatically.";
+    }
+    
+    if (error.code === 'permission-denied') {
+         console.error(`${baseErrorMessage}PERMISSION DENIED. ${suggestion}`);
+    } else {
+        console.error(baseErrorMessage, error);
+    }
+    
+    return [];
   }
 }
