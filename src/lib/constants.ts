@@ -2,7 +2,7 @@
 import type { NavLink as BaseNavLink } from '@/lib/types';
 import { 
   Smartphone, Shirt, Home as HomeIcon, Tv, Laptop, Headphones, Heart, ShoppingCart, User, Search, Percent, Info, MessageSquare, Phone, Sparkles, Zap, HelpCircle, Package, BookOpen, Users, ShieldCheck, Menu as MenuIcon, ShoppingBasket, Apple, Leaf, Beaker, Baby, Sprout, VenetianMask,
-  Bike, ToyBrick, Car, BookMarked, HeartPulse, Dumbbell, Tent, Gamepad2, PencilRuler, Stethoscope, Popcorn, Coffee, Cookie, Gavel, Store
+  Bike, ToyBrick, Car, BookMarked, HeartPulse, Dumbbell, Tent, Gamepad2, PencilRuler, Stethoscope, Popcorn, Coffee, Cookie, Gavel, Store, Gift
 } from 'lucide-react';
 
 export const SITE_NAME = "Creme Collections";
@@ -19,10 +19,8 @@ export const MAIN_NAV_LINKS: NavLink[] = [
   { href: '/products/category/electronics', label: 'Electronics', icon: Smartphone },
   { href: '/products/category/fashion', label: 'Fashion', icon: Shirt },
   { href: '/products/category/home-living', label: 'Home & Living', icon: HomeIcon },
-  { href: '/products/category/beauty-personal-care', label: 'Beauty & Care', icon: VenetianMask },
-  { href: '/products/category/sports-outdoors', label: 'Sports', icon: Bike },
-  { href: '/products/category/toys-kids-baby', label: 'Toys & Baby', icon: ToyBrick },
-  { href: '/products', label: 'All Products', icon: ShoppingBasket }, // Changed from "Offers" to "All Products" for clarity
+  { href: '/gift-card', label: 'Gift Cards', icon: Gift },
+  { href: '/products', label: 'All Products', icon: ShoppingBasket },
 ];
 
 
