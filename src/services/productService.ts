@@ -356,16 +356,35 @@ export async function getPromotions(): Promise<PromoSlideProps[]> {
     console.log(`[getPromotions Call] Successfully fetched ${promotions.length} active promotions.`);
     return promotions;
   } catch (error: any) {
-    const baseErrorMessage = "!!! CRITICAL ERROR fetching promotions from Firestore: ";
-    let suggestion = "This often means your Firestore Security Rules are blocking access (see FIRESTORE_RULES.md).";
-    if (error.code === 'failed-precondition') {
-      suggestion = "This usually means a required Composite Index is missing. Check your browser's developer console for a link to create the index automatically.";
-    }
-    
     if (error.code === 'permission-denied') {
-         console.error(`${baseErrorMessage}PERMISSION DENIED. ${suggestion}`);
-    } else {
-        console.error(baseErrorMessage, error);
+      const errorMessage = `
+--------------------------------------------------------------------------------------
+!!! FIREBASE PERMISSION ERROR !!!
+Your Firestore Security Rules are blocking access to the 'promotions' collection.
+This is the expected default behavior for a new Firebase project.
+
+SOLUTION: Update your rules in the Firebase Console.
+Please see the file 'FIRESTORE_RULES.md' for instructions and the rules to copy.
+The rules in that file cover both 'products' and 'promotions'.
+--------------------------------------------------------------------------------------`;
+      console.error(errorMessage);
+    } else if (error.code === 'failed-precondition') {
+        const errorMessage = `
+--------------------------------------------------------------------------------------
+!!! FIRESTORE INDEX MISSING !!!
+Your query for promotions requires a composite index in Firestore, which has not been created.
+
+SOLUTION:
+1. Open your browser's Developer Tools (F12 or Ctrl+Shift+I).
+2. Go to the 'Console' tab.
+3. Refresh your application page.
+4. Find the Firebase error message that says "The query requires an index. You can create it here: [URL]".
+5. Click that URL to create the index in the Firebase Console. It may take a few minutes to build.
+--------------------------------------------------------------------------------------`;
+        console.error(errorMessage);
+    }
+    else {
+        console.error(`[getPromotions Call] Error fetching promotions: `, error);
     }
     
     return [];
