@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import type { ProductCardProps } from '@/components/features/home/product-card';
@@ -321,6 +322,7 @@ export async function updateProduct(productId: string, productData: Partial<Omit
 }
 
 export async function getPromotions(): Promise<PromoSlideProps[]> {
+  console.log('[getPromotions Call] Initiating fetch from Firestore.');
   if (!db) {
     console.error("Firestore 'db' object is not initialized. Cannot fetch promotions.");
     return [];
@@ -331,7 +333,7 @@ export async function getPromotions(): Promise<PromoSlideProps[]> {
     const querySnapshot = await getDocs(q);
     
     if (querySnapshot.empty) {
-        console.warn("No active promotions found in Firestore.");
+        console.warn("[getPromotions Call] No active promotions found in Firestore. This could be because no documents exist, none are marked 'isActive: true', or a required index is missing. Please check your Firestore data and indexes.");
         return [];
     }
 
@@ -339,9 +341,11 @@ export async function getPromotions(): Promise<PromoSlideProps[]> {
       ...doc.data(),
     } as PromoSlideProps));
     
+    console.log(`[getPromotions Call] Successfully fetched ${promotions.length} active promotions.`);
     return promotions;
   } catch (error) {
-    console.error("Error fetching promotions from Firestore: ", error);
+    console.error("!!! [getPromotions Call] CRITICAL ERROR fetching promotions from Firestore: ", error);
+    console.error("!!! This often means your Firestore Security Rules are blocking access or a required Composite Index is missing. Check your browser's developer console for a link to create the index.");
     // In case of an error, return a default set of promotions to avoid breaking the page
     return [
         {
