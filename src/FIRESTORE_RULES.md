@@ -1,9 +1,9 @@
 
 # Firestore Security Rules Fix
 
-Your application is currently being blocked by Firestore's default security rules, causing a "Missing or insufficient permissions" error when trying to display products or promotions.
+Your application is currently being blocked by Firestore's default security rules, causing a "Missing or insufficient permissions" error when trying to fetch user data after login or display products/promotions.
 
-To fix this, you need to update your Firestore security rules to allow public read access for your `products` and `promotions` collections while keeping user data secure.
+To fix this, you need to update your Firestore security rules to allow public read access for your `products` and `promotions` collections while also allowing a logged-in user to access their own data.
 
 ## **Instructions**
 
@@ -34,9 +34,14 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null; // For admin panel
     }
+    
+    // Allow users to read and write their own document in the 'users' collection.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
 
-    // Secure user-specific data. Only the logged-in user can access their own documents.
-    // This covers wishlist, invoices, addresses, messages, etc., stored under /users/{userId}/...
+    // Secure user-specific sub-collections. Only the logged-in user can access their own documents.
+    // This covers wishlist, invoices, addresses, messages, etc.
     match /users/{userId}/{document=**} {
       allow read, write, create, delete: if request.auth != null && request.auth.uid == userId;
     }
@@ -53,4 +58,4 @@ service cloud.firestore {
 
 ---
 
-After you publish these rules, refresh your application page. The error should be resolved, and your products and promotions will now be displayed correctly.
+After you publish these rules, refresh your application page. The error should be resolved, and your products, promotions, and user profile data will be displayed correctly.

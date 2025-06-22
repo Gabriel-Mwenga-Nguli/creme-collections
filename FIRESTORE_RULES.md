@@ -1,8 +1,9 @@
+
 # Firestore Security Rules Fix
 
-Your application is currently being blocked by Firestore's default security rules, causing a "Missing or insufficient permissions" error when trying to display products.
+Your application is currently being blocked by Firestore's default security rules, causing a "Missing or insufficient permissions" error when trying to fetch user data after login.
 
-To fix this, you need to update your Firestore security rules to allow public read access for your `products` collection while keeping user data secure.
+To fix this, you need to update your Firestore security rules to allow a logged-in user to read and write to their own profile document.
 
 ## **Instructions**
 
@@ -34,8 +35,13 @@ service cloud.firestore {
       allow write: if request.auth != null; // For admin panel
     }
 
-    // Secure user-specific data. Only the logged-in user can access their own documents.
-    // This covers wishlist, invoices, addresses, messages, etc., stored under /users/{userId}/...
+    // Allow users to read and write their own document in the 'users' collection.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Secure user-specific sub-collections. Only the logged-in user can access their own documents.
+    // This covers wishlist, invoices, addresses, messages, etc.
     match /users/{userId}/{document=**} {
       allow read, write, create, delete: if request.auth != null && request.auth.uid == userId;
     }
@@ -52,4 +58,4 @@ service cloud.firestore {
 
 ---
 
-After you publish these rules, refresh your application page. The error should be resolved, and your products will now be displayed correctly.
+After you publish these rules, refresh your application page and try logging in again. The error should be resolved.
