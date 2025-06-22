@@ -46,7 +46,7 @@ export default function GiftCardPage() {
     e.preventDefault();
     setIsGenerating(true);
     setGeneratedCard(null);
-    toast({ title: "AI is thinking...", description: "Generating a personalized gift card for you." });
+    toast({ title: "Creating your card...", description: "Generating a personalized gift card for you." });
     try {
       const contentInput: GenerateGiftCardContentInput = {
         recipientName: formData.recipientName,
@@ -56,7 +56,7 @@ export default function GiftCardPage() {
       };
       const contentOutput = await generateGiftCardContent(contentInput);
       
-      toast({ title: "Creating design...", description: "Your personalized message is ready, now creating the visuals." });
+      toast({ title: "Adding the finishing touches...", description: "Your personalized message is ready, now creating the visuals." });
       
       const imageInput: GenerateImageInput = { prompt: contentOutput.designPrompt };
       const imageOutput = await generateImage(imageInput);
@@ -66,10 +66,10 @@ export default function GiftCardPage() {
         imageUrl: imageOutput.imageUrl,
       });
 
-      toast({ title: "Preview Ready!", description: "Your personalized gift card is ready to be purchased." });
+      toast({ title: "Preview Ready!", description: "Your personalized gift card is ready for purchase." });
     } catch (error) {
       console.error("Error generating gift card:", error);
-      toast({ title: "Generation Failed", description: "The AI could not create a gift card. Please try again.", variant: "destructive" });
+      toast({ title: "Generation Failed", description: "We couldn't create a gift card at this time. Please try again.", variant: "destructive" });
     } finally {
       setIsGenerating(false);
     }
@@ -111,7 +111,7 @@ export default function GiftCardPage() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-10">
           <Gift className="mx-auto h-12 w-12 text-primary mb-4" />
-          <h1 className="text-4xl font-bold text-primary font-headline">AI-Powered Gift Cards</h1>
+          <h1 className="text-4xl font-bold text-primary font-headline">Create a Personalized Gift Card</h1>
           <p className="mt-4 text-lg text-muted-foreground">
             Create a unique and personalized gift card for any occasion.
           </p>
@@ -121,7 +121,7 @@ export default function GiftCardPage() {
           <Card className="shadow-xl">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold">1. Create Your Gift Card</CardTitle>
-              <CardDescription>Fill in the details and let our AI do the rest.</CardDescription>
+              <CardDescription>Fill in the details to create a unique gift.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleGeneratePreview} className="space-y-4">
@@ -166,7 +166,7 @@ export default function GiftCardPage() {
                 </div>
                 <Button type="submit" className="w-full" size="lg" disabled={isGenerating}>
                   {isGenerating ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
-                  Generate AI Preview
+                  Create Preview
                 </Button>
               </form>
             </CardContent>
