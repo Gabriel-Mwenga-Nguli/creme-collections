@@ -95,8 +95,12 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
     
     const orders = querySnapshot.docs.map(docSnapshot => mapDocToOrder(docSnapshot));
     return orders;
-  } catch (error) {
-    console.error(`Error fetching orders for user ${userId}: `, error);
+  } catch (error: any) {
+    if (error.code === 'permission-denied') {
+      console.error(`[OrderService] FIREBASE PERMISSION ERROR fetching orders for user ${userId}. Check Firestore rules for the 'orders' collection.`);
+    } else {
+      console.error(`Error fetching orders for user ${userId}: `, error);
+    }
     return [];
   }
 }
@@ -126,8 +130,12 @@ export async function getOrderDetails(orderId: string, userId?: string): Promise
             console.warn(`No such order document with ID: ${orderId}`);
             return null;
         }
-    } catch (error) {
-        console.error(`Error fetching order details for order ID ${orderId}: `, error);
+    } catch (error: any) {
+        if (error.code === 'permission-denied') {
+            console.error(`[OrderService] FIREBASE PERMISSION ERROR fetching order details for order ID ${orderId}. Check Firestore rules.`);
+        } else {
+            console.error(`Error fetching order details for order ID ${orderId}: `, error);
+        }
         return null;
     }
 }
@@ -150,8 +158,12 @@ export async function getAllOrdersForAdmin(countLimit?: number): Promise<OrderAd
     
     const orders = querySnapshot.docs.map(docSnapshot => mapDocToOrder(docSnapshot) as OrderAdminItem);
     return orders;
-  } catch (error) {
-    console.error("Error fetching all orders for admin: ", error);
+  } catch (error: any) {
+     if (error.code === 'permission-denied') {
+      console.error(`[OrderService] FIREBASE PERMISSION ERROR fetching all orders for admin. Check Firestore rules for the 'orders' collection.`);
+    } else {
+      console.error("Error fetching all orders for admin: ", error);
+    }
     return [];
   }
 }
