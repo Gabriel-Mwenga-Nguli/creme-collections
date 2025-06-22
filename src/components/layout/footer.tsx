@@ -55,15 +55,15 @@ const MastercardIcon = () => (
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-700 bg-slate-900 text-slate-200 shadow-inner">
+    <footer className="border-t border-slate-700 bg-slate-900 text-slate-200 shadow-inner dark:bg-primary dark:text-primary-foreground dark:border-t-primary-foreground/20">
       <div className="container mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-8">
 
           {/* Column 1: Logo, Location, Social, & Map */}
           <div className="space-y-6">
             <div>
-              <Logo className="text-3xl" />
-              <p className="mt-4 text-sm text-slate-400 leading-relaxed">
+              <Logo className="text-3xl dark:text-primary-foreground" />
+              <p className="mt-4 text-sm text-slate-400 dark:text-primary-foreground/80 leading-relaxed">
                 All you want, all in one place. Shop smarter with {SITE_NAME} — Kenya's most trusted online marketplace.
               </p>
             </div>
@@ -82,7 +82,7 @@ export default function Footer() {
                 </div>
             </div>
             <div>
-              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">Connect With Us</h3>
+              <h3 className="text-base font-semibold text-slate-100 dark:text-primary-foreground tracking-wider uppercase mb-4">Connect With Us</h3>
               <div className="flex space-x-5">
                 <a href="https://facebook.com/cremecollections" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:opacity-80 transition-all duration-200 hover:scale-110">
                   <FacebookIcon className="w-6 h-6" />
@@ -101,24 +101,24 @@ export default function Footer() {
           {/* Column 2: Shop & Support Links */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">Shop</h3>
+              <h3 className="text-base font-semibold text-slate-100 dark:text-primary-foreground tracking-wider uppercase mb-4">Shop</h3>
               <ul role="list" className="space-y-2.5">
-                <li><Link href="/products" className="text-sm text-slate-300 hover:text-primary transition-colors hover:underline">All Products</Link></li>
-                <li><Link href="/#promotions-slider" className="text-sm text-slate-300 hover:text-primary transition-colors hover:underline">Promotions</Link></li>
-                <li><Link href="/#weekly-deals" className="text-sm text-slate-300 hover:text-primary transition-colors hover:underline">Flash Deals</Link></li>
-                <li><Link href="/products?filter=new" className="text-sm text-slate-300 hover:text-primary transition-colors hover:underline">New Arrivals</Link></li>
+                <li><Link href="/products" className="text-sm text-slate-300 hover:text-primary dark:text-primary-foreground/90 dark:hover:text-primary-foreground dark:hover:underline">All Products</Link></li>
+                <li><Link href="/#promotions-slider" className="text-sm text-slate-300 hover:text-primary dark:text-primary-foreground/90 dark:hover:text-primary-foreground dark:hover:underline">Promotions</Link></li>
+                <li><Link href="/#weekly-deals" className="text-sm text-slate-300 hover:text-primary dark:text-primary-foreground/90 dark:hover:text-primary-foreground dark:hover:underline">Flash Deals</Link></li>
+                <li><Link href="/products?filter=new" className="text-sm text-slate-300 hover:text-primary dark:text-primary-foreground/90 dark:hover:text-primary-foreground dark:hover:underline">New Arrivals</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">Support</h3>
+              <h3 className="text-base font-semibold text-slate-100 dark:text-primary-foreground tracking-wider uppercase mb-4">Support</h3>
               <ul role="list" className="space-y-2.5">
                 {FOOTER_SUPPORT_LINKS.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-300 hover:text-primary transition-colors hover:underline flex items-center"
+                      className="text-sm text-slate-300 hover:text-primary dark:text-primary-foreground/90 dark:hover:text-primary-foreground dark:hover:underline flex items-center"
                     >
-                      {link.icon && <link.icon className="inline h-4 w-4 mr-2 text-primary/70" />}
+                      {link.icon && <link.icon className="inline h-4 w-4 mr-2 text-primary dark:text-primary-foreground" />}
                       {link.label}
                     </Link>
                   </li>
@@ -126,11 +126,11 @@ export default function Footer() {
               </ul>
             </div>
             <div className="sm:col-span-2">
-                 <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">We Accept</h3>
+                 <h3 className="text-base font-semibold text-slate-100 dark:text-primary-foreground tracking-wider uppercase mb-4">We Accept</h3>
                 <div className="flex flex-wrap items-center gap-2">
                     <MpesaIcon />
                     <MastercardIcon />
-                    <div className="flex items-center justify-center h-8 px-2 bg-gray-200 rounded text-gray-700" title="Direct Bank Transfer">
+                    <div className="flex items-center justify-center h-8 px-2 bg-gray-200 rounded text-gray-700 dark:bg-primary-foreground dark:text-primary" title="Direct Bank Transfer">
                     <Landmark className="h-5 w-5" />
                     </div>
                 </div>
@@ -140,15 +140,15 @@ export default function Footer() {
           {/* Column 3: Company & Contact */}
           <div className="grid grid-cols-1 sm:grid-cols-1 gap-8">
              <div>
-              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">Company & Legal</h3>
+              <h3 className="text-base font-semibold text-slate-100 dark:text-primary-foreground tracking-wider uppercase mb-4">Company & Legal</h3>
               <ul role="list" className="space-y-2.5">
                 {FOOTER_COMPANY_LINKS.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-300 hover:text-primary transition-colors hover:underline flex items-center"
+                      className="text-sm text-slate-300 hover:text-primary dark:text-primary-foreground/90 dark:hover:text-primary-foreground dark:hover:underline flex items-center"
                     >
-                      {link.icon && <link.icon className="inline h-4 w-4 mr-2 text-primary/70" />}
+                      {link.icon && <link.icon className="inline h-4 w-4 mr-2 text-primary dark:text-primary-foreground" />}
                       {link.label}
                     </Link>
                   </li>
@@ -156,29 +156,29 @@ export default function Footer() {
               </ul>
             </div>
             <div className="mt-8">
-              <h3 className="text-base font-semibold text-slate-100 tracking-wider uppercase mb-4">Contact Info</h3>
+              <h3 className="text-base font-semibold text-slate-100 dark:text-primary-foreground tracking-wider uppercase mb-4">Contact Info</h3>
               <div className="space-y-3">
-                  <div className="flex items-start text-sm text-slate-300">
-                    <Mail className="w-4 h-4 mr-2.5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex items-start text-sm text-slate-300 dark:text-primary-foreground/90">
+                    <Mail className="w-4 h-4 mr-2.5 text-primary dark:text-primary-foreground shrink-0 mt-0.5" />
                     <div className="flex flex-col">
-                        <a href="mailto:support@cremecollections.shop" className="hover:text-primary transition-colors hover:underline">support@cremecollections.shop</a>
-                        <a href="mailto:creme.collectionlt@gmail.com" className="hover:text-primary transition-colors hover:underline">creme.collectionlt@gmail.com</a>
+                        <a href="mailto:support@cremecollections.shop" className="hover:text-primary dark:hover:text-primary-foreground dark:hover:underline">support@cremecollections.shop</a>
+                        <a href="mailto:creme.collectionlt@gmail.com" className="hover:text-primary dark:hover:text-primary-foreground dark:hover:underline">creme.collectionlt@gmail.com</a>
                     </div>
                   </div>
-                  <div className="flex items-start text-sm text-slate-300">
-                    <MessageSquare className="w-4 h-4 mr-2.5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex items-start text-sm text-slate-300 dark:text-primary-foreground/90">
+                    <MessageSquare className="w-4 h-4 mr-2.5 text-primary dark:text-primary-foreground shrink-0 mt-0.5" />
                     <div className="flex flex-col">
-                        <a href="https://wa.me/254742468070" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors hover:underline">+254 742 468070</a>
-                        <a href="https://wa.me/254743117211" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors hover:underline">+254 743 117211</a>
-                        <a href="https://wa.me/254717988700" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors hover:underline">+254 717 988700</a>
+                        <a href="https://wa.me/254742468070" target="_blank" rel="noopener noreferrer" className="hover:text-primary dark:hover:text-primary-foreground dark:hover:underline">+254 742 468070</a>
+                        <a href="https://wa.me/254743117211" target="_blank" rel="noopener noreferrer" className="hover:text-primary dark:hover:text-primary-foreground dark:hover:underline">+254 743 117211</a>
+                        <a href="https://wa.me/254717988700" target="_blank" rel="noopener noreferrer" className="hover:text-primary dark:hover:text-primary-foreground dark:hover:underline">+254 717 988700</a>
                     </div>
                   </div>
-                  <div className="flex items-start text-sm text-slate-300">
-                      <Clock className="w-4 h-4 mr-2.5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex items-start text-sm text-slate-300 dark:text-primary-foreground/90">
+                      <Clock className="w-4 h-4 mr-2.5 text-primary dark:text-primary-foreground shrink-0 mt-0.5" />
                       <div>
                           <span>Mon – Fri: 9am – 5pm EAT</span><br/>
                           <span>Saturday: 9am – 12pm EAT</span><br/>
-                          <span className="text-slate-400">Sun & Holidays: Closed</span>
+                          <span className="text-slate-400 dark:text-primary-foreground/70">Sun & Holidays: Closed</span>
                       </div>
                   </div>
               </div>
@@ -186,8 +186,8 @@ export default function Footer() {
           </div>
 
         </div>
-        <div className="mt-12 border-t border-slate-700 pt-8 text-center">
-          <p className="text-sm text-slate-400">
+        <div className="mt-12 border-t border-slate-700 dark:border-primary-foreground/20 pt-8 text-center">
+          <p className="text-sm text-slate-400 dark:text-primary-foreground/70">
             &copy; {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
           </p>
         </div>
