@@ -109,7 +109,9 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error("Google login error:", error);
       let errorMessage = 'Failed to login with Google. Please try again.';
-      if (error.code === 'auth/popup-closed-by-user') {
+       if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = "This website's domain is not authorized for Google Sign-In. An admin must add this domain to the Firebase Console -> Authentication -> Settings -> Authorized domains.";
+      } else if (error.code === 'auth/popup-closed-by-user') {
         errorMessage = 'Google login was cancelled.';
       } else if (error.code === 'auth/account-exists-with-different-credential') {
         errorMessage = 'An account already exists with this email address using a different sign-in method.';
