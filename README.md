@@ -2,12 +2,30 @@
 
 This is a NextJS starter in Firebase Studio.
 
-To get started, take a look at `src/app/page.tsx`.
+## ⚠️ Important First Steps to Avoid Errors
 
-## Initial Data Setup
+Before you can see products or other data, you must configure your Firebase project correctly.
 
-For the application to display products, you'll need to add data to your Firestore database.
-Please see the [DATA_SETUP.md](./DATA_SETUP.md) file for instructions on how to populate your `products` collection with sample data.
+### 1. Set Up Environment Variables
+Create a `.env.local` file in the root of your project and add your Firebase project configuration. You can find these values in your Firebase project settings. See `src/lib/firebase.ts` for the expected variable names.
+Example:
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+# ... and other Firebase config values
+```
+
+### 2. Update Firestore Security Rules (Critical for Fixing "Permissions Error")
+Your app is likely showing a **"Missing or insufficient permissions"** error. This is expected for a new project. To fix it, you **must** update your Firestore security rules.
+
+**Please see the [FIRESTORE_RULES.md](./src/FIRESTORE_RULES.md) file for instructions and the rules to copy.**
+
+### 3. Add Sample Data
+For the application to display products and promotions, you'll need to add data to your Firestore database.
+- For products, see [DATA_SETUP.md](./DATA_SETUP.md).
+- For promotions, see [PROMOTIONS_SETUP.md](./src/PROMOTIONS_SETUP.md).
+
 
 ## Running the Project
 
@@ -15,22 +33,13 @@ Please see the [DATA_SETUP.md](./DATA_SETUP.md) file for instructions on how to 
     ```bash
     npm install
     ```
-2.  **Set up Firebase Environment Variables:**
-    Create a `.env.local` file in the root of your project and add your Firebase project configuration. You can find these values in your Firebase project settings. See `src/lib/firebase.ts` for the expected variable names.
-    Example:
-    ```env
-    NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
-    NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
-    # ... and other Firebase config values
-    ```
-3.  **Run the development server:**
+2.  **Run the development server:**
     ```bash
     npm run dev
     ```
     This will typically start the Next.js app on `http://localhost:9002`.
 
-4.  **(Optional) Run Genkit development server:**
+3.  **(Optional) Run Genkit development server:**
     If you are working with Genkit AI flows, you can run the Genkit development server in a separate terminal:
     ```bash
     npm run genkit:dev
