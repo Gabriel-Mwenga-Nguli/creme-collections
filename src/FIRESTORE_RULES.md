@@ -1,16 +1,16 @@
 
 # Firestore Security Rules Fix
 
-Your application is currently being blocked by Firestore's default security rules, causing a "Missing or insufficient permissions" error when trying to fetch user data after login or display products/promotions.
+Your application is currently being blocked by Firestore's default security rules. This is **expected behavior** for a new Firebase project and causes the **"Missing or insufficient permissions"** error you are seeing.
 
-To fix this, you need to update your Firestore security rules to allow public read access for your `products` and `promotions` collections while also allowing a logged-in user to access their own data.
+To fix this, you **must** update your Firestore security rules. This will allow your app to read public data like `products` and `promotions`, and allow logged-in users to access their own private data.
 
 ## **Instructions**
 
 1.  **Go to the Firebase Console**: Open your project in the [Firebase Console](https://console.firebase.google.com/).
 2.  **Navigate to Firestore**: In the left-hand navigation pane, click on **Build > Firestore Database**.
 3.  **Open the Rules Tab**: Click on the **Rules** tab at the top of the Firestore viewer.
-4.  **Replace the Rules**: Delete the existing rules and replace them with the following code.
+4.  **Replace the Rules**: Delete the existing rules and replace them with the complete set of rules provided below.
 5.  **Publish**: Click the **Publish** button to save and apply the new rules. The changes should take effect almost immediately.
 
 ---
@@ -35,6 +35,13 @@ service cloud.firestore {
       allow write: if request.auth != null; // For admin panel
     }
     
+    // Allow any authenticated user to create a gift card.
+    // Reading/updating should be locked down further in a real-world scenario.
+    match /giftCards/{giftCardId} {
+      allow create: if request.auth != null;
+      allow read, write: if request.auth != null; // For admin/redemption logic
+    }
+
     // Allow users to read and write their own document in the 'users' collection.
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
@@ -55,7 +62,6 @@ service cloud.firestore {
   }
 }
 ```
-
 ---
 
 After you publish these rules, refresh your application page. The error should be resolved, and your products, promotions, and user profile data will be displayed correctly.
