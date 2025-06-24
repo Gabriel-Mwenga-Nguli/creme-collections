@@ -34,6 +34,16 @@ if (firebaseConfig.projectId) {
   storage = getStorage(app);
 
   if (typeof window !== 'undefined') {
+    // In a development environment, we set this global variable to true to enable App Check debugging.
+    // The SDK will then print a debug token to the console, which you can
+    // register in the Firebase Console (App Check -> Your App -> Manage debug tokens).
+    if (process.env.NODE_ENV === 'development') {
+      (window as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+      console.log(
+        '[Firebase Module Load] App Check debug mode enabled. Look for a debug token in the console on the first page load and add it to your Firebase project settings.'
+      );
+    }
+    
     const key = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
     if (key) {
       appCheck = initializeAppCheck(app, {
@@ -51,7 +61,6 @@ if (firebaseConfig.projectId) {
     '[Firebase Module Load] Firebase config is missing. App will not connect to Firebase. ' +
     'Ensure you have a .env.local file with NEXT_PUBLIC_FIREBASE_... variables.'
   );
-  // Assign null to auth if firebase is not configured
   auth = null as any; 
 }
 

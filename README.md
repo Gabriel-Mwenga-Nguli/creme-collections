@@ -1,3 +1,4 @@
+
 # Firebase Studio
 
 This is a NextJS starter in Firebase Studio.
@@ -15,7 +16,8 @@ NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
 # ... and other Firebase config values
 
-# For App Check (see section below for setup)
+# The reCAPTCHA key is for your *production* site.
+# For local development, see the App Check section below.
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
 ```
 
@@ -33,25 +35,25 @@ If you are using Google Sign-In, you **must** authorize the domain where your ap
 4.  Click **Add domain** and paste the domain you copied.
 5.  Click **Add**.
 
-### 4. Configure App Check (Fix for "appCheck/recaptcha-error")
-If you see an `appCheck/recaptcha-error` in your browser console, it means App Check is enabled but not correctly configured for the domain your app is running on.
+### 4. Fix App Check Errors (appCheck/recaptcha-error)
 
-1.  **Find your reCAPTCHA v3 Site Key:**
-    *   Go to your **Firebase Console**.
-    *   Navigate to **Build > App Check**.
-    *   In the **Apps** tab, find your web app.
-    *   Click the overflow menu (three dots) and select **Manage reCAPTCHA keys**.
-    *   Copy the **Site key**.
-2.  **Add the Key to your Environment:**
-    *   In your `.env.local` file, add the following line, replacing `your-recaptcha-site-key` with the key you copied:
-        ```env
-        NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
-        ```
-3.  **Ensure Your Domain is Registered for reCAPTCHA:**
-    *   The reCAPTCHA key is tied to specific domains. Go to the [Google Cloud Console reCAPTCHA admin page](https://console.cloud.google.com/security/recaptcha).
-    *   Select your project.
-    *   Find the key you are using.
-    *   Ensure that the domain your app is running on (e.g., `localhost`, or `your-project.cloudworkstations.dev`) is listed in the **Domains** list for that key. If it's not, add it.
+App Check protects your backend resources, but it requires specific configuration for the domain your app is running on. If you see an `appCheck/recaptcha-error` in your browser console, it's because this configuration is missing for your development environment.
+
+This project is now configured to use **App Check Debug Mode** during local development (`npm run dev`). This is the recommended way to bypass reCAPTCHA errors locally.
+
+**Here's how to fix it permanently for local development:**
+
+1.  **Run your application** locally (`npm run dev`).
+2.  **Open your browser's Developer Console** (usually F12).
+3.  Look for a message that says:
+    > `Firebase App Check debug token: [A LONG DEBUG TOKEN]...`
+4.  **Copy that entire debug token.**
+5.  Go to the **Firebase Console** and select your project.
+6.  Navigate to **Build > App Check**.
+7.  In the **Apps** tab, find your web app and click the overflow menu (three dots), then select **Manage debug tokens**.
+8.  Click **Add debug token** and paste the token you copied from the console.
+
+Once you add the debug token, the `appCheck/recaptcha-error` will be resolved for your local development environment. You will still need to configure the reCAPTCHA provider for your live, production site.
 
 ### 5. Add Sample Data
 For the application to display products and promotions, you'll need to add data to your Firestore database.
