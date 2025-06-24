@@ -1,3 +1,4 @@
+
 'use server';
 
 import type { ProductCardProps } from '@/components/features/home/product-card';
@@ -9,10 +10,10 @@ const MOCK_PRODUCTS: Product[] = [
     {
         id: '1', name: 'Modern Smartwatch Series X', description: 'Sleek smartwatch with advanced health tracking.',
         longDescription: 'Full-featured Modern Smartwatch Series X with a vibrant AMOLED display, heart rate monitoring, SpO2 sensor, GPS, and up to 7 days battery life. Compatible with Android and iOS.',
-        image: '/images/products/smartwatch_main.png', 
+        image: 'https://placehold.co/600x400.png', 
         images: [
-            '/images/products/smartwatch_main.png', 
-            '/images/products/smartwatch_side.png',
+            'https://placehold.co/600x400.png', 
+            'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png'
         ],
@@ -23,10 +24,10 @@ const MOCK_PRODUCTS: Product[] = [
     {
         id: '2', name: 'Classic Men\'s Polo Shirt', description: 'Comfortable and stylish polo shirt.',
         longDescription: 'Made from 100% premium cotton, this classic fit polo shirt offers both comfort and durability. Features a two-button placket and ribbed collar and cuffs. Available in various colors.',
-        image: '/images/products/polo_shirt_blue.png', 
+        image: 'https://placehold.co/600x400.png', 
         images: [
-            '/images/products/polo_shirt_blue.png', 
-            '/images/products/polo_shirt_green.png',
+            'https://placehold.co/600x400.png', 
+            'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png'
         ],
@@ -37,9 +38,9 @@ const MOCK_PRODUCTS: Product[] = [
     {
         id: '3', name: 'Stainless Steel Cookware Set', description: 'Durable 10-piece cookware set.',
         longDescription: 'This 10-piece stainless steel cookware set includes saucepans, frying pans, and stockpot, all with ergonomic handles and tempered glass lids. Suitable for all stovetops, including induction.',
-        image: '/images/products/cookware_set.png', 
+        image: 'https://placehold.co/600x400.png', 
         images: [
-            '/images/products/cookware_set.png',
+            'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png'
@@ -51,9 +52,9 @@ const MOCK_PRODUCTS: Product[] = [
     {
         id: '4', name: 'Wireless Noise-Cancelling Headphones', description: 'Immersive audio experience, free from distractions.',
         longDescription: 'Experience industry-leading noise cancellation with these wireless headphones. Enjoy up to 30 hours of battery life, crystal-clear call quality, and high-resolution audio support.',
-        image: '/images/products/headphones.png', 
+        image: 'https://placehold.co/600x400.png', 
         images: [
-            '/images/products/headphones.png',
+            'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png'
@@ -65,9 +66,9 @@ const MOCK_PRODUCTS: Product[] = [
     {
         id: '5', name: 'Organic Green Tea', description: '25 bags of premium organic green tea.',
         longDescription: 'Sourced from the finest tea gardens, our organic green tea offers a smooth and refreshing taste. Rich in antioxidants, it\'s the perfect healthy beverage to start your day or unwind in the evening.',
-        image: '/images/products/green_tea.png', 
+        image: 'https://placehold.co/600x400.png', 
         images: [
-            '/images/products/green_tea.png',
+            'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png',
             'https://placehold.co/600x400.png'
         ],

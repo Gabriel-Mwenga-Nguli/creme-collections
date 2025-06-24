@@ -22,14 +22,16 @@ const mockOrder = {
     {
       id: '1',
       name: 'Modern Smartwatch Series X',
-      image: '/images/products/smartwatch_main.png',
+      image: 'https://placehold.co/64x64.png',
+      dataAiHint: 'smartwatch technology',
       price: 12999,
       quantity: 1,
     },
     {
       id: '2',
       name: 'Classic Men\'s Polo Shirt',
-      image: '/images/products/polo_shirt_blue.png',
+      image: 'https://placehold.co/64x64.png',
+      dataAiHint: 'men shirt',
       price: 2499,
       quantity: 1,
     },
@@ -71,7 +73,7 @@ export default function OrderDetailsPage({ params }: { params: { orderId: string
           <div className="space-y-4">
             {order.items.map((item) => (
               <div key={item.id} className="flex items-center gap-4">
-                <Image src={item.image} alt={item.name} width={64} height={64} className="rounded-md border object-cover" />
+                <Image src={item.image} alt={item.name} width={64} height={64} className="rounded-md border object-cover" data-ai-hint={item.dataAiHint} />
                 <div className="flex-grow">
                   <p className="font-semibold">{item.name}</p>
                   <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
