@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown } from 'lucide-react';
+import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, LogIn, Heart } from 'lucide-react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -91,6 +92,9 @@ export default function Header() {
   const { getCartItemCount } = useCart();
   const cartItemCount = getCartItemCount();
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+
+  // Since auth is removed, user is always null
+  const user = null;
 
   useEffect(() => {
     if (isMobile && isMegaMenuOpen) {
