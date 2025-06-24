@@ -89,9 +89,9 @@ const config = {
             height: '0',
           },
         },
-        'scroll-rtl': { 
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' }, 
+        'scroll-left': { 
+          'from': { transform: 'translateX(0)' },
+          'to': { transform: 'translateX(-100%)' }, 
         },
         'kenburns': { // Explicit Ken Burns definition
           '0%': { transform: 'scale(1.05) translate(0, 0)' },
@@ -113,7 +113,7 @@ const config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'scroll-rtl': 'scroll-rtl 60s linear infinite', 
+        'scroll-left': 'scroll-left 60s linear infinite', 
         'kenburns': 'kenburns 7.5s ease-in-out infinite alternate',
         'fade-in-right': 'fade-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
         'fade-in-left': 'fade-in-left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',

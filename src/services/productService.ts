@@ -75,6 +75,34 @@ const MOCK_PRODUCTS: Product[] = [
         dataAiHint: 'tea beverage', offerPrice: 599, originalPrice: 750, rating: '4.6',
         reviewsCount: 120, availability: 'In Stock', category: 'Groceries', categorySlug: 'groceries', subCategory: 'Beverages', subCategorySlug: 'beverages',
         brand: 'PureLeaf', stock: 200, isFeatured: false, isWeeklyDeal: true, createdAt: new Date()
+    },
+    {
+        id: '6', name: 'Pro Gaming Laptop', description: 'High-performance gaming laptop.',
+        longDescription: 'Dominate the competition with this Pro Gaming Laptop, featuring the latest gen processor, a high-refresh-rate display, and advanced cooling system.',
+        image: 'https://placehold.co/600x400.png', dataAiHint: 'gaming laptop', offerPrice: 149999, originalPrice: 165000, rating: '4.8',
+        reviewsCount: 75, availability: 'In Stock', category: 'Electronics', categorySlug: 'electronics', subCategory: 'Laptops & Computers', subCategorySlug: 'laptops-computers',
+        brand: 'GameRig', stock: 15, isFeatured: false, isWeeklyDeal: true, createdAt: new Date()
+    },
+    {
+        id: '7', name: 'Elegant Evening Gown', description: 'A stunning dress for special occasions.',
+        longDescription: 'Turn heads in this elegant evening gown, crafted from luxurious satin with intricate beadwork. Perfect for galas, weddings, and formal events.',
+        image: 'https://placehold.co/600x400.png', dataAiHint: 'woman dress', offerPrice: 8999, originalPrice: 11000, rating: '4.9',
+        reviewsCount: 45, availability: 'In Stock', category: 'Fashion', categorySlug: 'fashion', subCategory: 'Women\'s Clothing', subCategorySlug: 'women-clothing',
+        brand: 'Elegance', stock: 25, isFeatured: true, isWeeklyDeal: true, createdAt: new Date()
+    },
+    {
+        id: '8', name: 'Espresso Coffee Maker', description: 'Barista-quality coffee at home.',
+        longDescription: 'Brew delicious espresso, cappuccinos, and lattes with this semi-automatic espresso machine. Features a 15-bar pump and a built-in milk frother.',
+        image: 'https://placehold.co/600x400.png', dataAiHint: 'coffee machine', offerPrice: 15999, originalPrice: 18000, rating: '4.7',
+        reviewsCount: 92, availability: 'In Stock', category: 'Home & Living', categorySlug: 'home-living', subCategory: 'Kitchen & Dining', subCategorySlug: 'kitchen-dining',
+        brand: 'BrewMaster', stock: 35, isFeatured: false, isWeeklyDeal: true, createdAt: new Date()
+    },
+     {
+        id: '9', name: 'Ergonomic Gaming Mouse', description: 'Precision and comfort for gamers.',
+        longDescription: 'Gain a competitive edge with this ergonomic gaming mouse, featuring an ultra-precise optical sensor, customizable buttons, and RGB lighting.',
+        image: 'https://placehold.co/600x400.png', dataAiHint: 'gaming mouse', offerPrice: 4500, originalPrice: 5500, rating: '4.8',
+        reviewsCount: 180, availability: 'In Stock', category: 'Electronics', categorySlug: 'electronics', subCategory: 'Gaming', subCategorySlug: 'gaming',
+        brand: 'GameRig', stock: 80, isFeatured: false, isWeeklyDeal: true, createdAt: new Date()
     }
 ];
 
