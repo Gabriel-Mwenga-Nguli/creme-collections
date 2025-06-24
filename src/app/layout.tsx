@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import { CartProvider } from '@/context/CartContext';
+import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
   title: 'Creme Collections - Online Shopping Kenya | Best Deals & Quality Products',
@@ -37,12 +38,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <CartProvider>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-            <Toaster />
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <Toaster />
+            </CartProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

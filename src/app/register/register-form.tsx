@@ -3,7 +3,6 @@
 
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useAuth } from '@/context/AuthContext';
 
 const GoogleIcon = () => (
   <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
@@ -24,8 +24,8 @@ export default function RegisterForm() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -35,13 +35,11 @@ export default function RegisterForm() {
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     toast({
-      title: 'Simulation Mode',
-      description: 'Registration is disabled. This is a UI preview.',
+      title: 'Registration Successful',
+      description: "Welcome! We're logging you in.",
     });
     
-    // You could redirect to the login page to test that flow
-    // router.push('/login');
-
+    login();
     setIsLoading(false);
   };
 
@@ -50,9 +48,10 @@ export default function RegisterForm() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     toast({
-      title: 'Simulation Mode',
-      description: 'Google Sign-up is disabled. This is a UI preview.',
+      title: 'Registration Successful',
+      description: "Welcome! We're logging you in.",
     });
+    login();
     setIsLoading(false);
   };
 

@@ -3,7 +3,6 @@
 
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const GoogleIcon = () => (
   <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
@@ -22,36 +22,34 @@ export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     toast({
-      title: 'Simulation Mode',
-      description: 'Login functionality is disabled. This is a UI preview.',
+      title: 'Login Successful',
+      description: 'Welcome back! Redirecting you now.',
     });
     
-    // You could redirect to a mock profile page if you want to test that flow
-    // For now, we'll just reset the form.
-    // router.push('/profile');
-
+    login();
     setIsLoading(false);
   };
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    toast({
-      title: 'Simulation Mode',
-      description: 'Google Login is disabled. This is a UI preview.',
+    await new Promise(resolve => setTimeout(resolve, 1000));
+     toast({
+      title: 'Login Successful',
+      description: 'Welcome back! Redirecting you now.',
     });
+    login();
     setIsLoading(false);
   };
 
