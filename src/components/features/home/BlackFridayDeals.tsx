@@ -72,7 +72,7 @@ const BlackFridayDeals: React.FC<BlackFridayDealsProps> = ({ deals }) => {
         <div className="grid md:grid-cols-12 gap-6 md:gap-8 items-center">
           {/* Left: Banner */}
           <div className="md:col-span-4 lg:col-span-3 flex flex-col justify-center items-center bg-black rounded-xl shadow-2xl p-4 md:p-0">
-            <Link href="/products?filter=black-friday" className="block w-full">
+            <Link href="/products" className="block w-full">
               <div className="relative aspect-[1/1] w-full overflow-hidden rounded-lg group">
                 <Image
                   src="/images/banners/black-friday.png"
@@ -132,7 +132,7 @@ const BlackFridayDeals: React.FC<BlackFridayDealsProps> = ({ deals }) => {
             </div>
              <div className="text-center mt-6 md:hidden">
                 <Button asChild variant="default" size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    <Link href="/products?filter=black-friday">
+                    <Link href="/products">
                         Shop All Black Friday Deals <ShoppingBag className="ml-2 h-5 w-5" />
                     </Link>
                 </Button>

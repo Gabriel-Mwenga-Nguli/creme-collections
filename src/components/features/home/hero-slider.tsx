@@ -77,7 +77,7 @@ const slidesData: Slide[] = [
     title: 'MEGA DEALS DAILY!',
     subtitle: 'Don\'t miss out on incredible savings. Limited stock available.',
     buttonText: 'Grab Deals',
-    buttonLink: '/products?filter=sale',
+    buttonLink: '/products',
     textAlign: 'left',
     textColor: 'text-white',
     overlayColor: 'bg-slate-800/50',

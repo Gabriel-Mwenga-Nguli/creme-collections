@@ -2,7 +2,6 @@
 'use client'; // Make it a client component to read searchParams
 
 import { Suspense } from 'react';
-import type { Metadata } from 'next';
 import { useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,13 +9,7 @@ import { Search as SearchIcon, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState, useEffect } from 'react';
 import { smartProductSearch, type SmartProductSearchOutput } from '@/ai/flows/product-search';
-import ProductCard from '@/components/features/home/product-card'; // Re-use product card for results
-
-
-// export const metadata: Metadata = { // Metadata cannot be used in client components directly this way
-//   title: 'Search Products - Creme Collections',
-//   description: 'Find exactly what you are looking for with our smart search.',
-// };
+import ProductCard from '@/components/features/home/product-card';
 
 function SearchPageComponent() {
   const searchParams = useSearchParams();
@@ -47,6 +40,7 @@ function SearchPageComponent() {
   };
 
   useEffect(() => {
+    document.title = initialQuery ? `Search results for "${initialQuery}"` : 'Search Products - Creme Collections';
     if (initialQuery) {
       performSearch(initialQuery);
     }
@@ -54,6 +48,9 @@ function SearchPageComponent() {
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // Update URL to reflect new search term, which will trigger the useEffect
+    const newUrl = searchTerm ? `/search-page?q=${encodeURIComponent(searchTerm)}` : '/search-page';
+    window.history.pushState({}, '', newUrl);
     performSearch(searchTerm);
   };
 
@@ -108,19 +105,18 @@ function SearchPageComponent() {
                 <p className="text-muted-foreground mb-6 italic">Note: {searchResults.reasoning}</p>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {searchResults.products.map((productName, index) => (
-                  // This ProductCard usage is a placeholder.
-                  // Ideally, smartProductSearch would return more product details (ID, image, desc, price)
-                  // For now, we create a dummy product card structure.
+                {searchResults.products.map((product) => (
                   <ProductCard
-                    key={index}
-                    // Attempt to create a somewhat unique ID. In a real app, the flow would return IDs.
-                    id={index + 1000 + Math.floor(Math.random()*1000)} 
-                    name={productName}
-                    description={`AI suggested product based on your search for "${searchTerm}".`}
-                    image="/images/banners/electronics.png" // Placeholder image
-                    dataAiHint="search result" // Generic hint
-                    // Prices would ideally come from the flow or a subsequent lookup
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    description={product.description}
+                    image={product.image}
+                    dataAiHint={product.dataAiHint}
+                    fixedOfferPrice={product.offerPrice}
+                    fixedOriginalPrice={product.originalPrice}
+                    rating={product.rating}
+                    reviewsCount={product.reviewsCount}
                   />
                 ))}
               </div>
