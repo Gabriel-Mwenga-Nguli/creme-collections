@@ -2,7 +2,7 @@
 import type { NavLink as BaseNavLink } from '@/lib/types';
 import { 
   Smartphone, Shirt, Home as HomeIcon, Tv, Laptop, Headphones, Heart, ShoppingCart, User, Search, Percent, Info, MessageSquare, Phone, Sparkles, Zap, HelpCircle, Package, BookOpen, Users, ShieldCheck, Menu as MenuIcon, ShoppingBasket, Apple, Leaf, Beaker, Baby, Sprout, VenetianMask,
-  Bike, ToyBrick, Car, BookMarked, HeartPulse, Dumbbell, Tent, Gamepad2, PencilRuler, Stethoscope, Popcorn, Coffee, Cookie, Gavel, Store, Gift
+  Bike, ToyBrick, Car, BookMarked, HeartPulse, Dumbbell, Tent, Gamepad2, PencilRuler, Stethoscope, Popcorn, Coffee, Cookie, Gavel, Store, Gift, ListOrdered, MapPin, Inbox
 } from 'lucide-react';
 
 export const SITE_NAME = "Creme Collections";
@@ -166,6 +166,14 @@ export const CATEGORY_NAV_LINKS: NavLink[] = [
       { label: 'Mobility Aids', href: '/products/category/health-wellness/mobility-aids' },
     ],
   },
+];
+
+export const PROFILE_NAV_LINKS: NavLink[] = [
+  { href: "/profile", label: "My Account", icon: User },
+  { href: "/profile/orders", label: "My Orders", icon: ListOrdered },
+  { href: "/wishlist", label: "Wishlist", icon: Heart },
+  { href: "/profile/address", label: "Address Book", icon: MapPin },
+  { href: "/profile/inbox", label: "Inbox", icon: Inbox },
 ];
 
 

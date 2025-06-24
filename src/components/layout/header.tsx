@@ -3,11 +3,11 @@
 
 import React, { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, Heart, ServerOff, UserPlus, LogIn } from 'lucide-react';
+import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, Heart, ServerOff, UserPlus, LogIn, ListOrdered, Mail } from 'lucide-react';
 import Logo from '@/components/logo';
-import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
+import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, PROFILE_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useTheme } from 'next-themes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AISearchBar from '@/components/features/search/AISearchBar';
@@ -25,6 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -93,6 +95,51 @@ const ListItem = forwardRef<
 });
 ListItem.displayName = "ListItem";
 
+const UserMenu = () => {
+    const { toast } = useToast();
+    const handleLogout = () => {
+        toast({
+            title: "Simulation Mode",
+            description: "Logout functionality is for demonstration only."
+        })
+    }
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                    <Avatar className="h-9 w-9">
+                        <AvatarImage src="https://placehold.co/100x100.png" alt="Jane Doe" data-ai-hint="user avatar" />
+                        <AvatarFallback>JD</AvatarFallback>
+                    </Avatar>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">Jane Doe</p>
+                        <p className="text-xs leading-none text-muted-foreground">jane.doe@example.com</p>
+                    </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {PROFILE_NAV_LINKS.map(link => (
+                    <DropdownMenuItem key={link.label} asChild>
+                        <Link href={link.href}>
+                            {link.icon && <link.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
+                            <span>{link.label}</span>
+                        </Link>
+                    </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}
+
 export default function Header() {
   const isMobile = useIsMobile();
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
@@ -145,16 +192,7 @@ export default function Header() {
             <ThemeToggle />
             
             <div className="hidden sm:flex items-center gap-1">
-               <Button asChild variant="ghost" className="text-foreground hover:text-primary text-sm">
-                  <Link href="/login">
-                      Login
-                  </Link>
-              </Button>
-               <Button asChild variant="default" size="sm">
-                  <Link href="/register">
-                      Sign Up
-                  </Link>
-              </Button>
+               <UserMenu />
             </div>
 
             {isMobile ? (
@@ -165,7 +203,6 @@ export default function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[320px] p-0 bg-background flex flex-col">
-                  <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
                   <div className="flex justify-between items-center p-4 border-b">
                      <Logo />
                     <SheetClose asChild>
@@ -176,40 +213,28 @@ export default function Header() {
                   </div>
 
                   <div className="p-4 flex-1 overflow-y-auto">
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                         <SheetClose asChild>
-                            <Button asChild className="w-full">
-                                <Link href="/login">
-                                    <LogIn className="mr-2 h-4 w-4" />
-                                    Login
-                                </Link>
-                            </Button>
-                         </SheetClose>
-                         <SheetClose asChild>
-                            <Button asChild variant="outline" className="w-full">
-                                <Link href="/register">
-                                    <UserPlus className="mr-2 h-4 w-4" />
-                                    Sign Up
-                                </Link>
-                            </Button>
-                        </SheetClose>
+                    <div className="flex items-center gap-3 mb-4 p-2 rounded-md bg-muted">
+                        <Avatar>
+                            <AvatarImage src="https://placehold.co/100x100.png" alt="Jane Doe" />
+                            <AvatarFallback>JD</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <p className="font-semibold text-sm">Jane Doe</p>
+                            <p className="text-xs text-muted-foreground">jane.doe@example.com</p>
+                        </div>
                     </div>
-                    <nav className="flex flex-col gap-1 mb-4 mt-4">
-                       {MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger).map((link) => (
-                         <SheetClose asChild key={link.label}>
-                            <Link
-                              href={link.href}
-                              className="flex items-center gap-2 py-2 px-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
-                            >
-                              <span>
-                                {link.icon && <link.icon className="h-5 w-5 text-muted-foreground inline-block mr-1" />}
-                                {link.label}
-                              </span>
-                            </Link>
-                         </SheetClose>
-                       ))}
+                    <Separator className="my-3"/>
+                    <nav className="flex flex-col gap-1 mb-4">
+                        {PROFILE_NAV_LINKS.map(link => (
+                             <SheetClose asChild key={link.label}>
+                                <Link href={link.href} className="flex items-center gap-2 py-2 px-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary">
+                                    {link.icon && <link.icon className="h-5 w-5 text-muted-foreground inline-block" />}
+                                    {link.label}
+                                </Link>
+                             </SheetClose>
+                        ))}
                     </nav>
-                    <hr className="my-3"/>
+                    <Separator className="my-3"/>
                     <p className="px-2 text-sm font-semibold text-muted-foreground mb-2">Browse Categories</p>
                     <Accordion type="single" collapsible className="w-full">
                       {CATEGORY_NAV_LINKS.map((category) => (
@@ -336,8 +361,8 @@ export default function Header() {
             </nav>
           </div>
         )}
+        {isMegaMenuOpen && <MegaMenu categories={CATEGORY_NAV_LINKS} onClose={closeMegaMenu} />}
       </div>
-      {!isMobile && isMegaMenuOpen && <MegaMenu categories={CATEGORY_NAV_LINKS} onClose={closeMegaMenu} />}
     </header>
   );
 }
