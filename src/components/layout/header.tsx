@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
@@ -177,18 +176,24 @@ export default function Header() {
                     <Accordion type="single" collapsible className="w-full">
                       {CATEGORY_NAV_LINKS.map((category) => (
                         <AccordionItem value={category.label} key={category.label}>
-                          <AccordionTrigger className="text-base font-medium hover:text-primary py-3 px-2" asChild>
-                            <div className="flex items-center justify-between w-full cursor-pointer">
-                                <Link href={category.href} className="flex items-center gap-2 w-full text-left" onClick={() => setMobileSheetOpen(false)}>
-                                   <span>
-                                    {category.icon && <category.icon className="h-5 w-5 text-muted-foreground inline-block mr-2" />}
-                                    {category.label}
-                                   </span>
-                                </Link>
-                            </div>
+                          {/* This trigger no longer uses asChild or contains a Link, fixing the error */}
+                          <AccordionTrigger className="text-base font-medium hover:text-primary py-3 px-2 w-full text-left justify-between">
+                             <span className="flex items-center gap-2">
+                              {category.icon && <category.icon className="h-5 w-5 text-muted-foreground inline-block" />}
+                              {category.label}
+                             </span>
                           </AccordionTrigger>
                           <AccordionContent className="pl-6 pr-2">
                             <nav className="flex flex-col gap-1.5 mt-1">
+                              {/* Added a link to the main category page inside the content */}
+                              <SheetClose asChild key={category.label}>
+                                <Link
+                                    href={category.href}
+                                    className="text-sm font-medium text-foreground hover:text-primary py-1.5 block"
+                                >
+                                    All {category.label}
+                                </Link>
+                              </SheetClose>
                               {category.subLinks?.map((subLink) => (
                                 <SheetClose asChild key={subLink.label}>
                                   <Link
