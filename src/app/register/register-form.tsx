@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const GoogleIcon = () => (
   <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
@@ -18,14 +19,15 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export default function LoginForm() {
+export default function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
@@ -34,23 +36,22 @@ export default function LoginForm() {
 
     toast({
       title: 'Simulation Mode',
-      description: 'Login functionality is disabled. This is a UI preview.',
+      description: 'Registration is disabled. This is a UI preview.',
     });
     
-    // You could redirect to a mock profile page if you want to test that flow
-    // For now, we'll just reset the form.
-    // router.push('/profile');
+    // You could redirect to the login page to test that flow
+    // router.push('/login');
 
     setIsLoading(false);
   };
 
-  const handleGoogleLogin = async () => {
+   const handleGoogleRegister = async () => {
     setIsLoading(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     toast({
       title: 'Simulation Mode',
-      description: 'Google Login is disabled. This is a UI preview.',
+      description: 'Google Sign-up is disabled. This is a UI preview.',
     });
     setIsLoading(false);
   };
@@ -58,50 +59,45 @@ export default function LoginForm() {
   return (
     <Card className="w-full max-w-md shadow-xl bg-card/90 backdrop-blur-sm mx-4">
       <CardHeader className="text-center px-4 py-6 sm:px-6">
-        <CardTitle className="text-2xl sm:text-3xl font-bold text-primary font-headline">Welcome Back!</CardTitle>
-        <CardDescription className="text-sm sm:text-base">Sign in to continue to your account.</CardDescription>
+        <CardTitle className="text-2xl sm:text-3xl font-bold text-primary font-headline">Create an Account</CardTitle>
+        <CardDescription className="text-sm sm:text-base">Join us and start shopping smarter today.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 px-4 pb-6 sm:px-6">
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="fullName">Full Name</Label>
             <Input 
-              type="email" 
-              name="email" 
-              id="email" 
-              autoComplete="email" 
-              required 
-              className="mt-1 text-base sm:text-sm" 
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
+              type="text" name="fullName" id="fullName" autoComplete="name" required 
+              className="mt-1 text-base sm:text-sm" placeholder="Jane Doe"
+              value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={isLoading}
             />
           </div>
           <div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link href="/forgot-password" className="text-xs sm:text-sm text-primary hover:underline">
-                Forgot password?
-              </Link>
-            </div>
+            <Label htmlFor="email">Email Address</Label>
             <Input 
-              type="password" 
-              name="password" 
-              id="password" 
-              autoComplete="current-password" 
-              required 
-              className="mt-1 text-base sm:text-sm"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
+              type="email" name="email" id="email" autoComplete="email" required 
+              className="mt-1 text-base sm:text-sm" placeholder="you@example.com"
+              value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading}
             />
+          </div>
+          <div>
+            <Label htmlFor="password">Password</Label>
+            <Input 
+              type="password" name="password" id="password" autoComplete="new-password" required 
+              className="mt-1 text-base sm:text-sm" placeholder="••••••••"
+              value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading}
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="terms" required />
+            <Label htmlFor="terms" className="text-xs text-muted-foreground">
+              I agree to the <Link href="/terms" className="underline hover:text-primary">Terms & Conditions</Link>.
+            </Label>
           </div>
           <div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Login
+              Create Account
             </Button>
           </div>
         </form>
@@ -112,22 +108,22 @@ export default function LoginForm() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-card px-2 text-muted-foreground">
-              Or continue with
+              Or sign up with
             </span>
           </div>
         </div>
 
         <div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading}>
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
-            Login with Google
+          <Button variant="outline" className="w-full" onClick={handleGoogleRegister} disabled={isLoading}>
+             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
+            Sign up with Google
           </Button>
         </div>
 
         <p className="text-center text-xs sm:text-sm text-muted-foreground">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="font-medium text-primary hover:underline">
-            Sign up
+          Already have an account?{' '}
+          <Link href="/login" className="font-medium text-primary hover:underline">
+            Sign In
           </Link>
         </p>
       </CardContent>
