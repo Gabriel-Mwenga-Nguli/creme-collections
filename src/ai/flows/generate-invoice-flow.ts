@@ -12,8 +12,6 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { SITE_NAME } from '@/lib/constants';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const InvoiceItemSchema = z.object({
   name: z.string().describe("The name of the product."),
@@ -111,36 +109,13 @@ const generateInvoiceEmailFlow = ai.defineFlow(
   async (input) => {
     console.log("Generating invoice email for order:", input.orderId);
     
-    // Generate the email content
     const { output: emailOutput } = await invoicePrompt(input);
     if (!emailOutput) {
       throw new Error("AI could not generate an invoice email.");
     }
     
-    // Save invoice record to Firestore
-    if (db && input.userId) {
-      try {
-        const invoicesRef = collection(db, 'users', input.userId, 'invoices');
-        const simpleInvoiceId = `INV-${Date.now().toString().slice(-6)}`;
-        await addDoc(invoicesRef, {
-          invoiceId: simpleInvoiceId,
-          orderId: input.orderId,
-          userId: input.userId,
-          customerEmail: input.customerEmail,
-          totalAmount: input.totalAmount,
-          invoiceDate: serverTimestamp(),
-          status: 'Paid', // Assuming this flow is triggered on payment confirmation
-          subject: emailOutput.subject,
-        });
-        console.log(`Successfully saved invoice record for user ${input.userId} and order ${input.orderId}`);
-      } catch (error) {
-        console.error(`Error saving invoice record to Firestore for user ${input.userId}:`, error);
-        // We don't throw here, as sending the email is still the primary goal.
-        // We just log the error.
-      }
-    } else {
-      console.warn("Firestore not available or userId missing. Skipping saving invoice record.");
-    }
+    // Firestore saving logic has been removed.
+    console.log(`[DEV MODE] Skipping saving invoice record for user ${input.userId} and order ${input.orderId} as Firestore is disabled.`);
 
     console.log("Successfully generated invoice email content.");
     return emailOutput;

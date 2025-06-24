@@ -9,8 +9,6 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { db } from '@/lib/firebase'; // Import Firestore instance
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { z } from 'genkit';
 
 const LoyaltyPointsInputSchema = z.object({
@@ -78,25 +76,10 @@ const loyaltyPointsFlow = ai.defineFlow(
     outputSchema: LoyaltyPointsOutputSchema,
   },
   async (input) => {
-    if (!db) {
-        throw new Error("Firestore is not initialized. Cannot manage loyalty points.");
-    }
-    const userDocRef = doc(db, 'users', input.userId);
-
-    let currentPoints = 0;
-    let userSegment = 'new'; // Default segment
-
-    try {
-      const userDocSnap = await getDoc(userDocRef);
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
-        currentPoints = userData.loyaltyPoints || 0;
-        userSegment = userData.segment || 'regular'; 
-      }
-    } catch (error) {
-      console.error(`Error fetching user ${input.userId} for loyalty points:`, error);
-      // Decide if flow should fail or proceed with 0 points
-    }
+    // Firestore logic removed. Using mock data.
+    console.log("[DEV MODE] Firestore is disabled. Using mock data for loyalty points.");
+    const currentPoints = 0; // Mock current points
+    const userSegment = 'new'; // Mock user segment
 
     const promptInputForAI = {
         currentPoints,
@@ -114,22 +97,15 @@ const loyaltyPointsFlow = ai.defineFlow(
     const pointsChange = aiDecision.pointsToAwardOrDeduct;
     const newTotalPoints = currentPoints + pointsChange;
 
-    try {
-      await setDoc(userDocRef, {
-        loyaltyPoints: newTotalPoints,
-        lastLoyaltyUpdate: serverTimestamp(),
-      }, { merge: true });
-    } catch (error) {
-      console.error(`Error updating loyalty points for user ${input.userId} in Firestore:`, error);
-      throw new Error("Failed to save loyalty points to database.");
-    }
+    // Skip saving to Firestore
+    console.log(`[DEV MODE] Skipping saving loyalty points for user ${input.userId} to Firestore.`);
 
     return {
       userId: input.userId,
       previousPoints: currentPoints,
       pointsChange,
       newTotalPoints,
-      message: `User ${input.userId} ${pointsChange >= 0 ? 'awarded' : 'deducted'} ${Math.abs(pointsChange)} points. New total: ${newTotalPoints}. Reason: ${aiDecision.calculationReasoning}`,
+      message: `[MOCK] User ${input.userId} ${pointsChange >= 0 ? 'awarded' : 'deducted'} ${Math.abs(pointsChange)} points. New total: ${newTotalPoints}. Reason: ${aiDecision.calculationReasoning}`,
     };
   }
 );

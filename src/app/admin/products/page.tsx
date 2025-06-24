@@ -1,137 +1,24 @@
 
-"use client";
-
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, PlusCircle, Edit3, ShoppingBag, Search } from 'lucide-react';
-import { getAllProducts, type Product } from '@/services/productService';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { ServerOff } from 'lucide-react';
 
-export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    document.title = "Manage Products - Admin";
-    async function fetchProducts() {
-      setIsLoading(true);
-      try {
-        const fetchedProducts = await getAllProducts();
-        setProducts(fetchedProducts);
-      } catch (error) {
-        console.error("Error fetching products for admin:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchProducts();
-  }, []);
-
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (product.id && product.id.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
+export default function AdminFeatureDisabledPage() {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground font-headline flex items-center">
-            <ShoppingBag className="mr-3 h-7 w-7 text-primary" />
-            Manage Products
-          </h1>
-          <p className="text-muted-foreground text-sm">View, add, and edit products in your store.</p>
-        </div>
-        <Button asChild>
-          <Link href="/admin/products/add">
-            <PlusCircle className="mr-2 h-5 w-5 inline-block" /> Add New Product
-          </Link>
-        </Button>
-      </div>
-
-      <Card>
+    <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-10rem)] px-4 py-12">
+      <Card className="max-w-md w-full text-center shadow-lg">
         <CardHeader>
-          <CardTitle>All Products ({filteredProducts.length})</CardTitle>
-          <CardDescription>A list of all products currently in your catalog.</CardDescription>
-           <div className="relative mt-2">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by name, category, brand, ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 w-full md:w-1/2 lg:w-2/5" 
-            />
-          </div>
+          <ServerOff className="mx-auto h-12 w-12 text-destructive" />
+          <CardTitle className="mt-4 text-2xl font-bold">Admin Panel Disabled</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center items-center py-10">
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            </div>
-          ) : filteredProducts.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[60px] sm:w-[80px]">Image</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="hidden md:table-cell">Category</TableHead>
-                    <TableHead>Price (KES)</TableHead>
-                    <TableHead className="hidden sm:table-cell">Stock</TableHead>
-                    <TableHead className="hidden sm:table-cell">Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredProducts.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell>
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          width={40}
-                          height={40}
-                          className="rounded-md object-cover w-10 h-10 sm:w-12 sm:h-12"
-                          data-ai-hint={product.dataAiHint}
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium max-w-[150px] sm:max-w-xs truncate" title={product.name}>{product.name}</TableCell>
-                      <TableCell className="hidden md:table-cell">{product.category || 'N/A'}</TableCell>
-                      <TableCell>{product.offerPrice.toLocaleString()}</TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        <Badge variant={product.stock && product.stock < 10 ? (product.stock === 0 ? 'destructive' : 'secondary') : 'outline'} className="text-xs">
-                          {product.stock ?? 'N/A'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        <Badge variant={product.availability === 'In Stock' ? 'default' : 'destructive'} className="bg-opacity-75 text-xs">
-                          {product.availability || 'N/A'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button asChild variant="outline" size="sm">
-                          <Link href={`/admin/products/edit/${product.id}`}>
-                            <Edit3 className="mr-1 h-3.5 w-3.5 inline-block" /> Edit
-                          </Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-10">No products found matching your search or no products available.</p>
-          )}
+          <CardDescription>
+            The Admin Panel is temporarily disabled as the application is running without backend services.
+          </CardDescription>
+          <Button asChild className="mt-6">
+            <Link href="/">Go to Homepage</Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

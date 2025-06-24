@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A comprehensive AI-powered chat support agent.
@@ -41,12 +42,7 @@ Be concise and clear in your responses. Use markdown for formatting like lists o
 
 Today's date is {{currentDate}}.
 
-{{#if isLoggedIn}}
-The user is logged in.
-{{#if userName}}Their name is {{{userName}}}. Address them by their name where it feels natural.{{/if}}
-{{else}}
-The user is not logged in.
-{{/if}}
+The user is not logged in because user accounts are currently disabled. Do not ask them to log in.
 
 Here is the conversation history so far (if any):
 {{#if chatHistory}}
@@ -61,11 +57,10 @@ Current user message: {{{message}}}
 Your Task:
 1.  Analyze the user's message in the context of the conversation history.
 2.  Provide a direct, helpful, and friendly response.
-3.  If the user asks about something you cannot do (e.g., process a refund directly, change personal details), politely explain the limitation.
-4.  If you determine the user needs to speak with a human support agent for complex issues (like a damaged order, a specific account problem, or a refund request), you MUST include the special phrase "[NEEDS_HUMAN_LOGIN_REQUIRED]" in your response. This phrase will be used by the system to trigger a handoff process.
-    - Example: "I understand this is frustrating. To resolve this, I need to connect you with a support agent. [NEEDS_HUMAN_LOGIN_REQUIRED]"
+3.  If the user asks about something you cannot do (e.g., check order status, process a refund, change personal details), politely explain the limitation and suggest they contact support via email at support@cremecollections.shop or WhatsApp at +254742468070.
+4.  Do not use the special phrase "[NEEDS_HUMAN_LOGIN_REQUIRED]" as login is disabled.
 
-Do not make up information about products or orders if you don't have it. It's better to say "I'm sorry, I don't have access to that specific information, but I can help you find your order history page."
+Do not make up information about products or orders if you don't have it. It's better to say "I'm sorry, I don't have access to that specific information, but I can help you find products on our site."
 
 Respond to the user's current message now.`,
 });
@@ -77,8 +72,11 @@ const comprehensiveChatSupportFlow = ai.defineFlow(
     outputSchema: ComprehensiveChatSupportOutputSchema,
   },
   async (input) => {
+    // Override login status since auth is disabled
     const promptInput = {
       ...input,
+      isLoggedIn: false,
+      userName: undefined,
       currentDate: new Date().toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
     };
 

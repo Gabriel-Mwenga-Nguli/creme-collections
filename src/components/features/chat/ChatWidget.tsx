@@ -6,22 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BotIcon as BotMessageSquareIconInChat, Send, X, Loader2, User as UserIcon, MessageSquare } from 'lucide-react'; // Changed Headphones to MessageSquare
+import { BotIcon as BotMessageSquareIconInChat, Send, X, Loader2, User as UserIcon, MessageSquare } from 'lucide-react';
 import { comprehensiveChatSupport, type ComprehensiveChatSupportInput, type ComprehensiveChatSupportOutput } from '@/ai/flows/comprehensive-chat-support';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { ToastAction } from '@/components/ui/toast';
 import Link from 'next/link';
 
-interface ChatMessage {
+export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
   content: string;
 }
-
-const AGENT_HANDOFF_PHRASE = "[NEEDS_HUMAN_LOGIN_REQUIRED]";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,8 +25,6 @@ export default function ChatWidget() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [user, authLoading] = useAuthState(auth);
-  const router = useRouter();
   const { toast } = useToast();
 
   const toggleChat = useCallback(() => {
@@ -74,31 +66,12 @@ export default function ChatWidget() {
       const input: ComprehensiveChatSupportInput = {
         message: userMessageContent,
         chatHistory: historyForFlow,
-        isLoggedIn: !!user, 
-        userName: user?.displayName || undefined,
+        isLoggedIn: false, // Hardcoded to false as auth is disabled
+        userName: undefined,
       };
       const result: ComprehensiveChatSupportOutput = await comprehensiveChatSupport(input);
-      let aiResponseContent = result.response;
-
-      if (aiResponseContent.includes(AGENT_HANDOFF_PHRASE)) {
-        if (!user) {
-          aiResponseContent = aiResponseContent.replace(AGENT_HANDOFF_PHRASE, 
-            "To connect you with a support agent, please log in or create an account. You can also reach us via email at support@cremecollections.shop or WhatsApp at +254742468070."
-          );
-           toast({
-              title: "Login Required for Agent Support",
-              description: "Please log in to connect directly with a support agent.",
-              action: <ToastAction altText="Login" onClick={() => router.push('/login?redirect=.')}>Login</ToastAction>,
-              duration: 7000,
-            });
-        } else {
-          aiResponseContent = aiResponseContent.replace(AGENT_HANDOFF_PHRASE, 
-            "Thank you for confirming. I'm escalating your request to a human agent. Please wait a moment..."
-          );
-        }
-      }
-
-      const aiResponse: ChatMessage = { id: `${Date.now()}-model`, role: 'model', content: aiResponseContent };
+      
+      const aiResponse: ChatMessage = { id: `${Date.now()}-model`, role: 'model', content: result.response };
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
       console.error("Chat API error:", error);
@@ -108,16 +81,14 @@ export default function ChatWidget() {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 0);
     }
-  }, [inputValue, messages, user, router, toast]);
+  }, [inputValue, messages, toast]);
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      const welcomeMessage = user 
-        ? `Hello ${user.displayName || 'there'}! I'm CremeBot, your virtual assistant for Creme Collections. How can I help you today?`
-        : "Hello! I'm CremeBot, your virtual assistant for Creme Collections. How can I assist you?";
+      const welcomeMessage = "Hello! I'm CremeBot, your virtual assistant for Creme Collections. How can I assist you?";
       setMessages([{ id: 'welcome-msg', role: 'model', content: welcomeMessage }]);
     }
-  }, [isOpen, user, messages.length]);
+  }, [isOpen, messages.length]);
 
 
   return (
@@ -200,5 +171,3 @@ export default function ChatWidget() {
     </>
   );
 }
-
-    
