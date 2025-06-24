@@ -7,7 +7,7 @@ import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, Heart, ServerOff, 
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, PROFILE_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 import { useTheme } from 'next-themes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AISearchBar from '@/components/features/search/AISearchBar';
@@ -35,6 +35,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -203,6 +204,7 @@ export default function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[320px] p-0 bg-background flex flex-col">
+                  <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
                   <div className="flex justify-between items-center p-4 border-b">
                      <Logo />
                     <SheetClose asChild>
@@ -247,14 +249,14 @@ export default function Header() {
                           </AccordionTrigger>
                           <AccordionContent className="pl-6 pr-2">
                             <nav className="flex flex-col gap-1.5 mt-1">
-                              <SheetClose asChild key={`all-${category.label}`}>
-                                <Link
-                                    href={category.href}
-                                    className="text-sm font-medium text-foreground hover:text-primary py-1.5 block"
-                                >
-                                    All {category.label}
-                                </Link>
-                              </SheetClose>
+                               <SheetClose asChild key={`all-${category.label}`}>
+                                  <Link
+                                      href={category.href}
+                                      className="text-sm font-medium text-foreground hover:text-primary py-1.5 block"
+                                  >
+                                      All {category.label}
+                                  </Link>
+                                </SheetClose>
                               {category.subLinks?.map((subLink) => (
                                 <SheetClose asChild key={subLink.label}>
                                   <Link
