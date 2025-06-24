@@ -1,8 +1,9 @@
+
 "use client";
 
 import React, { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, LogIn, Heart, Loader2, LogOut, UserPlus } from 'lucide-react';
+import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, Heart, ServerOff, UserPlus, LogIn } from 'lucide-react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -24,9 +25,6 @@ import {
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,22 +100,6 @@ export default function Header() {
   const cartItemCount = getCartItemCount();
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!auth) {
-      setLoading(false);
-      return;
-    }
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   useEffect(() => {
     if (isMobile && isMegaMenuOpen) {
       setIsMegaMenuOpen(false);
@@ -161,59 +143,19 @@ export default function Header() {
               </Link>
             </Button>
             <ThemeToggle />
-
-            {/* Auth Buttons */}
-            {loading ? (
-                <Button variant="ghost" size="icon" className="w-9 h-9" disabled>
-                    <Loader2 className="h-[1.2rem] w-[1.2rem] animate-spin" />
-                </Button>
-            ) : user ? (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                            <Avatar className="h-9 w-9">
-                                <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "User"} />
-                                <AvatarFallback>{user.email ? user.email.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
-                            </Avatar>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
-                        <DropdownMenuLabel className="font-normal">
-                            <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium leading-none">{user.displayName || "Creme User"}</p>
-                                <p className="text-xs leading-none text-muted-foreground">
-                                    {user.email}
-                                </p>
-                            </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <Link href="/profile"><User className="mr-2 h-4 w-4" />My Account</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                            <Link href="/wishlist"><Heart className="mr-2 h-4 w-4" />Wishlist</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => auth && auth.signOut()}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            ) : (
-                 <div className="hidden sm:flex items-center gap-1">
-                     <Button asChild variant="ghost" className="text-foreground hover:text-primary text-sm">
-                        <Link href="/login">
-                            Login
-                        </Link>
-                    </Button>
-                     <Button asChild variant="default" size="sm">
-                        <Link href="/register">
-                            Sign Up
-                        </Link>
-                    </Button>
-                 </div>
-            )}
+            
+            <div className="hidden sm:flex items-center gap-1">
+               <Button asChild variant="ghost" className="text-foreground hover:text-primary text-sm">
+                  <Link href="/login">
+                      Login
+                  </Link>
+              </Button>
+               <Button asChild variant="default" size="sm">
+                  <Link href="/register">
+                      Sign Up
+                  </Link>
+              </Button>
+            </div>
 
             {isMobile ? (
               <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
@@ -234,26 +176,24 @@ export default function Header() {
                   </div>
 
                   <div className="p-4 flex-1 overflow-y-auto">
-                    {!user && !loading && (
-                        <div className="grid grid-cols-2 gap-2 mb-4">
-                             <SheetClose asChild>
-                                <Button asChild className="w-full">
-                                    <Link href="/login">
-                                        <LogIn className="mr-2 h-4 w-4" />
-                                        Login
-                                    </Link>
-                                </Button>
-                             </SheetClose>
-                             <SheetClose asChild>
-                                <Button asChild variant="outline" className="w-full">
-                                    <Link href="/register">
-                                        <UserPlus className="mr-2 h-4 w-4" />
-                                        Sign Up
-                                    </Link>
-                                </Button>
-                            </SheetClose>
-                        </div>
-                    )}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                         <SheetClose asChild>
+                            <Button asChild className="w-full">
+                                <Link href="/login">
+                                    <LogIn className="mr-2 h-4 w-4" />
+                                    Login
+                                </Link>
+                            </Button>
+                         </SheetClose>
+                         <SheetClose asChild>
+                            <Button asChild variant="outline" className="w-full">
+                                <Link href="/register">
+                                    <UserPlus className="mr-2 h-4 w-4" />
+                                    Sign Up
+                                </Link>
+                            </Button>
+                        </SheetClose>
+                    </div>
                     <nav className="flex flex-col gap-1 mb-4 mt-4">
                        {MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger).map((link) => (
                          <SheetClose asChild key={link.label}>
@@ -397,9 +337,7 @@ export default function Header() {
           </div>
         )}
       </div>
-      {!isMobile && isMegaMenuOpen && (
-        <MegaMenu categories={CATEGORY_NAV_LINKS} onClose={closeMegaMenu} />
-      )}
+      {!isMobile && isMegaMenuOpen && <MegaMenu categories={CATEGORY_NAV_LINKS} onClose={closeMegaMenu} />}
     </header>
   );
 }

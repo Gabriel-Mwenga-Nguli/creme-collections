@@ -1,4 +1,3 @@
-
 'use server';
 
 import type { ProductCardProps } from '@/components/features/home/product-card';
@@ -153,16 +152,4 @@ export async function getPromotions(): Promise<PromoSlideProps[]> {
           accentColor: 'text-primary border-primary', displayOrder: 3, isActive: true,
         }
     ];
-}
-
-// These functions are no longer needed as they write to the database.
-// They are kept here but return dummy data to avoid breaking imports.
-export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>): Promise<string | null> {
-  console.log("[DEV MODE] addProduct called with:", productData);
-  return `mock_product_id_${Date.now()}`;
-}
-
-export async function updateProduct(productId: string, productData: Partial<Product>): Promise<boolean> {
-  console.log(`[DEV MODE] updateProduct called for ID ${productId} with:`, productData);
-  return true;
 }
