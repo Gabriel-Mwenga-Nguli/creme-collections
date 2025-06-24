@@ -1,8 +1,9 @@
+
 "use client";
 
 import React, { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, LogIn, Heart } from 'lucide-react';
+import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, LogIn, Heart, Loader2, LogOut } from 'lucide-react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,16 @@ import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -92,8 +103,21 @@ export default function Header() {
   const cartItemCount = getCartItemCount();
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
-  // Since auth is removed, user is always null
-  const user = null;
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (isMobile && isMegaMenuOpen) {
@@ -137,7 +161,55 @@ export default function Header() {
                 </>
               </Link>
             </Button>
-             <ThemeToggle />
+            <ThemeToggle />
+
+            {/* Auth Buttons */}
+            {loading ? (
+                <Button variant="ghost" size="icon" className="w-9 h-9" disabled>
+                    <Loader2 className="h-[1.2rem] w-[1.2rem] animate-spin" />
+                </Button>
+            ) : user ? (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                            <Avatar className="h-9 w-9">
+                                <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "User"} />
+                                <AvatarFallback>{user.email ? user.email.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                            </Avatar>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                        <DropdownMenuLabel className="font-normal">
+                            <div className="flex flex-col space-y-1">
+                                <p className="text-sm font-medium leading-none">{user.displayName || "Creme User"}</p>
+                                <p className="text-xs leading-none text-muted-foreground">
+                                    {user.email}
+                                </p>
+                            </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href="/profile"><User className="mr-2 h-4 w-4" />My Account</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href="/wishlist"><Heart className="mr-2 h-4 w-4" />Wishlist</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => auth && auth.signOut()}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ) : (
+                <Button asChild variant="ghost" className="text-foreground hover:text-primary hidden sm:inline-flex">
+                    <Link href="/login">
+                        <LogIn className="mr-2 h-4 w-4" />
+                        Login
+                    </Link>
+                </Button>
+            )}
+
             {isMobile ? (
               <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
                 <SheetTrigger asChild>
@@ -176,7 +248,6 @@ export default function Header() {
                     <Accordion type="single" collapsible className="w-full">
                       {CATEGORY_NAV_LINKS.map((category) => (
                         <AccordionItem value={category.label} key={category.label}>
-                          {/* This trigger no longer uses asChild or contains a Link, fixing the error */}
                           <AccordionTrigger className="text-base font-medium hover:text-primary py-3 px-2 w-full text-left justify-between">
                              <span className="flex items-center gap-2">
                               {category.icon && <category.icon className="h-5 w-5 text-muted-foreground inline-block" />}
@@ -185,8 +256,7 @@ export default function Header() {
                           </AccordionTrigger>
                           <AccordionContent className="pl-6 pr-2">
                             <nav className="flex flex-col gap-1.5 mt-1">
-                              {/* Added a link to the main category page inside the content */}
-                              <SheetClose asChild key={category.label}>
+                              <SheetClose asChild key={`all-${category.label}`}>
                                 <Link
                                     href={category.href}
                                     className="text-sm font-medium text-foreground hover:text-primary py-1.5 block"

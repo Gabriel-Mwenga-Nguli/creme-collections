@@ -1,3 +1,4 @@
+
 "use client"; 
 
 import { useState, type FormEvent, useEffect } from 'react';
@@ -28,7 +29,6 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  // Redirect if already logged in
   useEffect(() => {
     if (auth) {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
