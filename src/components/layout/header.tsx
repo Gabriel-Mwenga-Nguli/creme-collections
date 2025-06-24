@@ -3,9 +3,9 @@
 
 import React, { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, Heart, ServerOff, UserPlus, LogIn, ListOrdered, Mail } from 'lucide-react';
+import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, UserPlus, LogIn } from 'lucide-react';
 import Logo from '@/components/logo';
-import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, PROFILE_NAV_LINKS, type NavLink } from '@/lib/constants';
+import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 import { useTheme } from 'next-themes';
@@ -25,16 +25,6 @@ import {
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 
 const ThemeToggle = () => {
@@ -96,51 +86,6 @@ const ListItem = forwardRef<
 });
 ListItem.displayName = "ListItem";
 
-const UserMenu = () => {
-    const { toast } = useToast();
-    const handleLogout = () => {
-        toast({
-            title: "Simulation Mode",
-            description: "Logout functionality is for demonstration only."
-        })
-    }
-
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                    <Avatar className="h-9 w-9">
-                        <AvatarImage src="https://placehold.co/100x100.png" alt="Jane Doe" data-ai-hint="user avatar" />
-                        <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">Jane Doe</p>
-                        <p className="text-xs leading-none text-muted-foreground">jane.doe@example.com</p>
-                    </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {PROFILE_NAV_LINKS.map(link => (
-                    <DropdownMenuItem key={link.label} asChild>
-                        <Link href={link.href}>
-                            {link.icon && <link.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                            <span>{link.label}</span>
-                        </Link>
-                    </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                    <LogIn className="mr-2 h-4 w-4" />
-                    <span>Logout</span>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    )
-}
-
 export default function Header() {
   const isMobile = useIsMobile();
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
@@ -193,7 +138,18 @@ export default function Header() {
             <ThemeToggle />
             
             <div className="hidden sm:flex items-center gap-1">
-               <UserMenu />
+                <Button variant="ghost" asChild>
+                    <Link href="/login">
+                        <LogIn className="mr-2 h-4 w-4"/>
+                        Login
+                    </Link>
+                </Button>
+                <Button asChild>
+                    <Link href="/register">
+                        <UserPlus className="mr-2 h-4 w-4"/>
+                        Sign Up
+                    </Link>
+                </Button>
             </div>
 
             {isMobile ? (
@@ -215,27 +171,19 @@ export default function Header() {
                   </div>
 
                   <div className="p-4 flex-1 overflow-y-auto">
-                    <div className="flex items-center gap-3 mb-4 p-2 rounded-md bg-muted">
-                        <Avatar>
-                            <AvatarImage src="https://placehold.co/100x100.png" alt="Jane Doe" />
-                            <AvatarFallback>JD</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <p className="font-semibold text-sm">Jane Doe</p>
-                            <p className="text-xs text-muted-foreground">jane.doe@example.com</p>
-                        </div>
+                    <div className="flex flex-col gap-2 mb-4">
+                        <SheetClose asChild>
+                            <Button asChild className="w-full justify-start text-base" variant="default">
+                               <Link href="/login"><LogIn className="mr-2 h-5 w-5" /> Login</Link>
+                            </Button>
+                        </SheetClose>
+                        <SheetClose asChild>
+                            <Button asChild className="w-full justify-start text-base" variant="outline">
+                               <Link href="/register"><UserPlus className="mr-2 h-5 w-5" /> Register</Link>
+                            </Button>
+                        </SheetClose>
                     </div>
-                    <Separator className="my-3"/>
-                    <nav className="flex flex-col gap-1 mb-4">
-                        {PROFILE_NAV_LINKS.map(link => (
-                             <SheetClose asChild key={link.label}>
-                                <Link href={link.href} className="flex items-center gap-2 py-2 px-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary">
-                                    {link.icon && <link.icon className="h-5 w-5 text-muted-foreground inline-block" />}
-                                    {link.label}
-                                </Link>
-                             </SheetClose>
-                        ))}
-                    </nav>
+
                     <Separator className="my-3"/>
                     <p className="px-2 text-sm font-semibold text-muted-foreground mb-2">Browse Categories</p>
                     <Accordion type="single" collapsible className="w-full">
