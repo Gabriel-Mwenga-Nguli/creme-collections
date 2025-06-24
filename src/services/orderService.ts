@@ -1,8 +1,6 @@
 
 'use server';
 
-import type { Timestamp } from 'firebase/firestore';
-
 export interface OrderItem {
   productId: string;
   name: string;
@@ -33,7 +31,7 @@ export interface Order {
   items: OrderItem[];
   totalAmount: number;
   status: OrderStatus;
-  orderDate: Timestamp;
+  orderDate: Date;
   shippingAddress: OrderShippingAddress; 
 }
 

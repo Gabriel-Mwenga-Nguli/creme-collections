@@ -1,8 +1,6 @@
 
 'use server';
 
-import type { Timestamp } from 'firebase/firestore';
-
 export interface GiftCard {
   id: string; // Firestore document ID
   code: string; // The redeemable code
@@ -12,8 +10,8 @@ export interface GiftCard {
   senderName: string;
   message: string;
   designImageUrl: string;
-  createdAt: Timestamp;
-  expiryDate: Timestamp;
+  createdAt: Date;
+  expiryDate: Date;
   isRedeemed: boolean;
 }
 
