@@ -4,7 +4,7 @@ import { initializeApp, getApps, getApp, type FirebaseApp, type FirebaseOptions 
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
-import { getAnalytics, type Analytics, isSupported } from "firebase/analytics";
+// import { getAnalytics, type Analytics, isSupported } from "firebase/analytics";
 import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from 'firebase/app-check';
 
 const firebaseConfigValues = {
@@ -21,7 +21,7 @@ let app: FirebaseApp | undefined;
 let db: Firestore | null = null; 
 let auth: Auth | null = null;
 let storage: FirebaseStorage | null = null;
-let analytics: Analytics | null = null;
+// let analytics: Analytics | null = null;
 let appCheck: AppCheck | null = null;
 
 const projectIdIsMissingOrPlaceholder = !firebaseConfigValues.projectId ||
@@ -59,7 +59,7 @@ if (
   db = null;
   auth = null;
   storage = null;
-  analytics = null;
+  // analytics = null;
   appCheck = null;
 } else {
   const firebaseConfig: FirebaseOptions = {
@@ -109,6 +109,7 @@ if (
     }
 
     if (typeof window !== 'undefined') {
+      /*
        isSupported().then(supported => {
         if (supported) {
           try {
@@ -119,6 +120,7 @@ if (
           }
         }
       });
+      */
       try {
         if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
           appCheck = initializeAppCheck(app, {
@@ -141,9 +143,9 @@ if (
      db = null;
      auth = null;
      storage = null;
-     analytics = null;
+     // analytics = null;
      appCheck = null;
   }
 }
 
-export { db, auth, storage, analytics, appCheck };
+export { db, auth, storage, appCheck };
