@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import LoginForm from './login-form';
 import { Suspense } from 'react';

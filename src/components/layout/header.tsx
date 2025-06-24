@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, LogIn, Heart, Loader2, LogOut } from 'lucide-react';
+import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, LogIn, Heart, Loader2, LogOut, UserPlus } from 'lucide-react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -202,12 +201,18 @@ export default function Header() {
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
-                <Button asChild variant="ghost" className="text-foreground hover:text-primary hidden sm:inline-flex">
-                    <Link href="/login">
-                        <LogIn className="mr-2 h-4 w-4" />
-                        Login
-                    </Link>
-                </Button>
+                 <div className="hidden sm:flex items-center gap-1">
+                     <Button asChild variant="ghost" className="text-foreground hover:text-primary text-sm">
+                        <Link href="/login">
+                            Login
+                        </Link>
+                    </Button>
+                     <Button asChild variant="default" size="sm">
+                        <Link href="/register">
+                            Sign Up
+                        </Link>
+                    </Button>
+                 </div>
             )}
 
             {isMobile ? (
@@ -229,6 +234,26 @@ export default function Header() {
                   </div>
 
                   <div className="p-4 flex-1 overflow-y-auto">
+                    {!user && !loading && (
+                        <div className="grid grid-cols-2 gap-2 mb-4">
+                             <SheetClose asChild>
+                                <Button asChild className="w-full">
+                                    <Link href="/login">
+                                        <LogIn className="mr-2 h-4 w-4" />
+                                        Login
+                                    </Link>
+                                </Button>
+                             </SheetClose>
+                             <SheetClose asChild>
+                                <Button asChild variant="outline" className="w-full">
+                                    <Link href="/register">
+                                        <UserPlus className="mr-2 h-4 w-4" />
+                                        Sign Up
+                                    </Link>
+                                </Button>
+                            </SheetClose>
+                        </div>
+                    )}
                     <nav className="flex flex-col gap-1 mb-4 mt-4">
                        {MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger).map((link) => (
                          <SheetClose asChild key={link.label}>
