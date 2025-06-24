@@ -7,7 +7,7 @@ import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown, User, LogIn, Heart, Load
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 import { useTheme } from 'next-themes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AISearchBar from '@/components/features/search/AISearchBar';
@@ -218,6 +218,7 @@ export default function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[320px] p-0 bg-background flex flex-col">
+                  <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
                   <div className="flex justify-between items-center p-4 border-b">
                      <Logo />
                     <SheetClose asChild>
