@@ -14,10 +14,11 @@ import { Label } from '@/components/ui/label';
 import { useCart } from '@/context/CartContext';
 import { getProductDetailsById, getFeaturedProducts, getWeeklyDeals } from '@/services/productService'; 
 import type { ProductDetailsPageData } from '@/services/productService';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function ProductDetailPage({ params }: { params: { productId: string } }) {
+export default function ProductDetailPage() {
+  const params = useParams<{ productId: string }>();
   const { productId } = params; 
   const { toast } = useToast();
   const { addToCart } = useCart(); 
