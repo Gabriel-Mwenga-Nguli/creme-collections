@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react'; 
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from 'react';
-import HelpSection from '@/components/features/contact/HelpSection'; // Import the new component
 
 const PageTitle = 'Contact Us - Creme Collections';
 
@@ -39,16 +38,12 @@ export default function ContactPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-      <div className="max-w-6xl mx-auto"> {/* Increased max-width to accommodate layout */}
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-primary mb-12 font-headline">Contact Creme Collections</h1>
 
         <div className="grid md:grid-cols-2 gap-10 md:gap-12 items-start">
-          {/* Left Column: New Help Section */}
           <div className="space-y-8">
-            <HelpSection />
-            
-            {/* Additional Contact Info / Store Details - Re-add if HelpSection doesn't cover everything */}
-            <div className="mt-8 p-6 bg-card rounded-lg shadow-md">
+            <div className="p-6 bg-card rounded-lg shadow-md">
               <h3 className="text-xl font-semibold text-foreground mb-4 font-headline flex items-center"><MapPin className="w-5 h-5 mr-2 text-primary" /> Our Office</h3>
               <address className="text-sm text-muted-foreground not-italic space-y-1">
                 <p>Taveta Road, Nairobi, Kenya</p>
@@ -63,7 +58,6 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Right Column: Contact Form */}
           <div>
             <form onSubmit={handleSubmit} className="space-y-6 bg-card p-6 sm:p-8 rounded-lg shadow-xl">
               <h2 className="text-2xl font-semibold text-foreground mb-5 font-headline">Send Us a Message</h2>

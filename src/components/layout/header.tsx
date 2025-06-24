@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, forwardRef, ElementRef, ComponentPropsWithoutRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, Heart, ShoppingCart, User as UserIconLucide, ChevronDown, type LucideIcon, BarChart3 } from 'lucide-react';
+import { Menu, X, Sun, Moon, ShoppingCart, ChevronDown } from 'lucide-react';
 import Logo from '@/components/logo';
 import { MAIN_NAV_LINKS, CATEGORY_NAV_LINKS, type NavLink } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -25,8 +25,6 @@ import {
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { Badge } from '@/components/ui/badge';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -92,30 +90,7 @@ export default function Header() {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const { getCartItemCount } = useCart();
   const cartItemCount = getCartItemCount();
-  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    if (!auth) {
-      console.warn("[Header] Firebase auth is not initialized. User state won't be tracked.");
-      setAuthLoading(false);
-      setCurrentUser(null);
-      setIsAdmin(false);
-      return;
-    }
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      if (user && user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
-      setAuthLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
   useEffect(() => {
     if (isMobile && isMegaMenuOpen) {
@@ -130,51 +105,23 @@ export default function Header() {
   }, [isMobile]);
 
   const closeMegaMenu = useCallback(() => setIsMegaMenuOpen(false), []);
-  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
-  const accountLink = currentUser ? "/profile" : "/login";
   const megaMenuTriggerLink = MAIN_NAV_LINKS.find(link => link.isMegaMenuTrigger);
   const otherNavLinks = MAIN_NAV_LINKS.filter(link => !link.isMegaMenuTrigger);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container max-w-screen-2xl px-4 sm:px-6 lg:px-8">
-        {/* Top Row: Logo and Right-Side Icons */}
         <div className="flex h-16 items-center justify-between gap-1 sm:gap-2">
           <div className="flex-shrink-0">
             <Logo />
           </div>
           
-          {/* Desktop Search Bar Container (hidden on mobile) */}
           <div className="hidden md:flex flex-1 min-w-0 mx-2">
             <AISearchBar />
           </div>
 
           <div className="flex items-center gap-0 sm:gap-0.5">
-            {isAdmin && !isMobile && (
-              <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3 mr-1 md:mr-2 border-primary text-primary hover:bg-primary/10">
-                <Link href="/admin/dashboard">
-                  <span>
-                    <BarChart3 className="mr-1.5 h-3.5 w-3.5"/>Admin
-                  </span>
-                </Link>
-              </Button>
-            )}
-            {!isMobile && !authLoading && !currentUser && (
-                <>
-                    <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm px-2 md:px-3">
-                      <Link href="/login">Login</Link>
-                    </Button>
-                    <Button asChild variant="default" size="sm" className="text-xs sm:text-sm px-2 md:px-3">
-                      <Link href="/register">Register</Link>
-                    </Button>
-                </>
-            )}
-            <Button asChild variant="ghost" size="icon" aria-label="Wishlist" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
-              <Link href="/wishlist">
-                <Heart className="h-4 w-4 sm:h-5 sm:h-5" />
-              </Link>
-            </Button>
             <Button asChild variant="ghost" size="icon" aria-label="Shopping Cart" className="relative text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9">
               <Link href="/cart">
                 <>
@@ -220,21 +167,7 @@ export default function Header() {
                             </Link>
                          </SheetClose>
                        ))}
-                       {isAdmin && (
-                         <SheetClose asChild>
-                            <Link
-                              href="/admin/dashboard"
-                              className="flex items-center gap-2 py-2 px-2 rounded-md text-base font-medium text-primary hover:bg-primary/10"
-                            >
-                              <span>
-                                <BarChart3 className="h-5 w-5 text-primary inline-block mr-1" />
-                                Admin Dashboard
-                              </span>
-                            </Link>
-                         </SheetClose>
-                       )}
                     </nav>
-
                     <hr className="my-3"/>
                     <p className="px-2 text-sm font-semibold text-muted-foreground mb-2">Browse Categories</p>
                     <Accordion type="single" collapsible className="w-full">
@@ -242,12 +175,7 @@ export default function Header() {
                         <AccordionItem value={category.label} key={category.label}>
                           <AccordionTrigger className="text-base font-medium hover:text-primary py-3 px-2" asChild>
                             <div className="flex items-center justify-between w-full cursor-pointer">
-                                <Link href={category.href} className="flex items-center gap-2 w-full text-left" onClick={(e) => {
-                                    if (category.subLinks && category.subLinks.length > 0) {
-                                    } else {
-                                        setMobileSheetOpen(false); 
-                                    }
-                                }}>
+                                <Link href={category.href} className="flex items-center gap-2 w-full text-left" onClick={() => setMobileSheetOpen(false)}>
                                    <span>
                                     {category.icon && <category.icon className="h-5 w-5 text-muted-foreground inline-block mr-2" />}
                                     {category.label}
@@ -272,58 +200,19 @@ export default function Header() {
                         </AccordionItem>
                       ))}
                     </Accordion>
-
-                    <hr className="my-4" />
-                     <SheetClose asChild>
-                         <Link href={authLoading ? "/login" : accountLink} className="text-base font-medium text-foreground hover:text-primary flex items-center gap-2 py-2 px-2">
-                            <span>
-                             <UserIconLucide className="h-5 w-5 text-muted-foreground inline-block mr-1" />
-                             {currentUser ? "My Account" : "Login / Profile"}
-                            </span>
-                         </Link>
-                     </SheetClose>
-                  </div>
-
-                  <div className="p-4 border-t mt-auto">
-                     {authLoading ? (
-                        <p className="text-sm text-muted-foreground text-center">Loading user...</p>
-                     ) : currentUser ? (
-                       <SheetClose asChild>
-                           <Button variant="outline" className="w-full" onClick={() => auth?.signOut()}>Logout</Button>
-                       </SheetClose>
-                     ) : (
-                       <div className="flex flex-col gap-2">
-                          <SheetClose asChild>
-                            <Button asChild variant="outline" className="w-full">
-                               <Link href="/login">Login</Link>
-                            </Button>
-                          </SheetClose>
-                          <SheetClose asChild>
-                            <Button asChild className="w-full">
-                                <Link href="/register">Register</Link>
-                            </Button>
-                          </SheetClose>
-                       </div>
-                     )}
                   </div>
                 </SheetContent>
               </Sheet>
-            ) : (
-              <Button asChild variant="ghost" size="icon" aria-label="User Account" className="text-foreground hover:text-primary w-8 h-8 sm:w-9 sm:h-9" disabled={authLoading}>
-                <Link href={accountLink}><UserIconLucide className="h-4 w-4 sm:h-5 sm:h-5" /></Link>
-              </Button>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {/* Mobile Search Bar (visible only on mobile, below the top row) */}
         {isMobile && (
           <div className="py-2 md:hidden">
             <AISearchBar />
           </div>
         )}
 
-        {/* Second Row Navigation (Desktop) */}
         {!isMobile && (
           <div className="flex h-12 items-center justify-start border-t border-border/20 bg-primary/5 relative">
             <nav className="flex items-center flex-wrap py-1 px-1 md:px-2">
@@ -343,7 +232,7 @@ export default function Header() {
                     {megaMenuTriggerLink.label}
                     <ChevronDown className={cn("ml-1 h-4 w-4 transition-transform group-hover/megamenu:text-primary", isMegaMenuOpen ? 'rotate-180 text-slate-100' : 'text-muted-foreground')} />
                   </Button>
-                  {(otherNavLinks.length > 0 || CATEGORY_NAV_LINKS.filter(c => MAIN_NAV_LINKS.some(m => m.href === c.href && !m.isMegaMenuTrigger)).length > 0) && (
+                  {(otherNavLinks.length > 0) && (
                     <div className="h-5 w-px bg-border/70 self-center mx-1 md:mx-2" />
                   )}
                 </div>
@@ -357,11 +246,6 @@ export default function Header() {
 
                     return (
                       <React.Fragment key={link.label}>
-                        {index > 0 && !megaMenuTriggerLink && ( // Add separator only if megaMenuTriggerLink is not present and it's not the first item
-                           <li className="flex items-center list-none" aria-hidden="true">
-                             <div className="h-5 w-px bg-border/70 self-center mx-1 md:mx-2" />
-                           </li>
-                        )}
                         <NavigationMenuItem>
                           {hasSubmenu ? (
                             <>

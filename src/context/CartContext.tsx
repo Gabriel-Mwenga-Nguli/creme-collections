@@ -5,7 +5,7 @@ import type { ProductCardProps } from '@/components/features/home/product-card';
 import { useToast } from '@/hooks/use-toast'; 
 import Link from 'next/link';
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
-import { Button } from '@/components/ui/button'; // Added import
+import { Button } from '@/components/ui/button';
 
 export interface CartItem extends ProductCardProps { 
   quantity: number;

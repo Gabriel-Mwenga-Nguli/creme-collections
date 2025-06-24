@@ -6,8 +6,6 @@ import type {
   ToastActionElement,
   ToastProps,
 } from "@/components/ui/toast"
-import { ToastAction as RadixToastAction } from "@/components/ui/toast";
-import Link from "next/link";
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
@@ -59,19 +57,9 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
-let memoryState: State = { toasts: [] }
-const listeners: Array<(state: State) => void> = []
-
-function dispatch(action: Action) {
-  memoryState = reducer(memoryState, action)
-  listeners.forEach((listener) => {
-    listener(memoryState)
-  })
-}
-
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
-    clearTimeout(toastTimeouts.get(toastId)!);
+    clearTimeout(toastTimeouts.get(toastId)!)
   }
 
   const timeout = setTimeout(() => {
@@ -85,22 +73,12 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
-
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
-      state.toasts.forEach(t => {
-        if (toastTimeouts.has(t.id)) {
-          clearTimeout(toastTimeouts.get(t.id)!);
-          toastTimeouts.delete(t.id);
-        }
-      });
       return {
         ...state,
-        toasts: [
-          { ...action.toast, open: true },
-          ...state.toasts.map(t => ({ ...t, open: false })),
-        ].slice(0, TOAST_LIMIT),
+        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
       }
 
     case "UPDATE_TOAST":
@@ -113,6 +91,7 @@ export const reducer = (state: State, action: Action): State => {
 
     case "DISMISS_TOAST": {
       const { toastId } = action
+
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -147,38 +126,46 @@ export const reducer = (state: State, action: Action): State => {
   }
 }
 
-type Toast = Omit<ToasterToast, "id">;
+const listeners: Array<(state: State) => void> = []
 
-function toast(props: Toast & { action?: ToastActionElement }): {
-  id: string;
-  dismiss: () => void;
-  update: (props: Partial<ToasterToast>) => void;
-} {
-  const id = genId();
+let memoryState: State = { toasts: [] }
 
-  const update = (props: Partial<ToasterToast>) =>
+function dispatch(action: Action) {
+  memoryState = reducer(memoryState, action)
+  listeners.forEach((listener) => {
+    listener(memoryState)
+  })
+}
+
+type Toast = Omit<ToasterToast, "id">
+
+function toast({ ...props }: Toast) {
+  const id = genId()
+
+  const update = (props: ToasterToast) =>
     dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },
-    });
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
+    })
+  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
   dispatch({
     type: "ADD_TOAST",
     toast: {
       ...props,
       id,
-      onOpenChange: (open: boolean) => {
-        if (!open) dismiss();
+      open: true,
+      onOpenChange: (open) => {
+        if (!open) dismiss()
       },
-    } as ToasterToast,
-  });
+    },
+  })
 
   return {
     id: id,
     dismiss,
     update,
-  };
+  }
 }
 
 function useToast() {
@@ -201,14 +188,4 @@ function useToast() {
   }
 }
 
-// Removed createViewCartToastAction function
-// export const createViewCartToastAction = (): ToastActionElement => {
-//     // This function was causing persistent parsing errors.
-//     // Temporarily returning a basic action or null.
-//     // For now, let's return a very simple, prop-less ToastAction to see if it parses.
-//     return (
-//       <RadixToastAction>View Cart</RadixToastAction>
-//     );
-// };
-
-export { useToast, toast };
+export { useToast, toast }

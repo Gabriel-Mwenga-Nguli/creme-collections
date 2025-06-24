@@ -3,40 +3,31 @@
 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Star, ShoppingCart, Heart, Share2, MessageCircle, Plus, Minus, Loader2, Info } from 'lucide-react';
+import { Star, ShoppingCart, Share2, MessageCircle, Plus, Minus, Loader2, Info } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import ProductCard, { type ProductCardProps } from '@/components/features/home/product-card'; 
 import WeeklyDealsSlider, { type DealProduct } from '@/components/features/home/weekly-deals-slider';
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState, useCallback } from 'react'; 
+import { useEffect, useState } from 'react'; 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCart } from '@/context/CartContext';
-import { getProductDetailsById, type ProductDetailsPageData, getFeaturedProducts, getWeeklyDeals } from '@/services/productService'; 
-import { notFound, useRouter } from 'next/navigation';
-import { auth, db } from '@/lib/firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { doc, setDoc, deleteDoc, getDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { getProductDetailsById, getFeaturedProducts, getWeeklyDeals } from '@/services/productService'; 
+import type { ProductDetailsPageData } from '@/services/productService';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
-
-
-interface ProductDetailsComponentData extends ProductDetailsPageData {}
 
 export default function ProductDetailPage({ params }: { params: { productId: string } }) {
   const { productId } = params; 
-  const router = useRouter();
   const { toast } = useToast();
   const { addToCart } = useCart(); 
-  const [user, authLoading] = useAuthState(auth);
-
-  const [product, setProduct] = useState<ProductDetailsComponentData | null>(null);
+  
+  const [product, setProduct] = useState<ProductDetailsPageData | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<ProductCardProps[]>([]);
   const [offerProducts, setOfferProducts] = useState<DealProduct[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [isWishlistProcessing, setIsWishlistProcessing] = useState(false);
 
   useEffect(() => {
     async function loadProductData() {
@@ -45,25 +36,19 @@ export default function ProductDetailPage({ params }: { params: { productId: str
         try {
           const productDetails = await getProductDetailsById(productId);
           if (productDetails) {
-            setProduct(productDetails as ProductDetailsComponentData); 
+            setProduct(productDetails); 
             setSelectedImage(productDetails.image); 
             document.title = `${productDetails.name} - Creme Collections`;
 
             const fetchedRelatedProductsData = await getFeaturedProducts(); 
             const mappedRelatedProducts = fetchedRelatedProductsData.map(p => ({
-              id: p.id,
-              name: p.name,
-              description: p.description,
-              image: p.image,
-              dataAiHint: p.dataAiHint,
-              fixedOfferPrice: p.fixedOfferPrice,
-              fixedOriginalPrice: p.fixedOriginalPrice
+              id: p.id, name: p.name, description: p.description, image: p.image, dataAiHint: p.dataAiHint,
+              fixedOfferPrice: p.fixedOfferPrice, fixedOriginalPrice: p.fixedOriginalPrice
             }));
             setRelatedProducts(mappedRelatedProducts.filter(p => p.id !== productId).slice(0, 4));
 
             const fetchedOfferProductsData = await getWeeklyDeals();
             setOfferProducts(fetchedOfferProductsData.filter(p => p.id !== productId).slice(0, 6));
-
 
           } else {
             console.warn("Product not found on client side after fetch for ID:", productId);
@@ -79,73 +64,9 @@ export default function ProductDetailPage({ params }: { params: { productId: str
       }
     }
     loadProductData();
-  }, [productId, router]); 
+  }, [productId]); 
 
-  useEffect(() => {
-    if (!user || !productId || !db || authLoading) {
-        if(!authLoading && user) setIsWishlistProcessing(false);
-        return;
-    }
-    if (typeof productId !== 'string') {
-        console.warn("Wishlist check skipped due to invalid productId:", productId);
-        setIsWishlistProcessing(false);
-        return;
-    }
-    setIsWishlistProcessing(true);
-    const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', productId);
-    const unsubscribe = onSnapshot(wishlistItemRef, (docSnap) => {
-        setIsInWishlist(docSnap.exists());
-        setIsWishlistProcessing(false);
-    }, (error) => {
-        console.error("Error checking wishlist status:", error);
-        setIsWishlistProcessing(false);
-    });
-    return () => unsubscribe();
-  }, [user, productId, authLoading]);
-
-
-  const handleToggleWishlist = async () => {
-    if (!user) {
-      toast({ title: "Login Required", description: "Please log in to manage your wishlist.", variant: "destructive", 
-        action: <Button asChild><Link href="/login">Login</Link></Button> 
-      });
-      return;
-    }
-    if (!product || !db || typeof product.id !== 'string') {
-        console.error("Product data or DB not available for wishlist action, or product ID is invalid.");
-        toast({ title: "Error", description: "Could not update wishlist. Product data missing.", variant: "destructive" });
-        return;
-    }
-
-
-    setIsWishlistProcessing(true);
-    const wishlistItemRef = doc(db, 'users', user.uid, 'wishlist', product.id);
-
-    try {
-      if (isInWishlist) {
-        await deleteDoc(wishlistItemRef);
-        toast({ title: "Removed from Wishlist", description: `${product.name} removed from your wishlist.` });
-      } else {
-        await setDoc(wishlistItemRef, { 
-          productId: product.id, 
-          addedAt: serverTimestamp(),
-          name: product.name, 
-          image: product.image,
-          categorySlug: product.categorySlug || null, 
-          offerPrice: product.offerPrice
-        });
-        toast({ title: "Added to Wishlist!", description: `${product.name} added to your wishlist.` });
-      }
-    } catch (error) {
-      console.error("Error toggling wishlist:", error);
-      toast({ title: "Error", description: "Could not update your wishlist. Please try again.", variant: "destructive" });
-    } finally {
-      // Snapshot listener will update isWishlistProcessing
-    }
-  };
-
-
-  if (isLoading || authLoading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 text-center min-h-[60vh] flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -158,23 +79,14 @@ export default function ProductDetailPage({ params }: { params: { productId: str
     return null; 
   }
   
-  const displayOriginalPrice = product.originalPrice && product.offerPrice && product.originalPrice > product.offerPrice 
-    ? product.originalPrice 
-    : (product.offerPrice || 0) * 1.25; 
-
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
   const handleAddToCart = () => {
     if (product && typeof product.id === 'string') {
       const productToAdd: ProductCardProps = {
-        id: product.id, 
-        name: product.name,
-        description: product.description, 
-        image: product.image,
-        dataAiHint: product.dataAiHint,
-        fixedOfferPrice: product.offerPrice, 
-        fixedOriginalPrice: product.originalPrice,
+        id: product.id, name: product.name, description: product.description, image: product.image,
+        dataAiHint: product.dataAiHint, fixedOfferPrice: product.offerPrice, fixedOriginalPrice: product.originalPrice,
       };
       addToCart(productToAdd, quantity);
     } else {
@@ -207,14 +119,9 @@ export default function ProductDetailPage({ params }: { params: { productId: str
           <div className="aspect-square rounded-lg overflow-hidden shadow-lg bg-card">
             {selectedImage && (
               <Image
-                key={selectedImage} 
-                src={selectedImage}
-                alt={product.name}
-                width={600}
-                height={600}
+                key={selectedImage} src={selectedImage} alt={product.name} width={600} height={600}
                 className="object-cover w-full h-full transition-opacity duration-300"
-                data-ai-hint={product.dataAiHint}
-                priority
+                data-ai-hint={product.dataAiHint} priority
               />
             )}
           </div>
@@ -227,12 +134,8 @@ export default function ProductDetailPage({ params }: { params: { productId: str
                 aria-label={`View image ${index + 1} of ${product.name}`}
               >
                 <Image
-                  src={img}
-                  alt={`${product.name} thumbnail ${index + 1}`}
-                  width={100}
-                  height={100}
-                  className="object-cover w-full h-full"
-                  data-ai-hint="product detail" 
+                  src={img} alt={`${product.name} thumbnail ${index + 1}`} width={100} height={100}
+                  className="object-cover w-full h-full" data-ai-hint="product detail" 
                 />
               </button>
             ))}
@@ -281,11 +184,7 @@ export default function ProductDetailPage({ params }: { params: { productId: str
                   <Minus className="h-4 w-4" />
                 </Button>
                 <Input
-                  type="text"
-                  id="quantity"
-                  name="quantity"
-                  value={quantity}
-                  readOnly
+                  type="text" id="quantity" name="quantity" value={quantity} readOnly
                   className="h-10 w-12 text-center border-0 focus-visible:ring-0 bg-transparent font-medium"
                   aria-label="Current quantity"
                 />
@@ -298,20 +197,6 @@ export default function ProductDetailPage({ params }: { params: { productId: str
             <div className="flex flex-col sm:flex-row gap-3">
               <Button size="lg" className="flex-grow" onClick={handleAddToCart} disabled={product.availability !== 'In Stock'}>
                 <ShoppingCart className="mr-2 h-5 w-5" /> {product.availability === 'In Stock' ? 'Add to Cart' : 'Out of Stock'}
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="flex-grow" 
-                onClick={handleToggleWishlist}
-                disabled={isWishlistProcessing}
-              >
-                {isWishlistProcessing ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                ) : (
-                  <Heart className={`mr-2 h-5 w-5 ${isInWishlist ? 'fill-destructive text-destructive' : ''}`} />
-                )}
-                {isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
               </Button>
             </div>
           </div>
@@ -350,16 +235,7 @@ export default function ProductDetailPage({ params }: { params: { productId: str
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {relatedProducts.map((relatedProd) => (
-              <ProductCard
-                key={relatedProd.id}
-                id={relatedProd.id}
-                name={relatedProd.name}
-                description={relatedProd.description}
-                image={relatedProd.image}
-                dataAiHint={relatedProd.dataAiHint}
-                fixedOfferPrice={relatedProd.fixedOfferPrice}
-                fixedOriginalPrice={relatedProd.fixedOriginalPrice}
-              />
+              <ProductCard key={relatedProd.id} {...relatedProd} />
             ))}
           </div>
         </div>
