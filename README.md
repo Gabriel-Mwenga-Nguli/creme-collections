@@ -15,9 +15,8 @@ NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
 # ... and other Firebase config values
 
-# For App Check (optional but recommended to fix reCAPTCHA errors)
-# Get this key from Firebase Console -> App Check -> Apps -> Your Web App -> reCAPTCHA v3
-# NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
+# For App Check (see section below for setup)
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
 ```
 
 ### 2. Update Firestore Security Rules (Critical for Fixing "Permissions Error")
@@ -34,7 +33,27 @@ If you are using Google Sign-In, you **must** authorize the domain where your ap
 4.  Click **Add domain** and paste the domain you copied.
 5.  Click **Add**.
 
-### 4. Add Sample Data
+### 4. Configure App Check (Fix for "appCheck/recaptcha-error")
+If you see an `appCheck/recaptcha-error` in your browser console, it means App Check is enabled but not correctly configured for the domain your app is running on.
+
+1.  **Find your reCAPTCHA v3 Site Key:**
+    *   Go to your **Firebase Console**.
+    *   Navigate to **Build > App Check**.
+    *   In the **Apps** tab, find your web app.
+    *   Click the overflow menu (three dots) and select **Manage reCAPTCHA keys**.
+    *   Copy the **Site key**.
+2.  **Add the Key to your Environment:**
+    *   In your `.env.local` file, add the following line, replacing `your-recaptcha-site-key` with the key you copied:
+        ```env
+        NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
+        ```
+3.  **Ensure Your Domain is Registered for reCAPTCHA:**
+    *   The reCAPTCHA key is tied to specific domains. Go to the [Google Cloud Console reCAPTCHA admin page](https://console.cloud.google.com/security/recaptcha).
+    *   Select your project.
+    *   Find the key you are using.
+    *   Ensure that the domain your app is running on (e.g., `localhost`, or `your-project.cloudworkstations.dev`) is listed in the **Domains** list for that key. If it's not, add it.
+
+### 5. Add Sample Data
 For the application to display products and promotions, you'll need to add data to your Firestore database.
 - For products, see [DATA_SETUP.md](./DATA_SETUP.md).
 - For promotions, see [PROMOTIONS_SETUP.md](./PROMOTIONS_SETUP.md).
