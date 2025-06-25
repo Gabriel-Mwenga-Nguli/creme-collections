@@ -66,10 +66,6 @@ export default function TermsPage() {
           <p>
             You can review the most current version of the Terms of Service at any time on this page. We reserve the right, at our sole discretion, to update, change or replace any part of these Terms of Service by posting updates and changes to our website. It is your responsibility to check our website periodically for changes.
           </p>
-          
-          <div className="mt-8 border-t pt-6 text-sm text-muted-foreground">
-            <p><strong>Disclaimer:</strong> This is a sample Terms & Conditions document. It is not legal advice. You should consult with a legal professional to ensure your terms are compliant and tailored to your specific business needs.</p>
-          </div>
 
           {lastUpdatedDate && (
             <p className="text-sm text-muted-foreground pt-6">Last updated: {lastUpdatedDate}</p>

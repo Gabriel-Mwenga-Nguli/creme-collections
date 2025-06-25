@@ -57,10 +57,6 @@ export default function LegalNoticePage() {
           <p>
             Our web pages and their contents are subject to Kenyan copyright law. Unless expressly permitted by law, every form of utilizing, reproducing, or processing works subject to copyright protection on our web pages requires the prior consent of the respective owner of the rights. Individual reproductions of a work are onlyallowed for private use. The materials from these pages are copyrighted and any unauthorized use may violate copyright laws.
           </p>
-          
-          <div className="mt-8 border-t pt-6 text-sm text-muted-foreground">
-            <p><strong>Please Note:</strong> This is a sample legal notice. It is essential to consult with a legal professional to ensure all information is accurate and compliant with the specific laws and regulations applicable to your business in Kenya.</p>
-          </div>
 
           {lastUpdatedDate && (
             <p className="text-sm text-muted-foreground pt-6">Last updated: {lastUpdatedDate}</p>

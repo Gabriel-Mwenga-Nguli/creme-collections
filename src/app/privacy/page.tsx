@@ -87,10 +87,6 @@ export default function PrivacyPage() {
             Email: <a href="mailto:privacy@cremecollections.shop" className="text-primary hover:underline">privacy@cremecollections.shop</a><br />
             Address: Creme Collections, Attn: Data Protection Officer, Taveta Road, Nairobi, Kenya.
           </p>
-
-          <div className="mt-8 border-t pt-6 text-sm text-muted-foreground">
-            <p><strong>Disclaimer:</strong> This is a sample Privacy Policy. It is not a substitute for legal advice from a qualified professional. You should consult with a legal expert to ensure your policy is fully compliant with all applicable laws, including the Kenyan Data Protection Act.</p>
-          </div>
           
           {lastUpdatedDate && (
             <p className="text-sm text-muted-foreground pt-6">Last updated: {lastUpdatedDate}</p>
