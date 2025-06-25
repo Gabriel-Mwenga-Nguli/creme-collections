@@ -25,34 +25,46 @@ export default function RegisterForm() {
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { register, googleLogin } = useAuth();
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    toast({
-      title: 'Registration Successful',
-      description: "Welcome! We're logging you in.",
-    });
-    
-    login();
-    setIsLoading(false);
+    try {
+      await register(fullName, email, password);
+      toast({
+        title: 'Registration Successful',
+        description: "Welcome! We're logging you in.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Registration Failed',
+        description: error.message || 'An unexpected error occurred.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
    const handleGoogleRegister = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    toast({
-      title: 'Registration Successful',
-      description: "Welcome! We're logging you in.",
-    });
-    login();
-    setIsLoading(false);
+    try {
+      await googleLogin();
+      toast({
+        title: 'Registration Successful',
+        description: "Welcome! We're logging you in.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Google Sign-Up Failed',
+        description: error.message || 'Could not sign up with Google.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

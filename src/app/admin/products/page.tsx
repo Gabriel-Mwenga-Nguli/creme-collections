@@ -1,25 +1,31 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Loader2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import Image from 'next/image';
 import Link from 'next/link';
-
-const mockProducts = [
-  { id: '1', name: 'Modern Smartwatch Series X', category: 'Electronics', price: 12999, stock: 50, status: 'Active', image: 'https://placehold.co/40x40.png' },
-  { id: '2', name: 'Classic Men\'s Polo Shirt', category: 'Fashion', price: 2499, stock: 120, status: 'Active', image: 'https://placehold.co/40x40.png' },
-  { id: '3', name: 'Stainless Steel Cookware Set', category: 'Home & Living', price: 7999, stock: 30, status: 'Active', image: 'https://placehold.co/40x40.png' },
-  { id: '4', name: 'Wireless Headphones', category: 'Electronics', price: 19999, stock: 0, status: 'Archived', image: 'https://placehold.co/40x40.png' },
-  { id: '5', name: 'Organic Green Tea', category: 'Groceries', price: 599, stock: 5, status: 'Active', image: 'https://placehold.co/40x40.png' },
-];
+import { getAllProducts, type Product } from '@/services/productService'; // Import real service
 
 export default function AdminProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      setIsLoading(true);
+      const fetchedProducts = await getAllProducts();
+      setProducts(fetchedProducts);
+      setIsLoading(false);
+    }
+    fetchProducts();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -41,51 +47,57 @@ export default function AdminProductsPage() {
           <CardDescription>A list of all products in your store.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[80px]">Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead className="text-right">Stock</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <Image src={product.image} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>
-                    <Badge variant={product.status === 'Active' ? 'default' : 'outline'}>{product.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">KES {product.price.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{product.stock}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Actions for {product.name}</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem asChild><Link href={`/admin/products/edit/${product.id}`}>Edit</Link></DropdownMenuItem>
-                        <DropdownMenuItem>View on Site</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-48">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[80px]">Image</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Price</TableHead>
+                  <TableHead className="text-right">Stock</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <Image src={product.image} alt={product.name} width={40} height={40} className="rounded-md object-cover border" />
+                    </TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>{product.category}</TableCell>
+                    <TableCell>
+                      <Badge variant={product.availability === 'In Stock' ? 'default' : 'outline'}>{product.availability}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">KES {product.offerPrice.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">{product.stock}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Actions for {product.name}</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem asChild><Link href={`/admin/products/edit/${product.id}`}>Edit</Link></DropdownMenuItem>
+                          <DropdownMenuItem asChild><Link href={`/products/item/${product.id}`} target="_blank">View on Site</Link></DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

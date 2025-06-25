@@ -1,6 +1,9 @@
 
 'use server';
 
+import { db } from '@/lib/firebase';
+import { collection, query, where, orderBy, getDocs, doc, getDoc, addDoc, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore';
+
 export interface OrderItem {
   productId: string;
   name: string;
@@ -31,7 +34,7 @@ export interface Order {
   items: OrderItem[];
   totalAmount: number;
   status: OrderStatus;
-  orderDate: Date;
+  orderDate: Date; // Keep as Date for client-side, convert from Timestamp
   shippingAddress: OrderShippingAddress; 
 }
 
@@ -39,22 +42,72 @@ export interface OrderAdminItem extends Order {
     userEmail?: string;
 }
 
-// All functions now return empty/mock data to avoid backend calls.
+const orderFromDoc = (doc: any): Order => {
+  const data = doc.data();
+  return {
+    id: doc.id,
+    ...data,
+    orderDate: (data.orderDate as Timestamp).toDate(),
+  } as Order;
+}
+
 
 export async function getUserOrders(userId: string): Promise<Order[]> {
-  return [];
+  const ordersRef = collection(db, 'orders');
+  const q = query(ordersRef, where('userId', '==', userId), orderBy('orderDate', 'desc'));
+  
+  try {
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(orderFromDoc);
+  } catch (error) {
+    console.error("Error fetching user orders: ", error);
+    return [];
+  }
 }
 
 export async function getOrderDetails(orderId: string, userId?: string): Promise<Order | null> {
-    return null;
+    const docRef = doc(db, "orders", orderId);
+    try {
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) {
+            return null;
+        }
+        const order = orderFromDoc(docSnap);
+
+        // If userId is provided, ensure the order belongs to that user
+        if (userId && order.userId !== userId) {
+            return null;
+        }
+        return order;
+    } catch(error) {
+        console.error("Error fetching order details:", error);
+        return null;
+    }
 }
 
 export async function getAllOrdersForAdmin(countLimit?: number): Promise<OrderAdminItem[]> {
-  return [];
+  const ordersRef = collection(db, 'orders');
+  const q = query(ordersRef, orderBy('orderDate', 'desc'));
+  // You could add a limit here if `countLimit` is provided.
+
+  try {
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(orderFromDoc) as OrderAdminItem[];
+  } catch(error) {
+    console.error("Error fetching all admin orders:", error);
+    return [];
+  }
 }
 
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus): Promise<boolean> {
-    return true;
+    const orderRef = doc(db, "orders", orderId);
+    try {
+        await updateDoc(orderRef, { status: newStatus });
+        return true;
+    } catch (error) {
+        console.error("Error updating order status:", error);
+        return false;
+    }
 }
 
 export async function createOrder(
@@ -64,5 +117,23 @@ export async function createOrder(
     totalAmount: number,
     shippingAddress: OrderShippingAddress
 ): Promise<string | null> {
-    return `mock_order_${Date.now()}`;
+    try {
+        const orderRef = await addDoc(collection(db, 'orders'), {
+            userId,
+            userEmail,
+            items,
+            totalAmount,
+            shippingAddress,
+            status: 'Pending',
+            orderDate: serverTimestamp(),
+        });
+        // Set a more human-readable orderId as well
+        const readableOrderId = `ORD-${orderRef.id.substring(0, 6).toUpperCase()}`;
+        await updateDoc(orderRef, { orderId: readableOrderId });
+
+        return orderRef.id;
+    } catch(error) {
+        console.error("Error creating order:", error);
+        return null;
+    }
 }

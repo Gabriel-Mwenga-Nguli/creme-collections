@@ -1,23 +1,19 @@
+
 # Firestore Data Setup for Creme Collections
 
-**NOTE:** The application is currently running in a **frontend-only simulation mode**. These instructions are for when you connect the application to a live Firebase backend and do not need to be followed for the current UI development phase.
-
----
-
 For your Creme Collections application to display products correctly, especially on category and subcategory pages, you need to have well-structured data in your Firestore database, specifically in a collection named `products`.
-all the reason to take th
-Your project now uses local images from the `/public/images/` directory. When adding products, ensure your image paths reflect this structure (e.g., `/images/products/my-product-image.png`). For the sample data below, we'll use some generic images from `/public/images/banners/` to get you started.
+
+Your project uses local images from the `/public/images/` directory. When adding products, ensure your image paths reflect this structure (e.g., `/images/products/my-product-image.png`). For the sample data below, we'll use some generic images to get you started.
 
 Follow these steps to add sample product data through the Firebase Console:
 
 ## 1. Access Firestore Database
 
 1.  Go to the [Firebase Console](https://console.firebase.google.com/).
-2.  Select your Firebase project (e.g., "cremecollections").
+2.  Select your Firebase project.
 3.  In the left-hand navigation pane, click on **Build > Firestore Database**.
-4.  If you haven't used Firestore before in this project, you might be prompted to create a database. Choose "Start in test mode" for now if you're just developing (you can secure it later with security rules). Select a Cloud Firestore location.
 
-## 2. Create the `products` Collection (if it doesn't exist)
+## 2. Create the `products` Collection
 
 1.  Once in the Firestore Data viewer, click on **+ Start collection**.
 2.  For "Collection ID", enter `products`. **This must be exactly `products` (lowercase).**
@@ -36,10 +32,10 @@ You'll now add individual product documents to this `products` collection. For e
 *   `name` (Type: `string`) - Example: `Modern Smartwatch Series X`
 *   `description` (Type: `string`) - Example: `Sleek smartwatch with advanced health tracking and notifications.`
 *   `longDescription` (Type: `string`) - Example: `Full-featured Modern Smartwatch Series X with a vibrant AMOLED display, heart rate monitoring, SpO2 sensor, GPS, and up to 7 days battery life. Compatible with Android and iOS.`
-*   `image` (Type: `string`) - Example: `/images/banners/electronics.png`
+*   `image` (Type: `string`) - Example: `/images/products/smartwatch_main.png`
 *   `images` (Type: `array`)
-    *   `0` (Type: `string`) - `/images/banners/electronics.png`
-    *   `1` (Type: `string`) - `/images/banners/promo1.png`
+    *   `0` (Type: `string`) - `/images/products/smartwatch_main.png`
+    *   `1` (Type: `string`) - `/images/products/smartwatch_side.png`
 *   `dataAiHint` (Type: `string`) - Example: `smartwatch technology`
 *   `offerPrice` (Type: `number`) - Example: `12999`
 *   `originalPrice` (Type: `number`) - Example: `15999`
@@ -61,10 +57,10 @@ You'll now add individual product documents to this `products` collection. For e
 *   `name` (Type: `string`) - Example: `Classic Men's Polo Shirt`
 *   `description` (Type: `string`) - Example: `Comfortable and stylish polo shirt for everyday wear.`
 *   `longDescription` (Type: `string`) - Example: `Made from 100% premium cotton, this classic fit polo shirt offers both comfort and durability. Features a two-button placket and ribbed collar and cuffs. Available in various colors.`
-*   `image` (Type: `string`) - Example: `/images/banners/fashion.png`
+*   `image` (Type: `string`) - Example: `/images/products/polo_shirt_blue.png`
 *   `images` (Type: `array`)
-    *   `0` (Type: `string`) - `/images/banners/fashion.png`
-    *   `1` (Type: `string`) - `/images/promos/flash-sale.png`
+    *   `0` (Type: `string`) - `/images/products/polo_shirt_blue.png`
+    *   `1` (Type: `string`) - `/images/products/polo_shirt_green.png`
 *   `dataAiHint` (Type: `string`) - Example: `men shirt`
 *   `offerPrice` (Type: `number`) - Example: `2499`
 *   `originalPrice` (Type: `number`) - Example: `3200`
@@ -79,28 +75,6 @@ You'll now add individual product documents to this `products` collection. For e
 *   `stock` (Type: `number`) - Example: `120`
 *   `isFeatured` (Type: `boolean`) - Example: `false`
 *   `isWeeklyDeal` (Type: `boolean`) - Example: `true`
-*   `createdAt` (Type: `timestamp`) - Example: (Set current date and time)
-
-### Example Product 3: Different SubCategory (Home & Living -> Kitchen & Dining)
-
-*   `name` (Type: `string`) - Example: `Stainless Steel Cookware Set`
-*   `description` (Type: `string`) - Example: `Durable 10-piece cookware set for all your culinary needs.`
-*   `longDescription` (Type: `string`) - Example: `This 10-piece stainless steel cookware set includes saucepans, frying pans, and stockpot, all with ergonomic handles and tempered glass lids. Suitable for all stovetops, including induction.`
-*   `image` (Type: `string`) - Example: `/images/banners/home.png`
-*   `dataAiHint` (Type: `string`) - Example: `cookware kitchen`
-*   `offerPrice` (Type: `number`) - Example: `7999`
-*   `originalPrice` (Type: `number`) - Example: `9500`
-*   `rating` (Type: `string` or `number`) - Example: `4.8`
-*   `reviewsCount` (Type: `number`) - Example: `210`
-*   `availability` (Type: `string`) - Example: `In Stock`
-*   `category` (Type: `string`) - Example: `Home & Living`
-*   `categorySlug` (Type: `string`) - Example: `home-living` **(Must be `home-living`)**
-*   `subCategory` (Type: `string`) - Example: `Kitchen & Dining`
-*   `subCategorySlug` (Type: `string`) - Example: `kitchen-dining` **(Must be `kitchen-dining`)**
-*   `brand` (Type: `string`) - Example: `KitchenMaster`
-*   `stock` (Type: `number`) - Example: `30`
-*   `isFeatured` (Type: `boolean`) - Example: `true`
-*   `isWeeklyDeal` (Type: `boolean`) - Example: `false`
 *   `createdAt` (Type: `timestamp`) - Example: (Set current date and time)
 
 4.  Click "Save" to add the document.
@@ -118,7 +92,7 @@ You'll now add individual product documents to this `products` collection. For e
     *   Example: If a subcategory link is `/products/category/fashion/men-clothing`, the `categorySlug` must be `fashion` and `subCategorySlug` must be `men-clothing`.
 *   **`isFeatured`**: Set to `true` for products you want in the "Featured Products" section on the homepage.
 *   **`isWeeklyDeal`**: Set to `true` for products you want in the "Flash Deals of the Week!" slider.
-*   **Images**: Use local paths like `/images/products/your-image-name.png`. Ensure these images exist in your `/public/images/products/` directory. For the sample data, we've used generic banner images.
+*   **Images**: Use local paths like `/images/products/your-image-name.png`. Ensure these images exist in your `/public/images/products/` directory.
 *   **`createdAt`**: This field (type `timestamp`) is useful for sorting new arrivals. You can set it to the current server timestamp when adding documents.
 
 ## 4. Verify in Your App

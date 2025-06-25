@@ -18,7 +18,7 @@ export default function Error({
     console.error(error)
   }, [error])
 
-  const isPermissionError = error.message.includes('FIREBASE PERMISSION ERROR');
+  const isPermissionError = error.message.includes('permission-denied') || error.message.includes('insufficient permissions');
 
   return (
     <div className="container mx-auto px-4 py-16 text-center">
@@ -41,7 +41,7 @@ export default function Error({
                             <li>Open your project in the <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Firebase Console</a>.</li>
                             <li>Navigate to the <strong>Firestore Database</strong> section.</li>
                             <li>Click on the <strong>Rules</strong> tab.</li>
-                            <li>Delete the existing rules and replace them with the content from the <code>FIRESTORE_RULES.md</code> file in your project.</li>
+                            <li>Delete the existing rules and replace them with the content from the <code>src/FIRESTORE_RULES.md</code> file in your project.</li>
                             <li>Click <strong>Publish</strong>.</li>
                         </ol>
                     </div>

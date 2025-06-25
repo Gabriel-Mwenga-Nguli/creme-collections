@@ -1,19 +1,16 @@
-# Firestore Security Rules Fix
 
-**NOTE:** The application is currently running in a **frontend-only simulation mode**. These instructions are for when you connect the application to a live Firebase backend and do not need to be followed for the current UI development phase.
+# Firestore Security Rules
 
----
+Your application is likely being blocked by Firestore's default security rules. This is **expected behavior** for a new Firebase project and causes the **"Missing or insufficient permissions"** error you may see.
 
-Your application is currently being blocked by Firestore's default security rules, causing a "Missing or insufficient permissions" error when trying to fetch user data after login.
-
-To fix this, you need to update your Firestore security rules to allow a logged-in user to read and write to their own profile document.
+To fix this, you **must** update your Firestore security rules. This will allow your app to read public data like `products` and `promotions`, and allow logged-in users to access their own private data.
 
 ## **Instructions**
 
 1.  **Go to the Firebase Console**: Open your project in the [Firebase Console](https://console.firebase.google.com/).
 2.  **Navigate to Firestore**: In the left-hand navigation pane, click on **Build > Firestore Database**.
 3.  **Open the Rules Tab**: Click on the **Rules** tab at the top of the Firestore viewer.
-4.  **Replace the Rules**: Delete the existing rules and replace them with the following code.
+4.  **Replace the Rules**: Delete the existing rules and replace them with the complete set of rules provided below.
 5.  **Publish**: Click the **Publish** button to save and apply the new rules. The changes should take effect almost immediately.
 
 ---
@@ -26,19 +23,26 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Allow public read access to products so your homepage and category pages can load.
+    // Allow public read access to products and promotions so your homepage and category pages can load.
     match /products/{productId} {
       allow read: if true;
-      allow write: if request.auth != null; // For admin panel (lock down further in production)
+      // Allow writes only for authenticated users (admin role check would be done in backend logic)
+      allow write: if request.auth != null; 
     }
-
-    // Allow public read access to promotions for the homepage slider.
+    
     match /promotions/{promoId} {
       allow read: if true;
-      allow write: if request.auth != null; // For admin panel
+      allow write: if request.auth != null;
+    }
+    
+    // Allow any authenticated user to create a gift card.
+    // Reading/updating should be locked down further in a real-world scenario.
+    match /giftCards/{giftCardId} {
+      allow create: if request.auth != null;
+      allow read, write: if request.auth != null; // For admin/redemption logic
     }
 
-    // Allow users to read and write their own document in the 'users' collection.
+    // Allow users to create, read, and write their own document in the 'users' collection.
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
@@ -53,12 +57,11 @@ service cloud.firestore {
     // Reading/updating should be restricted to the owner. Admins will need separate rules.
     match /orders/{orderId} {
       allow create: if request.auth != null;
-      allow read, update: if request.auth != null && (request.auth.uid == resource.data.userId);
+      allow read, update: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }
 ```
-
 ---
 
-After you publish these rules, refresh your application page and try logging in again. The error should be resolved.
+After you publish these rules, refresh your application page. The permission errors should be resolved, and your products, promotions, and user profile data will be displayed correctly.

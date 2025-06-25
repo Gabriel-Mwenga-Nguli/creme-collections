@@ -23,34 +23,46 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    toast({
-      title: 'Login Successful',
-      description: 'Welcome back! Redirecting you now.',
-    });
-    
-    login();
-    setIsLoading(false);
+    try {
+      await login(email, password);
+      toast({
+        title: 'Login Successful',
+        description: 'Welcome back! Redirecting you now.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: error.message || 'An unexpected error occurred.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-     toast({
-      title: 'Login Successful',
-      description: 'Welcome back! Redirecting you now.',
-    });
-    login();
-    setIsLoading(false);
+    try {
+      await googleLogin();
+      toast({
+        title: 'Login Successful',
+        description: 'Welcome back! Redirecting you now.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Google Login Failed',
+        description: error.message || 'Could not sign in with Google.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
