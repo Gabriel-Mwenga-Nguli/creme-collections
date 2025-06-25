@@ -33,7 +33,7 @@ export default function NewsletterPopup() {
     setIsSubmitting(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log("Subscribing email:", email);
+    
     toast({
       title: "Subscribed Successfully!",
       description: "Thank you for joining our newsletter. Keep an eye out for exclusive deals!",

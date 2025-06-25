@@ -51,16 +51,13 @@ export default function ProductDetailPage() {
             const fetchedOfferProductsData = await getWeeklyDeals();
             setOfferProducts(fetchedOfferProductsData.filter(p => p.id !== productId).slice(0, 6));
 
-          } else {
-            console.warn("Product not found on client side after fetch for ID:", productId);
           }
         } catch (error) {
-          console.error("Error loading product data:", error);
+          // Error logging can be moved to a dedicated logging service
         } finally {
           setIsLoading(false);
         }
       } else {
-        console.warn("Invalid or missing productId for Product Detail Page:", productId);
         setIsLoading(false);
       }
     }

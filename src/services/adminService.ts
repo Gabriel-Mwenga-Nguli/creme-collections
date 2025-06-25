@@ -15,7 +15,6 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  console.log(`[Mock Service] Called getDashboardStats. Returning mock data.`);
   return {
     totalProducts: 5,
     totalOrders: 0,
@@ -29,6 +28,5 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
 // Example: Get recent products (could be used for a "Recently Added" section)
 export async function getRecentProductsForAdmin(count: number = 5): Promise<Product[]> {
-  console.log(`[Mock Service] Called getRecentProductsForAdmin. Returning empty array.`);
   return [];
 }

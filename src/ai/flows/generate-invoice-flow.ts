@@ -107,17 +107,13 @@ const generateInvoiceEmailFlow = ai.defineFlow(
     outputSchema: GenerateInvoiceOutputSchema,
   },
   async (input) => {
-    console.log("Generating invoice email for order:", input.orderId);
-    
     const { output: emailOutput } = await invoicePrompt(input);
     if (!emailOutput) {
       throw new Error("AI could not generate an invoice email.");
     }
     
     // Firestore saving logic has been removed.
-    console.log(`[DEV MODE] Skipping saving invoice record for user ${input.userId} and order ${input.orderId} as Firestore is disabled.`);
-
-    console.log("Successfully generated invoice email content.");
+    
     return emailOutput;
   }
 );

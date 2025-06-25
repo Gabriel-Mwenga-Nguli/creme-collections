@@ -42,22 +42,18 @@ export interface OrderAdminItem extends Order {
 // All functions now return empty/mock data to avoid backend calls.
 
 export async function getUserOrders(userId: string): Promise<Order[]> {
-  console.log(`[Mock Service] Called getUserOrders for user ${userId}. Returning empty array.`);
   return [];
 }
 
 export async function getOrderDetails(orderId: string, userId?: string): Promise<Order | null> {
-    console.log(`[Mock Service] Called getOrderDetails for order ${orderId}. Returning null.`);
     return null;
 }
 
 export async function getAllOrdersForAdmin(countLimit?: number): Promise<OrderAdminItem[]> {
-  console.log(`[Mock Service] Called getAllOrdersForAdmin. Returning empty array.`);
   return [];
 }
 
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus): Promise<boolean> {
-    console.log(`[Mock Service] Called updateOrderStatus for order ${orderId} to status ${newStatus}. Returning true.`);
     return true;
 }
 
@@ -68,6 +64,5 @@ export async function createOrder(
     totalAmount: number,
     shippingAddress: OrderShippingAddress
 ): Promise<string | null> {
-    console.log(`[Mock Service] Called createOrder for user ${userId}. Returning mock ID.`);
     return `mock_order_${Date.now()}`;
 }

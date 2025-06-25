@@ -77,7 +77,6 @@ const loyaltyPointsFlow = ai.defineFlow(
   },
   async (input) => {
     // Firestore logic removed. Using mock data.
-    console.log("[DEV MODE] Firestore is disabled. Using mock data for loyalty points.");
     const currentPoints = 0; // Mock current points
     const userSegment = 'new'; // Mock user segment
 
@@ -96,9 +95,6 @@ const loyaltyPointsFlow = ai.defineFlow(
 
     const pointsChange = aiDecision.pointsToAwardOrDeduct;
     const newTotalPoints = currentPoints + pointsChange;
-
-    // Skip saving to Firestore
-    console.log(`[DEV MODE] Skipping saving loyalty points for user ${input.userId} to Firestore.`);
 
     return {
       userId: input.userId,

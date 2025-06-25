@@ -35,8 +35,6 @@ export async function createGiftCard(data: {
   message: string;
   designImageUrl: string;
 }): Promise<string | null> {
-  console.log('[DEV MODE] Firestore is disabled. Simulating gift card creation.');
-  console.log('[DEV MODE] Gift card data:', data);
   // Simulate successful creation by returning a mock ID
   return `mock_gift_card_${Date.now()}`;
 }

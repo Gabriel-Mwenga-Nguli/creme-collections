@@ -52,7 +52,6 @@ async function fetchProductsFromLoyverseAPI(
   filters?: { categoryId?: string; featured?: boolean; weeklyDeal?: boolean, limit?: number, ids?: string[] }
 ): Promise<LoyverseRawProduct[]> {
   if (!apiKey || apiKey === "YOUR_LOYVERSE_API_KEY_PLEASE_REPLACE_IN_DOT_ENV_LOCAL") {
-    console.warn("[LoyverseService] API key is a placeholder or missing. Skipping actual API call.");
     return [];
   }
 
@@ -66,7 +65,6 @@ async function fetchProductsFromLoyverseAPI(
     // Loyverse API might have a specific way to fetch multiple items by ID
     // This is a conceptual example:
     // url = `${LOYVERSE_API_BASE_URL}/items?ids=${filters.ids.join(',')}`;
-    console.log('[LoyverseService] Fetching specific IDs - API call needs specific Loyverse implementation for this.', filters.ids);
     // For now, we'll just return all and filter later, or return empty for placeholder.
     // return []; // Or fetch all and filter client-side in this conceptual stage.
   }
@@ -77,8 +75,6 @@ async function fetchProductsFromLoyverseAPI(
     url += `?${params.toString()}`;
   }
 
-  console.log(`[LoyverseService] Conceptually fetching from: ${url} with API key: ${apiKey ? 'Provided' : 'MISSING'}`);
-
   try {
     // const response = await fetch(url, {
     //   headers: {
@@ -87,7 +83,6 @@ async function fetchProductsFromLoyverseAPI(
     //   },
     // });
     // if (!response.ok) {
-    //   console.error(`[LoyverseService] API Error ${response.status}: ${await response.text()}`);
     //   return [];
     // }
     // const data = await response.json();
@@ -125,7 +120,6 @@ async function fetchProductsFromLoyverseAPI(
     return filters?.limit ? filteredMockData.slice(0, filters.limit) : filteredMockData;
 
   } catch (error) {
-    console.error('[LoyverseService] Error in fetchProductsFromLoyverseAPI:', error);
     return [];
   }
 }
@@ -177,19 +171,16 @@ export async function getProductsFromLoyverse(
 ): Promise<Product[]> {
   const apiKey = process.env.LOYVERSE_API_KEY;
   if (!apiKey) {
-    console.warn('[LoyverseService] LOYVERSE_API_KEY not found in environment variables. Cannot fetch from Loyverse.');
     return [];
   }
 
   try {
     const rawProducts = await fetchProductsFromLoyverseAPI(apiKey, filters);
     if (!rawProducts || rawProducts.length === 0) {
-        console.log("[LoyverseService] No products returned from Loyverse API (or placeholder).");
         return [];
     }
     return rawProducts.map(transformLoyverseProduct);
   } catch (error) {
-    console.error('[LoyverseService] Error in getProductsFromLoyverse:', error);
     return [];
   }
 }
@@ -200,11 +191,9 @@ export async function getProductsFromLoyverse(
 export async function getProductByIdFromLoyverse(id: string): Promise<Product | null> {
   const apiKey = process.env.LOYVERSE_API_KEY;
   if (!apiKey) {
-    console.warn('[LoyverseService] LOYVERSE_API_KEY not found. Cannot fetch product by ID from Loyverse.');
     return null;
   }
    if (!id) {
-    console.warn('[LoyverseService] No ID provided to getProductByIdFromLoyverse.');
     return null;
   }
   
@@ -216,10 +205,8 @@ export async function getProductByIdFromLoyverse(id: string): Promise<Product | 
       const product = rawProducts.find(p => p.id === id); // Ensure correct product if API returns multiple
       return product ? transformLoyverseProduct(product) : null;
     }
-    console.log(`[LoyverseService] Product with ID ${id} not found via Loyverse API (or placeholder).`);
     return null;
   } catch (error) {
-    console.error(`[LoyverseService] Error fetching product ${id} from Loyverse:`, error);
     return null;
   }
 }

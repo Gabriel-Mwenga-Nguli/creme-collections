@@ -21,12 +21,6 @@ export default function ContactPage() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Form submitted with data:", {
-        name: (event.currentTarget.elements.namedItem('name') as HTMLInputElement).value,
-        email: (event.currentTarget.elements.namedItem('email') as HTMLInputElement).value,
-        subject: (event.currentTarget.elements.namedItem('subject') as HTMLInputElement).value,
-        message: (event.currentTarget.elements.namedItem('message') as HTMLInputElement).value,
-    });
     
     toast({
       title: "Message Sent!",
