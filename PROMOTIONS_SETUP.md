@@ -1,5 +1,9 @@
 # Firestore Data Setup for Promotions
 
+**NOTE:** The application is currently running in a **frontend-only simulation mode**. These instructions are for when you connect the application to a live Firebase backend and do not need to be followed for the current UI development phase.
+
+---
+
 For the "Today's Best Promotions" slider on your homepage to display correctly, you need to have a `promotions` collection in your Firestore database.
 
 Follow these steps to add sample promotion data through the Firebase Console:

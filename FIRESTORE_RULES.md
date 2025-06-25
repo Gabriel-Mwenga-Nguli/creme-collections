@@ -1,5 +1,8 @@
-
 # Firestore Security Rules Fix
+
+**NOTE:** The application is currently running in a **frontend-only simulation mode**. These instructions are for when you connect the application to a live Firebase backend and do not need to be followed for the current UI development phase.
+
+---
 
 Your application is currently being blocked by Firestore's default security rules, causing a "Missing or insufficient permissions" error when trying to fetch user data after login.
 
