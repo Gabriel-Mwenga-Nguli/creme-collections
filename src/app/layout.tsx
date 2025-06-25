@@ -8,6 +8,7 @@ import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { AdminAuthProvider } from '@/context/AdminAuthContext'; // Import AdminAuthProvider
 
 export const metadata: Metadata = {
   title: 'Creme Collections - Online Shopping Kenya | Best Deals & Quality Products',
@@ -38,14 +39,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <CartProvider>
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-              <Toaster />
-            </CartProvider>
-          </AuthProvider>
+          <AdminAuthProvider>
+            <AuthProvider>
+              <CartProvider>
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+                <Toaster />
+              </CartProvider>
+            </AuthProvider>
+          </AdminAuthProvider>
         </ThemeProvider>
       </body>
     </html>

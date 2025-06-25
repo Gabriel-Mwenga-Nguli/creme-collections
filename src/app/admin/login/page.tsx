@@ -1,0 +1,98 @@
+
+"use client";
+
+import { useState, type FormEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, ShieldCheck } from 'lucide-react';
+import { useAdminAuth } from '@/context/AdminAuthContext';
+import Logo from '@/components/logo';
+
+export default function AdminLoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const { login } = useAdminAuth();
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsLoading(true);
+
+    // Simulate API call for admin login
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // In a real app, you'd check credentials. Here, we just simulate success.
+    login({ email, name: 'Admin User' }); // Simulate logging in as an admin
+
+    toast({
+      title: "Admin Login Successful",
+      description: "Redirecting to the dashboard.",
+    });
+
+    // The redirect is handled by the AdminLayout
+    setIsLoading(false);
+  };
+
+  return (
+    <div 
+      className="flex flex-col items-center justify-center min-h-screen bg-slate-100 dark:bg-slate-900 p-4"
+    >
+      <div className="mb-8">
+        <Logo />
+      </div>
+      <Card className="w-full max-w-sm shadow-2xl">
+        <CardHeader className="text-center">
+          <ShieldCheck className="mx-auto h-10 w-10 text-primary mb-2" />
+          <CardTitle className="text-2xl font-bold text-primary font-headline">Admin Panel</CardTitle>
+          <CardDescription>
+            Please sign in to continue.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                type="email"
+                name="email"
+                id="email"
+                autoComplete="email"
+                required
+                className="mt-1"
+                placeholder="admin@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+             <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                type="password"
+                name="password"
+                id="password"
+                autoComplete="current-password"
+                required
+                className="mt-1"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Sign In
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
