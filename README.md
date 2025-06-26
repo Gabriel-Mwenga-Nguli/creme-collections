@@ -1,4 +1,3 @@
-
 # Creme Collections - Next.js E-Commerce Platform
 
 This is a Next.js e-commerce starter project built for Firebase Studio, featuring a modern tech stack and AI-powered capabilities.
@@ -68,7 +67,15 @@ npm run dev
 
 This will start the Next.js app on `http://localhost:9002` (or another port if 9002 is busy).
 
-### 5. Running Genkit AI Flows Locally
+### 5. Accessing the Admin Dashboard
+
+Your project includes a fully-featured, simulated admin dashboard.
+
+*   **URL**: Navigate to `/admin/login` on your local or hosted site.
+*   **Login**: The login is **for demonstration purposes only**. You can enter **any email and password** to access the dashboard.
+*   **Functionality**: The dashboard UI is fully built, but actions like adding products or managing users are simulated and will not save data permanently until connected to a live backend.
+
+### 6. Running Genkit AI Flows Locally
 
 To test and debug AI flows, run the Genkit development UI in a separate terminal:
 
