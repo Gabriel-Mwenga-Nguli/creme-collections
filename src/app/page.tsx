@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag, Zap, Award, Truck, Users, Mail, ShieldCheck, Gift, Percent, Smartphone, Shirt, Home as HomeIconLucide, Briefcase, Package, Power } from 'lucide-react';
-import ProductCard from '@/components/features/home/product-card';
 import WeeklyDealsSlider from '@/components/features/home/weekly-deals-slider';
 import { getFeaturedProducts, getWeeklyDeals, getPromotions } from '@/services/productService'; // Added getPromotions
 import { Input } from '@/components/ui/input';
@@ -15,6 +14,7 @@ import ServicesHighlight from '@/components/features/home/ServicesHighlight';
 import PromotionalOfferSlider, { type PromoSlideProps } from '@/components/features/home/PromotionalOfferSlider';
 import { cn } from '@/lib/utils';
 import BlackFridayDeals from '@/components/features/home/BlackFridayDeals';
+import FeaturedProductsSlider from '@/components/features/home/FeaturedProductsSlider';
 
 
 const categoryHighlights = [
@@ -175,27 +175,13 @@ export default async function HomePage() {
 
        <section className="py-10 md:py-16 bg-background animate-in fade-in-0 slide-in-from-bottom-12 duration-700 ease-out delay-400" id="featured-products">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-center text-foreground md:text-5xl font-headline mb-10 md:mb-14">
-            Featured Products
-          </h2>
-          {featuredProductsData.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-              {featuredProductsData.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  description={product.description}
-                  image={product.image}
-                  dataAiHint={product.dataAiHint}
-                  fixedOfferPrice={product.fixedOfferPrice}
-                  fixedOriginalPrice={product.fixedOriginalPrice}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-muted-foreground">No featured products available at the moment. Check back soon!</p>
-          )}
+          <div className="flex items-center justify-center mb-10 md:mb-14">
+             <Award className="w-10 h-10 sm:w-12 sm:h-12 text-primary mr-3 sm:mr-4" />
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-center text-foreground md:text-5xl font-headline">
+              Featured Products
+            </h2>
+          </div>
+          <FeaturedProductsSlider products={featuredProductsData} />
            <div className="text-center mt-10 md:mt-14">
             <Button asChild size="lg" variant="default" className="px-10 py-6 text-lg">
               <Link href="/products">
