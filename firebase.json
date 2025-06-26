@@ -18,17 +18,6 @@
   ],
   "apphosting": [
     {
-      "backendId": "cremecollectiononline",
-      "rootDir": "y",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "functions"
-      ]
-    },
-    {
       "backendId": "cremeonline",
       "rootDir": ".",
       "ignore": [
