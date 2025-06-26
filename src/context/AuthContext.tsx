@@ -3,99 +3,114 @@
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut,
-  type User as FirebaseUser,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup
-} from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { createUserProfile, getUserProfile, type UserProfile } from '@/services/userService';
+
+// This is a simplified User type for simulation, mirroring what Firebase might provide.
+interface SimulatedUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+}
+
+// This mirrors the UserProfile from your userService.
+export interface UserProfile {
+  name: string;
+  email: string;
+  createdAt: Date;
+}
 
 interface AuthContextType {
-  user: FirebaseUser | null;
+  user: SimulatedUser | null;
   userProfile: UserProfile | null;
   isLoading: boolean;
-  login: (email: string, pass: string) => Promise<FirebaseUser>;
-  register: (name: string, email: string, pass: string) => Promise<FirebaseUser>;
-  googleLogin: () => Promise<FirebaseUser>;
+  login: (email: string, pass: string) => Promise<SimulatedUser>;
+  register: (name: string, email: string, pass: string) => Promise<SimulatedUser>;
+  googleLogin: () => Promise<SimulatedUser>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const AUTH_SESSION_KEY = 'creme-user-session';
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [user, setUser] = useState<SimulatedUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-
+  
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
-        const profile = await getUserProfile(user.uid);
-        setUserProfile(profile);
-      } else {
-        setUserProfile(null);
+    // Simulate checking for an existing session from localStorage
+    try {
+      const storedSession = localStorage.getItem(AUTH_SESSION_KEY);
+      if (storedSession) {
+        const sessionData = JSON.parse(storedSession);
+        setUser(sessionData.user);
+        setUserProfile(sessionData.userProfile);
       }
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
+    } catch (error) {
+      console.error("Could not parse user session from localStorage", error);
+    }
+    setIsLoading(false);
   }, []);
+  
+  const saveSession = (user: SimulatedUser, profile: UserProfile) => {
+    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({ user, userProfile: profile }));
+  }
 
-  const login = useCallback(async (email: string, pass: string) => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+  const login = useCallback(async (email: string, pass: string): Promise<SimulatedUser> => {
+    console.log(`[Auth Sim] Logging in with ${email}`);
+    await new Promise(res => setTimeout(res, 500)); // Simulate network delay
+    
+    // In a real app, you'd verify credentials. Here, we just create a user.
+    const mockUser: SimulatedUser = { uid: `sim_${Date.now()}`, email, displayName: 'Simulated User' };
+    const mockProfile: UserProfile = { name: 'Simulated User', email, createdAt: new Date() };
+
+    setUser(mockUser);
+    setUserProfile(mockProfile);
+    saveSession(mockUser, mockProfile);
     router.push('/profile');
-    return userCredential.user;
+    return mockUser;
   }, [router]);
   
-  const googleLogin = useCallback(async () => {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
+  const register = useCallback(async (name: string, email: string, pass: string): Promise<SimulatedUser> => {
+    console.log(`[Auth Sim] Registering ${name} with ${email}`);
+    await new Promise(res => setTimeout(res, 500));
     
-    // Check if user profile exists, if not, create one
-    const profile = await getUserProfile(user.uid);
-    if (!profile) {
-      await createUserProfile(user.uid, {
-        name: user.displayName || 'New User',
-        email: user.email!,
-        createdAt: new Date(),
-      });
-    }
+    const mockUser: SimulatedUser = { uid: `sim_${Date.now()}`, email, displayName: name };
+    const mockProfile: UserProfile = { name, email, createdAt: new Date() };
     
+    setUser(mockUser);
+    setUserProfile(mockProfile);
+    saveSession(mockUser, mockProfile);
     router.push('/profile');
-    return user;
+    return mockUser;
   }, [router]);
-
-  const register = useCallback(async (name: string, email: string, pass: string) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-    const user = userCredential.user;
-    // Create user profile in Firestore
-    await createUserProfile(user.uid, {
-      name: name,
-      email: user.email!,
-      createdAt: new Date(),
-    });
+  
+  const googleLogin = useCallback(async (): Promise<SimulatedUser> => {
+    console.log(`[Auth Sim] Logging in with Google`);
+    await new Promise(res => setTimeout(res, 500));
+    
+    const mockUser: SimulatedUser = { uid: `sim_google_${Date.now()}`, email: 'google.user@example.com', displayName: 'Google User' };
+    const mockProfile: UserProfile = { name: 'Google User', email: 'google.user@example.com', createdAt: new Date() };
+    
+    setUser(mockUser);
+    setUserProfile(mockProfile);
+    saveSession(mockUser, mockProfile);
     router.push('/profile');
-    return user;
+    return mockUser;
   }, [router]);
-
 
   const logout = useCallback(async () => {
-    await signOut(auth);
+    console.log(`[Auth Sim] Logging out`);
+    localStorage.removeItem(AUTH_SESSION_KEY);
+    setUser(null);
+    setUserProfile(null);
     router.push('/');
   }, [router]);
 
   return (
     <AuthContext.Provider value={{ user, userProfile, isLoading, login, register, googleLogin, logout }}>
-      {!isLoading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
