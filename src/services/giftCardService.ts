@@ -1,8 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 export interface GiftCard {
   id: string; // Firestore document ID
@@ -38,28 +37,8 @@ export async function createGiftCard(data: {
   message: string;
   designImageUrl: string;
 }): Promise<string | null> {
-  try {
-    const createdAt = Timestamp.now();
-    const expiryDate = new Date(createdAt.toDate());
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-
-    const giftCardData = {
-      code: generateGiftCardCode(),
-      initialBalance: data.amount,
-      currentBalance: data.amount,
-      recipientEmail: data.recipientEmail,
-      senderName: data.senderName,
-      message: data.message,
-      designImageUrl: data.designImageUrl,
-      createdAt: createdAt,
-      expiryDate: Timestamp.fromDate(expiryDate),
-      isRedeemed: false,
-    };
-
-    const docRef = await addDoc(collection(db, "giftCards"), giftCardData);
-    return docRef.id;
-  } catch (error) {
-    console.error("Error creating gift card: ", error);
-    return null;
-  }
+  console.log('[DEV MODE] Firestore is disabled. Simulating gift card creation.');
+  console.log('[DEV MODE] Gift card data:', data);
+  // Simulate successful creation by returning a mock ID
+  return `mock_gift_card_${Date.now()}`;
 }

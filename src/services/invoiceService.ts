@@ -12,5 +12,6 @@ export interface Invoice {
 }
 
 export async function getUserInvoices(userId: string): Promise<Invoice[]> {
+  console.log(`[Mock Service] Called getUserInvoices for user ${userId}. Firestore is disabled.`);
   return [];
 }

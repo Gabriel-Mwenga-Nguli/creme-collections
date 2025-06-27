@@ -1,9 +1,6 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
-
 export interface Address {
   id: string;
   userId: string;
@@ -20,46 +17,21 @@ export interface Address {
 }
 
 export async function getUserAddresses(userId: string): Promise<Address[]> {
-  try {
-    const addressesRef = collection(db, "users", userId, "addresses");
-    const q = query(addressesRef);
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Address));
-  } catch (error) {
-    console.error("Error fetching user addresses:", error);
-    return [];
-  }
+  console.log(`[Mock Service] Called getUserAddresses for user ${userId}. Firestore is disabled.`);
+  return [];
 }
 
 export async function addUserAddress(userId: string, addressData: Omit<Address, 'id' | 'userId'>): Promise<string | null> {
-  try {
-    const addressesRef = collection(db, "users", userId, "addresses");
-    const docRef = await addDoc(addressesRef, addressData);
-    return docRef.id;
-  } catch (error) {
-    console.error("Error adding user address:", error);
-    return null;
-  }
+  console.log(`[Mock Service] Called addUserAddress for user ${userId}. Firestore is disabled.`);
+  return `mock_address_${Date.now()}`;
 }
 
 export async function updateUserAddress(userId: string, addressId: string, addressData: Partial<Omit<Address, 'id' | 'userId'>>): Promise<boolean> {
-  try {
-    const addressRef = doc(db, "users", userId, "addresses", addressId);
-    await updateDoc(addressRef, addressData);
-    return true;
-  } catch (error) {
-    console.error("Error updating user address:", error);
-    return false;
-  }
+  console.log(`[Mock Service] Called updateUserAddress for user ${userId}. Firestore is disabled.`);
+  return true;
 }
 
 export async function deleteUserAddress(userId: string, addressId: string): Promise<boolean> {
-  try {
-    const addressRef = doc(db, "users", userId, "addresses", addressId);
-    await deleteDoc(addressRef);
-    return true;
-  } catch (error) {
-    console.error("Error deleting user address:", error);
-    return false;
-  }
+  console.log(`[Mock Service] Called deleteUserAddress for user ${userId}. Firestore is disabled.`);
+  return true;
 }

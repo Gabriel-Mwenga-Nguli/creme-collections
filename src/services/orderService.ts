@@ -1,8 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, getDoc, addDoc, updateDoc, Timestamp, orderBy, limit } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 export interface OrderItem {
   productId: string;
@@ -43,78 +42,33 @@ export interface OrderAdminItem extends Order {
 }
 
 export async function getUserOrders(userId: string): Promise<Order[]> {
-  try {
-    const ordersRef = collection(db, "orders");
-    const q = query(ordersRef, where("userId", "==", userId), orderBy("orderDate", "desc"));
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-            id: doc.id,
-            ...data,
-            orderDate: (data.orderDate as Timestamp).toDate(),
-        } as Order
-    });
-  } catch (error) {
-    console.error("Error fetching user orders: ", error);
-    return [];
+  console.log(`[Mock Service] Called getUserOrders for user ${userId}. Firestore is disabled.`);
+  // Return mock orders for a specific mock user for demonstration
+  if (userId.startsWith('mock_user')) {
+    return [
+      { id: 'mock_ord_1', userId, orderId: 'CR12345', totalAmount: 15498, status: 'Delivered', orderDate: new Date('2024-06-20T10:30:00Z'), items: [], shippingAddress: { name: 'Mock User', addressLine1: '123 Test St', city: 'Nairobi', postalCode: '00100', phone: '123456789' } },
+      { id: 'mock_ord_2', userId, orderId: 'CR12346', totalAmount: 2499, status: 'Shipped', orderDate: new Date('2024-06-22T15:00:00Z'), items: [], shippingAddress: { name: 'Mock User', addressLine1: '123 Test St', city: 'Nairobi', postalCode: '00100', phone: '123456789' } },
+    ];
   }
+  return [];
 }
 
 export async function getOrderDetails(orderId: string, userId?: string): Promise<Order | null> {
-  try {
-    const orderRef = doc(db, "orders", orderId);
-    const docSnap = await getDoc(orderRef);
-    if (!docSnap.exists()) {
-      return null;
-    }
-    const orderData = docSnap.data() as Order;
-    if (userId && orderData.userId !== userId) {
-      return null; 
-    }
-     return {
-      id: docSnap.id,
-      ...orderData,
-      orderDate: (orderData.orderDate as Timestamp).toDate(),
-    };
-  } catch (error) {
-    console.error("Error fetching order details: ", error);
-    return null;
+  console.log(`[Mock Service] Called getOrderDetails for order ${orderId}. Firestore is disabled.`);
+  if (orderId === 'mock_ord_1') {
+      return { id: 'mock_ord_1', userId: 'mock_user_1', orderId: 'CR12345', totalAmount: 15498, status: 'Delivered', orderDate: new Date('2024-06-20T10:30:00Z'), items: [], shippingAddress: { name: 'Mock User', addressLine1: '123 Test St', city: 'Nairobi', postalCode: '00100', phone: '123456789' } };
   }
+  return null;
 }
 
 export async function getAllOrdersForAdmin(countLimit?: number): Promise<OrderAdminItem[]> {
-   try {
-    const ordersRef = collection(db, "orders");
-    const q = countLimit 
-        ? query(ordersRef, orderBy("orderDate", "desc"), limit(countLimit))
-        : query(ordersRef, orderBy("orderDate", "desc"));
-        
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-            id: doc.id,
-            ...data,
-            orderDate: (data.orderDate as Timestamp).toDate(),
-        } as OrderAdminItem
-    });
-  } catch (error) {
-    console.error("Error fetching all orders: ", error);
-    return [];
-  }
+  console.log(`[Mock Service] Called getAllOrdersForAdmin. Firestore is disabled.`);
+  return [];
 }
 
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus): Promise<boolean> {
-  try {
-    const orderRef = doc(db, "orders", orderId);
-    await updateDoc(orderRef, { status: newStatus });
-    return true;
-  } catch (error) {
-    console.error("Error updating order status: ", error);
-    return false;
-  }
+  console.log(`[Mock Service] Called updateOrderStatus for order ${orderId}. Firestore is disabled.`);
+  return true;
 }
 
 export async function createOrder(
@@ -124,20 +78,6 @@ export async function createOrder(
     totalAmount: number,
     shippingAddress: OrderShippingAddress
 ): Promise<string | null> {
-  try {
-    const orderRef = await addDoc(collection(db, "orders"), {
-      userId,
-      userEmail,
-      items,
-      totalAmount,
-      shippingAddress,
-      status: 'Pending',
-      orderDate: Timestamp.now(),
-      orderId: `CR${Date.now()}` // Simple human-readable ID
-    });
-    return orderRef.id;
-  } catch (error) {
-    console.error("Error creating order: ", error);
-    return null;
-  }
+  console.log('[DEV MODE] createOrder called. Firestore is disabled.');
+  return `mock_order_${Date.now()}`;
 }

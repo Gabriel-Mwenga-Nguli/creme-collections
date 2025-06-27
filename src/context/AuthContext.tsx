@@ -3,19 +3,10 @@
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { 
-  getAuth, 
-  onAuthStateChanged, 
-  signOut,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-  type User as FirebaseUser
-} from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
-import { createUserProfile, getUserProfile, type UserProfile } from '@/services/userService';
-import { doc, onSnapshot } from 'firebase/firestore';
+
+// Mock user types for frontend-only mode
+export type FirebaseUser = { uid: string; email: string; displayName: string; };
+export type UserProfile = { name: string; email: string; };
 
 
 interface AuthContextType {
@@ -29,6 +20,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const MOCK_SESSION_KEY = 'creme-mock-session';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -37,69 +29,66 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleAuthRedirect = useCallback((user: FirebaseUser | null) => {
-    if (user) {
+  useEffect(() => {
+    // Simulate checking for a session
+    const storedSession = localStorage.getItem(MOCK_SESSION_KEY);
+    if (storedSession) {
+        try {
+            const sessionData = JSON.parse(storedSession);
+            setUser(sessionData.user);
+            setUserProfile(sessionData.userProfile);
+        } catch (e) {
+            localStorage.removeItem(MOCK_SESSION_KEY);
+        }
+    }
+    setIsLoading(false);
+  }, []);
+  
+  const handleAuthRedirect = useCallback((loggedInUser: FirebaseUser | null) => {
+    if (loggedInUser) {
         if (pathname === '/login' || pathname === '/register') {
             router.push('/profile');
         }
     }
   },[pathname, router]);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
-        handleAuthRedirect(user);
-      }
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [handleAuthRedirect]);
-
-  useEffect(() => {
-    if (user?.uid && !userProfile) {
-      const unsub = onSnapshot(doc(db, "users", user.uid), (doc) => {
-        if (doc.exists()) {
-          const profileData = doc.data() as UserProfile;
-          setUserProfile(profileData);
-        }
-      });
-      return () => unsub();
-    } else if (!user) {
-      setUserProfile(null);
-    }
-  }, [user, userProfile]);
+  
+  const createMockSession = (name: string, email: string) => {
+      const uid = `mock_user_${Date.now()}`;
+      const mockUser = { uid, email, displayName: name };
+      const mockProfile = { name, email };
+      setUser(mockUser);
+      setUserProfile(mockProfile);
+      localStorage.setItem(MOCK_SESSION_KEY, JSON.stringify({ user: mockUser, userProfile: mockProfile }));
+      handleAuthRedirect(mockUser);
+      return mockUser;
+  };
 
   const login = useCallback(async (email: string, pass: string): Promise<FirebaseUser> => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    return userCredential.user;
-  }, []);
+    await new Promise(res => setTimeout(res, 500));
+    // In a real app, you would validate the password. Here, we just log in.
+    if (!email || !pass) {
+        throw new Error("Email and password are required.");
+    }
+    return createMockSession('Mock User', email);
+  }, [handleAuthRedirect]);
 
   const register = useCallback(async (name: string, email: string, pass:string): Promise<FirebaseUser> => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-    const user = userCredential.user;
-    await createUserProfile(user.uid, { name, email });
-    return user;
-  }, []);
+    await new Promise(res => setTimeout(res, 500));
+    if (!name || !email || !pass) {
+        throw new Error("All fields are required for registration.");
+    }
+    return createMockSession(name, email);
+  }, [handleAuthRedirect]);
   
   const googleLogin = useCallback(async (): Promise<FirebaseUser> => {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    const profile = await getUserProfile(user.uid);
-    if (!profile) {
-      await createUserProfile(user.uid, {
-        name: user.displayName || 'Google User',
-        email: user.email || 'no-email@example.com'
-      });
-    }
-    return user;
-  }, []);
+    await new Promise(res => setTimeout(res, 500));
+    return createMockSession('Google User', 'google.user@example.com');
+  }, [handleAuthRedirect]);
 
   const logout = useCallback(async () => {
-    await signOut(auth);
+    setUser(null);
+    setUserProfile(null);
+    localStorage.removeItem(MOCK_SESSION_KEY);
     router.push('/');
   }, [router]);
 
