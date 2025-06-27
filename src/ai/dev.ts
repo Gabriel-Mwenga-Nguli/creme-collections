@@ -7,3 +7,4 @@ import '@/ai/flows/smart-search-page.ts';
 import '@/ai/flows/ai-chat-support.ts';
 import '@/ai/flows/generate-gift-card-flow.ts';
 import '@/ai/flows/generate-image-flow.ts';
+import '@/ai/flows/hello-flow.ts';
