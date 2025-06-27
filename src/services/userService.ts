@@ -1,27 +1,38 @@
 
 'use server';
 
-import type { Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 
 export interface UserProfile {
   name: string;
   email: string;
-  createdAt: Date | Timestamp;
+  createdAt?: Date | Timestamp;
 }
 
 export async function createUserProfile(userId: string, data: Omit<UserProfile, 'createdAt'>): Promise<void> {
-    console.log(`[Mock Service] Creating profile for user ${userId} with data:`, data);
-    // In simulation, we don't need to do anything here.
+  try {
+    const userRef = doc(db, 'users', userId);
+    await setDoc(userRef, {
+      ...data,
+      createdAt: Timestamp.now(),
+    });
+  } catch (error) {
+    console.error("Error creating user profile: ", error);
+  }
 }
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
-  console.log(`[Mock Service] Getting profile for user ${userId}.`);
-  // This service will likely not be called directly in simulation mode, 
-  // as the simulated AuthContext will hold the profile info.
-  // Returning a default mock for completeness.
-  return {
-      name: "Mock User",
-      email: "mock.user@example.com",
-      createdAt: new Date()
-  };
+  try {
+    const userRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(userRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as UserProfile;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting user profile: ", error);
+    return null;
+  }
 }
