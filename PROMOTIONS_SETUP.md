@@ -1,4 +1,3 @@
-
 # Firestore Data Setup for Promotions
 
 For the "Today's Best Promotions" slider on your homepage to display correctly, you need to have a `promotions` collection in your Firestore database.
@@ -65,6 +64,40 @@ You will now add individual promotion documents to this collection. For each pro
 *   `isActive` (boolean) - `true`
 
 ---
+
+### Example 3: Reveal Code (Fashion)
+
+*   `type` (string) - `revealCode`
+*   `title` (string) - `Fashion Finds`
+*   `subtitle` (string) - `Up to 20% Off Select Apparel`
+*   `actionText` (string) - `TAP TO REVEAL`
+*   `codePlaceholder` (string) - `CODE`
+*   `productImage` (string) - `/images/banners/fashion.png`
+*   `href` (string) - `/products/category/fashion`
+*   `dataAiHint` (string) - `fashion apparel sale`
+*   `backgroundColor` (string) - `bg-secondary`
+*   `foregroundColor` (string) - `text-secondary-foreground`
+*   `accentColor` (string) - `text-primary border-primary`
+*   `displayOrder` (number) - `3`
+*   `isActive` (boolean) - `true`
+
+---
+
+### Example 4: Reveal Code (Home Essentials)
+
+*   `type` (string) - `revealCode`
+*   `title` (string) - `Home Essentials`
+*   `subtitle` (string) - `Save Big on Decor & More`
+*   `actionText` (string) - `TAP TO REVEAL`
+*   `codePlaceholder` (string) - `CODE`
+*   `productImage` (string) - `/images/banners/home.png`
+*   `href` (string) - `/products/category/home-living`
+*   `dataAiHint` (string) - `home decor sale`
+*   `backgroundColor` (string) - `bg-card`
+*   `foregroundColor` (string) - `text-card-foreground`
+*   `accentColor` (string) - `text-primary border-primary`
+*   `displayOrder` (number) - `4`
+*   `isActive` (boolean) - `true`
 
 ### Field Notes:
 

@@ -172,10 +172,12 @@ export async function getAllProducts(categorySlugParam?: string, subCategorySlug
 
 export async function getPromotions(): Promise<PromoSlideProps[]> {
   if (!isConfigured || !db) {
-      // In demo mode, return static data
+      // In demo mode, return static data with new types
       return [
-          { type: 'firstOrder', title: 'Ksh 500 Off!', subtitle: 'Your First Creme Collections Order', code: 'KARIBU500', terms: '*Min. spend Ksh 2,500. T&Cs apply.', href: '/products', dataAiHint: 'first order discount', backgroundColor: 'bg-gradient-to-br from-primary to-accent', foregroundColor: 'text-primary-foreground', accentColor: 'text-white', displayOrder: 1, isActive: true },
-          { type: 'revealCode', title: 'Fashion Finds', subtitle: 'Up to 20% Off Select Apparel', actionText: 'TAP TO REVEAL', codePlaceholder: 'CODE', productImage: '/images/banners/fashion.png', href: '/products/category/fashion', dataAiHint: 'fashion apparel sale', backgroundColor: 'bg-secondary', foregroundColor: 'text-secondary-foreground', accentColor: 'text-primary border-primary', displayOrder: 3, isActive: true }
+          { type: 'firstOrder', title: 'Ksh 500 Off!', subtitle: 'Your First Creme Collections Order', code: 'KARIBU500', terms: '*Min. spend Ksh 2,500. T&Cs apply.', href: '/register', dataAiHint: 'first order discount', backgroundColor: 'bg-gradient-to-br from-primary to-accent', foregroundColor: 'text-primary-foreground', accentColor: 'text-white', displayOrder: 1, isActive: true },
+          { type: 'tieredDiscount', title: 'Buy More, Save More!', tiers: [{ amount: 400, spend: 5000 }, { amount: 700, spend: 8000 }, { amount: 1000, spend: 10000 }], code: 'SAVEMORE', terms: '*Limited Time Offer. T&Cs Apply.', href: '/products', dataAiHint: 'tiered discount offer', backgroundColor: 'bg-gradient-to-tr from-slate-900 to-slate-700', foregroundColor: 'text-white', accentColor: 'text-primary', displayOrder: 2, isActive: true },
+          { type: 'revealCode', title: 'Fashion Finds', subtitle: 'Up to 20% Off Select Apparel', actionText: 'TAP TO REVEAL', codePlaceholder: 'CODE', productImage: '/images/banners/fashion.png', href: '/products/category/fashion', dataAiHint: 'fashion apparel sale', backgroundColor: 'bg-secondary', foregroundColor: 'text-secondary-foreground', accentColor: 'text-primary border-primary', displayOrder: 3, isActive: true },
+          { type: 'revealCode', title: 'Home Essentials', subtitle: 'Save Big on Decor & More', actionText: 'TAP TO REVEAL', codePlaceholder: 'CODE', productImage: '/images/banners/home.png', href: '/products/category/home-living', dataAiHint: 'home decor sale', backgroundColor: 'bg-card', foregroundColor: 'text-card-foreground', accentColor: 'text-primary border-primary', displayOrder: 4, isActive: true },
       ];
   }
   const q = query(collection(db, "promotions"), where("isActive", "==", true), limit(10));
