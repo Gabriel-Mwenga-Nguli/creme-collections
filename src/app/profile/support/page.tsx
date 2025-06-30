@@ -2,11 +2,11 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Send, Bot, User as UserIcon, MessageSquareQuestion } from 'lucide-react';
+import { Loader2, Send, Bot, User as UserIcon, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { dashboardSupport, type DashboardSupportInput, type DashboardSupportOutput } from '@/ai/flows/dashboard-support-flow';
 
@@ -92,14 +92,12 @@ export default function SupportPage() {
     }
 
   return (
-    <Card className="shadow-lg h-full flex flex-col min-h-[calc(100vh-14rem)]">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
+    <Card className="shadow-lg h-full flex flex-col min-h-[calc(100vh-20rem)]">
+      <CardHeader>
           <CardTitle className="text-xl font-headline flex items-center">
-            <Bot className="mr-2 h-5 w-5 text-primary" /> AI Account Support
+            <Sparkles className="mr-3 h-6 w-6 text-primary" /> AI Account Assistant
           </CardTitle>
           <CardDescription>Your personal assistant for account and order inquiries.</CardDescription>
-        </div>
       </CardHeader>
       <CardContent className="flex-grow p-0 overflow-hidden flex flex-col">
          <ScrollArea className="h-full flex-grow p-4" ref={scrollAreaRef}>
@@ -107,7 +105,7 @@ export default function SupportPage() {
               {messages.map((message) => (
                 <div key={message.id} className={`flex items-start gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {message.role === 'model' && <Bot className="h-6 w-6 text-muted-foreground self-start shrink-0 mt-1" />}
-                  <div className={`max-w-[85%] rounded-lg px-3 py-2 text-sm shadow-sm ${message.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-muted text-muted-foreground rounded-bl-none'}`}>
+                  <div className={`max-w-[85%] rounded-lg px-3 py-2 text-sm shadow-sm ${message.role === 'user' ? 'bg-secondary text-secondary-foreground rounded-br-none' : 'bg-muted text-muted-foreground rounded-bl-none'}`}>
                     {message.content.split('\n').map((line, i, arr) => (
                       <span key={i}>{line}{i < arr.length - 1 && <br/>}</span>
                     ))}
@@ -125,25 +123,25 @@ export default function SupportPage() {
               )}
             </div>
           </ScrollArea>
-          <div className="p-4 border-t">
-              <form onSubmit={handleSendMessage} className="flex w-full gap-2 items-center">
-                <Input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Ask about your orders, profile, or points..."
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  className="flex-grow h-10"
-                  disabled={isLoading}
-                  autoComplete="off"
-                />
-                <Button type="submit" size="icon" className="h-10 w-10 flex-shrink-0" disabled={isLoading || !inputValue.trim()}>
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                  <span className="sr-only">Send message</span>
-                </Button>
-              </form>
-          </div>
       </CardContent>
+      <CardFooter className="p-4 border-t">
+          <form onSubmit={handleSendMessage} className="flex w-full gap-2 items-center">
+            <Input
+              ref={inputRef}
+              type="text"
+              placeholder="Ask about your orders, profile, or points..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              className="flex-grow h-10"
+              disabled={isLoading}
+              autoComplete="off"
+            />
+            <Button type="submit" size="icon" className="h-10 w-10 flex-shrink-0" disabled={isLoading || !inputValue.trim()}>
+              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+              <span className="sr-only">Send message</span>
+            </Button>
+          </form>
+      </CardFooter>
     </Card>
   );
 }

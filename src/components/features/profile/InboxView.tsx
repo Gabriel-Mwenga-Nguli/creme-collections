@@ -39,7 +39,7 @@ export default function InboxView({ userId, userEmail }: { userId: string | null
          <Card className="shadow-lg h-full flex flex-col min-h-[400px]">
             <CardHeader>
                 <CardTitle className="text-xl font-headline flex items-center">
-                    <Inbox className="mr-2 h-5 w-5 text-primary" /> My Inbox
+                    <Inbox className="mr-3 h-6 w-6 text-primary" /> My Inbox
                 </CardTitle>
                 <CardDescription>Please log in to view your messages.</CardDescription>
             </CardHeader>
@@ -57,7 +57,7 @@ export default function InboxView({ userId, userEmail }: { userId: string | null
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle className="text-xl font-headline flex items-center">
-            <Inbox className="mr-2 h-5 w-5 text-primary" /> My Inbox
+            <Inbox className="mr-3 h-6 w-6 text-primary" /> My Inbox
           </CardTitle>
           <CardDescription>Messages from sellers and customer support.</CardDescription>
         </div>
@@ -84,8 +84,8 @@ export default function InboxView({ userId, userEmail }: { userId: string | null
                    <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-4 text-left">
                              {!message.isRead && <Badge className="h-2 w-2 p-0 rounded-full" />}
-                            <div className={cn(!message.isRead && "font-bold")}>{message.from}</div>
-                            <div className={cn("truncate", !message.isRead && "font-bold")}>{message.subject}</div>
+                            <div className={cn("text-sm", !message.isRead && "font-bold")}>{message.from}</div>
+                            <div className={cn("truncate text-sm", !message.isRead && "font-bold")}>{message.subject}</div>
                         </div>
                          <div className="text-xs text-muted-foreground font-normal pr-4">
                             {new Date(message.receivedAt).toLocaleDateString()}

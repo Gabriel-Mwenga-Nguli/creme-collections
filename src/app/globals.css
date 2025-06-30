@@ -8,24 +8,24 @@ body {
 
 @layer base {
   :root {
-    --background: 26 67% 95%; /* #FAF0E7 Light Orange */
-    --foreground: 24 10% 20%; /* Dark Grayish Brown for text */
-    --card: 0 0% 100%; /* White */
+    --background: 240 5% 96%; /* Lighter Gray for more contrast */
+    --foreground: 24 10% 20%;
+    --card: 0 0% 100%;
     --card-foreground: 24 10% 20%;
     --popover: 0 0% 100%;
     --popover-foreground: 24 10% 20%;
     --primary: 26 95% 53%; /* #f97316 Orange */
-    --primary-foreground: 0 0% 100%; /* White */
-    --secondary: 26 80% 88%; /* Lighter Orange */
-    --secondary-foreground: 26 95% 30%; /* Darker Orange */
-    --muted: 26 60% 92%; /* Very Light Orange */
-    --muted-foreground: 26 30% 60%; /* Muted Text Color */
-    --accent: 43 96% 56%; /* #FBBF24 Yellow-Orange */
-    --accent-foreground: 24 10% 20%; /* Dark Grayish Brown */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 221 83% 53%; /* Vibrant Blue */
+    --secondary-foreground: 0 0% 100%; /* White text on blue */
+    --muted: 210 40% 96.1%; /* Lighter Muted */
+    --muted-foreground: 215.4 16.3% 46.9%; /* Muted Text */
+    --accent: 43 96% 56%;
+    --accent-foreground: 24 10% 20%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 26 50% 85%; /* Light Orange Border */
-    --input: 26 50% 90%; /* Light Orange Input BG */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
     --ring: 26 95% 53%; /* Orange Ring */
     --radius: 0.5rem;
 
@@ -45,25 +45,25 @@ body {
     --sidebar-ring: 26 95% 53%;
   }
   .dark {
-    --background: 26 15% 10%; /* Dark Desaturated Orange/Brown */
-    --foreground: 26 67% 90%; /* Lighter Orange for text */
-    --card: 26 15% 15%; /* Darker Card BG */
-    --card-foreground: 26 67% 90%;
-    --popover: 26 15% 15%;
-    --popover-foreground: 26 67% 90%;
-    --primary: 26 95% 53%; /* #f97316 Orange */
-    --primary-foreground: 26 95% 15%; /* Darker Orange for text on primary */
-    --secondary: 26 30% 25%; /* Darker Muted Orange */
-    --secondary-foreground: 26 67% 85%; /* Lighter Orange for text on secondary */
-    --muted: 26 20% 20%;
-    --muted-foreground: 26 50% 70%;
-    --accent: 43 96% 56%; /* #FBBF24 Yellow-Orange */
-    --accent-foreground: 26 15% 10%; /* Dark Desaturated Orange/Brown for text on accent */
+    --background: 222.2 47.4% 11.2%; /* Dark Navy Blue */
+    --foreground: 210 40% 98%;
+    --card: 222.2 47.4% 15.2%; /* Slightly Lighter Navy */
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 47.4% 11.2%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 26 95% 53%;
+    --primary-foreground: 26 95% 15%;
+    --secondary: 217.2 91.2% 59.8%; /* Bright Blue for Dark Mode */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 26 20% 25%;
-    --input: 26 20% 20%;
-    --ring: 26 95% 53%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 217.2 91.2% 59.8%;
 
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -71,13 +71,13 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    --sidebar-background: 26 15% 12%; 
-    --sidebar-foreground: 26 67% 88%;
+    --sidebar-background: 222.2 47.4% 11.2%; 
+    --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 26 95% 53%;
     --sidebar-primary-foreground: 26 95% 15%;
-    --sidebar-accent: 26 25% 20%;
-    --sidebar-accent-foreground: 26 67% 80%;
-    --sidebar-border: 26 20% 22%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 26 95% 53%;
   }
 }

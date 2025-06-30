@@ -2,16 +2,17 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { User, Shield, Award, Edit, Loader2, Camera } from 'lucide-react';
+import { User, Shield, Award, Edit, Loader2, Camera, Heart, ListOrdered, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 export default function MyAccountPage() {
   const { toast } = useToast();
@@ -61,6 +62,8 @@ export default function MyAccountPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePic(reader.result as string);
+        updateUserProfile({ photoURL: reader.result as string });
+        toast({ title: 'Picture Updated!', description: 'Your profile picture has been changed.' });
       };
       reader.readAsDataURL(file);
     }
@@ -72,33 +75,33 @@ export default function MyAccountPage() {
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="flex flex-col items-center justify-center text-center bg-secondary text-secondary-foreground p-4">
+              <ListOrdered className="h-8 w-8 mb-2"/>
+              <p className="text-2xl font-bold">12</p>
+              <p className="text-xs">Total Orders</p>
+          </Card>
+           <Card className="flex flex-col items-center justify-center text-center bg-primary/10 text-primary p-4">
+              <Heart className="h-8 w-8 mb-2"/>
+              <p className="text-2xl font-bold">8</p>
+              <p className="text-xs">Wishlist Items</p>
+          </Card>
+           <Card className="flex flex-col items-center justify-center text-center bg-accent/10 text-accent p-4">
+              <Award className="h-8 w-8 mb-2"/>
+              <p className="text-2xl font-bold">1,250</p>
+              <p className="text-xs">Loyalty Points</p>
+          </Card>
+      </div>
+
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-xl font-headline flex items-center">
             <User className="mr-2 h-5 w-5 text-primary" /> Personal Information
           </CardTitle>
-          <CardDescription>Manage your personal details. Click "Save" to simulate an update.</CardDescription>
+          <CardDescription>Manage your personal details. Click "Save Changes" to update.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={profilePic || undefined} alt={name} />
-              <AvatarFallback className="text-2xl">
-                {getInitials(name)}
-              </AvatarFallback>
-            </Avatar>
-            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-              <Camera className="mr-2 h-4 w-4" /> Change Picture
-            </Button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handlePictureUpload}
-              className="hidden"
-              accept="image/png, image/jpeg"
-            />
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
+        <CardContent className="space-y-4">
+           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="fullName">Full Name</Label>
               <Input id="fullName" value={name} onChange={(e) => setName(e.target.value)} />
@@ -112,21 +115,10 @@ export default function MyAccountPage() {
             <Label htmlFor="phone">Phone Number</Label>
             <Input id="phone" type="tel" placeholder="+254 7XX XXX XXX" />
           </div>
-          <Button onClick={handleProfileUpdate}>Save Changes</Button>
         </CardContent>
-      </Card>
-
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl font-headline flex items-center">
-            <Award className="mr-2 h-5 w-5 text-primary" /> Loyalty Program
-          </CardTitle>
-          <CardDescription>Your loyalty points balance.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center justify-between">
-          <div className="text-4xl font-bold text-primary">1,250 Points</div>
-          <Button variant="outline">Redeem Points</Button>
-        </CardContent>
+         <CardFooter>
+            <Button onClick={handleProfileUpdate}>Save Changes</Button>
+        </CardFooter>
       </Card>
 
       <Card className="shadow-lg">
@@ -145,8 +137,10 @@ export default function MyAccountPage() {
             <Label htmlFor="new-password">New Password</Label>
             <Input id="new-password" type="password" />
           </div>
-          <Button onClick={handlePasswordUpdate}>Update Password</Button>
         </CardContent>
+        <CardFooter>
+          <Button onClick={handlePasswordUpdate}>Update Password</Button>
+        </CardFooter>
       </Card>
     </div>
   );

@@ -6,19 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ListOrdered, FileText, Loader2 } from 'lucide-react';
+import { ListOrdered, FileText, Loader2, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { getUserOrders, type Order } from '@/services/orderService';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
-const statusVariantMap = {
+const statusVariantMap: { [key in Order['status']]: 'default' | 'secondary' | 'outline' | 'destructive' } = {
   Delivered: 'default',
   Shipped: 'secondary',
   Processing: 'outline',
   Pending: 'outline',
   Cancelled: 'destructive',
-} as const;
+};
 
 
 export default function OrdersPage() {
@@ -44,21 +44,65 @@ export default function OrdersPage() {
     fetchOrders();
   }, [user, isAuthLoading, router]);
 
-  if (isAuthLoading || isLoading) {
+  const renderContent = () => {
+    if (isAuthLoading || isLoading) {
       return (
-          <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-xl font-headline flex items-center">
-                    <ListOrdered className="mr-2 h-5 w-5 text-primary" /> My Orders
-                </CardTitle>
-                <CardDescription>View your order history and track current orders.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex justify-center items-center h-48">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </CardContent>
-          </Card>
+          <div className="flex justify-center items-center h-48">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
       );
-  }
+    }
+    
+    if (orders.length > 0) {
+      return (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Order ID</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Total</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="font-medium">#{order.orderId || order.id.substring(0,8)}</TableCell>
+                <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  <Badge variant={statusVariantMap[order.status] || 'default'}>
+                    {order.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">KES {order.totalAmount.toLocaleString()}</TableCell>
+                <TableCell className="text-right">
+                  <Button asChild variant="outline" size="sm">
+                      <Link href={`/profile/orders/${order.id}`}>
+                        <FileText className="mr-2 h-4 w-4" /> View
+                      </Link>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      );
+    }
+
+    return (
+       <div className="text-center py-16">
+          <ShoppingBag className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
+          <p className="text-lg font-semibold text-foreground mb-2">No Orders Yet</p>
+          <p className="text-muted-foreground mb-6">
+            You haven't placed any orders with us. Let's change that!
+          </p>
+          <Button asChild size="lg">
+            <Link href="/products">Start Shopping</Link>
+          </Button>
+        </div>
+    );
+  };
 
   return (
     <Card className="shadow-lg">
@@ -69,44 +113,7 @@ export default function OrdersPage() {
         <CardDescription>View your order history and track current orders.</CardDescription>
       </CardHeader>
       <CardContent>
-        {orders.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">#{order.orderId || order.id.substring(0,8)}</TableCell>
-                  <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariantMap[order.status] || 'default'}>
-                      {order.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">KES {order.totalAmount.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">
-                    <Button asChild variant="outline" size="sm">
-                        <Link href={`/profile/orders/${order.id}`}>
-                          <FileText className="mr-2 h-4 w-4" /> View
-                        </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <div className="text-center py-10">
-            <p className="text-muted-foreground">You haven't placed any orders yet.</p>
-          </div>
-        )}
+        {renderContent()}
       </CardContent>
     </Card>
   );
