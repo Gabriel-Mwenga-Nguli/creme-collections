@@ -4,48 +4,7 @@
 import type { ProductCardProps } from '@/components/features/home/product-card';
 import type { DealProduct } from '@/components/features/home/weekly-deals-slider';
 import type { PromoSlideProps } from '@/lib/types';
-import { Timestamp } from 'firebase/firestore';
-
-// Mock data to replace Firestore
-const MOCK_PRODUCTS: Product[] = [
-    {
-        id: '1', name: 'Modern Smartwatch Series X', description: 'Sleek smartwatch with advanced health tracking.',
-        longDescription: 'Full-featured Modern Smartwatch Series X with a vibrant AMOLED display, heart rate monitoring, SpO2 sensor, GPS, and up to 7 days battery life. Compatible with Android and iOS.',
-        image: 'https://placehold.co/600x400.png', images: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
-        dataAiHint: 'smartwatch technology', offerPrice: 12999, originalPrice: 15999, rating: '4.5', reviewsCount: 150,
-        availability: 'In Stock', category: 'Electronics', categorySlug: 'electronics', subCategory: 'Wearable Technology', subCategorySlug: 'wearables',
-        brand: 'TechNova', stock: 50, isFeatured: true, isWeeklyDeal: false, createdAt: new Date()
-    },
-    {
-        id: '2', name: 'Classic Men\'s Polo Shirt', description: 'Comfortable and stylish polo shirt.',
-        longDescription: 'Made from 100% premium cotton, this classic fit polo shirt offers both comfort and durability. Features a two-button placket and ribbed collar and cuffs. Available in various colors.',
-        image: 'https://placehold.co/600x400.png', images: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
-        dataAiHint: 'men shirt', offerPrice: 2499, originalPrice: 3200, rating: '4.7', reviewsCount: 85,
-        availability: 'In Stock', category: 'Fashion', categorySlug: 'fashion', subCategory: 'Men\'s Clothing', subCategorySlug: 'men-clothing',
-        brand: 'UrbanStyle', stock: 120, isFeatured: false, isWeeklyDeal: true, createdAt: new Date()
-    },
-    {
-        id: '3', name: 'Stainless Steel Cookware Set', description: 'Durable 10-piece cookware set.',
-        longDescription: 'This 10-piece stainless steel cookware set includes saucepans, frying pans, and stockpot, all with ergonomic handles and tempered glass lids. Suitable for all stovetops, including induction.',
-        image: 'https://placehold.co/600x400.png', dataAiHint: 'cookware kitchen', offerPrice: 7999, originalPrice: 9500, rating: '4.8',
-        reviewsCount: 210, availability: 'In Stock', category: 'Home & Living', categorySlug: 'home-living', subCategory: 'Kitchen & Dining', subCategorySlug: 'kitchen-dining',
-        brand: 'KitchenMaster', stock: 30, isFeatured: true, isWeeklyDeal: false, createdAt: new Date()
-    },
-    {
-        id: '4', name: 'Wireless Noise-Cancelling Headphones', description: 'Immersive audio experience, free from distractions.',
-        longDescription: 'Experience industry-leading noise cancellation with these wireless headphones. Enjoy up to 30 hours of battery life, crystal-clear call quality, and high-resolution audio support.',
-        image: 'https://placehold.co/600x400.png', dataAiHint: 'audio headphones', offerPrice: 19999, originalPrice: 24000, rating: '4.9',
-        reviewsCount: 350, availability: 'In Stock', category: 'Electronics', categorySlug: 'electronics', subCategory: 'Audio & Headphones', subCategorySlug: 'audio-headphones',
-        brand: 'AudioPhile', stock: 40, isFeatured: true, isWeeklyDeal: true, createdAt: new Date()
-    },
-    {
-        id: '5', name: 'Organic Green Tea', description: '25 bags of premium organic green tea.',
-        longDescription: 'Sourced from the finest tea gardens, our organic green tea offers a smooth and refreshing taste. Rich in antioxidants, it\'s the perfect healthy beverage to start your day or unwind in the evening.',
-        image: 'https://placehold.co/600x400.png', dataAiHint: 'tea beverage', offerPrice: 599, originalPrice: 750, rating: '4.6',
-        reviewsCount: 120, availability: 'In Stock', category: 'Groceries', categorySlug: 'groceries', subCategory: 'Beverages', subCategorySlug: 'beverages',
-        brand: 'PureLeaf', stock: 200, isFeatured: false, isWeeklyDeal: true, createdAt: new Date()
-    }
-];
+import { getProductsFromLoyverse, getProductByIdFromLoyverse } from './loyverseService';
 
 export interface Product {
   id: string;
@@ -68,13 +27,16 @@ export interface Product {
   stock?: number;
   isFeatured?: boolean;
   isWeeklyDeal?: boolean;
-  createdAt?: Date | Timestamp;
+  createdAt?: Date;
+  loyverseId?: string;
+  sku?: string;
 }
 
 export interface ProductDetailsPageData extends Product {}
 
 export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
-  const products = MOCK_PRODUCTS.filter(p => p.isFeatured);
+  console.log("Fetching featured products from Loyverse service...");
+  const products = await getProductsFromLoyverse({ featured: true, limit: 10 });
   return products.map(p => ({
     id: p.id, name: p.name, description: p.description, image: p.image,
     dataAiHint: p.dataAiHint, fixedOfferPrice: p.offerPrice, fixedOriginalPrice: p.originalPrice,
@@ -83,7 +45,8 @@ export async function getFeaturedProducts(): Promise<ProductCardProps[]> {
 }
 
 export async function getWeeklyDeals(): Promise<DealProduct[]> {
-  const products = MOCK_PRODUCTS.filter(p => p.isWeeklyDeal);
+  console.log("Fetching weekly deals from Loyverse service...");
+  const products = await getProductsFromLoyverse({ weeklyDeal: true, limit: 10 });
   return products.map(p => ({
     id: p.id, name: p.name, description: p.description, image: p.image, dataAiHint: p.dataAiHint,
     fixedOfferPrice: p.offerPrice, fixedOriginalPrice: p.originalPrice || p.offerPrice * 1.2,
@@ -92,24 +55,33 @@ export async function getWeeklyDeals(): Promise<DealProduct[]> {
 }
 
 export async function getProductDetailsById(productId: string): Promise<ProductDetailsPageData | null> {
-  await new Promise(res => setTimeout(res, 50)); // Simulate network delay
-  const product = MOCK_PRODUCTS.find(p => p.id === productId);
-  return product || null;
+  console.log(`Fetching details for product ID ${productId} from Loyverse service...`);
+  return getProductByIdFromLoyverse(productId);
 }
 
 export async function getAllProducts(categorySlugParam?: string, subCategorySlugParam?: string): Promise<Product[]> {
-  await new Promise(res => setTimeout(res, 50)); // Simulate network delay
-  let products = MOCK_PRODUCTS;
+  console.log("Fetching all products from Loyverse service...");
+  const products = await getProductsFromLoyverse();
+  
+  if (!categorySlugParam && !subCategorySlugParam) {
+    return products;
+  }
+  
+  let filteredProducts = products;
   if (categorySlugParam) {
-    products = products.filter(p => p.categorySlug === categorySlugParam);
+    console.log(`Filtering for category: ${categorySlugParam}`);
+    filteredProducts = filteredProducts.filter(p => p.categorySlug === categorySlugParam);
   }
   if (subCategorySlugParam) {
-    products = products.filter(p => p.subCategorySlug === subCategorySlugParam);
+    console.log(`Filtering for sub-category: ${subCategorySlugParam}`);
+    filteredProducts = filteredProducts.filter(p => p.subCategorySlug === subCategorySlugParam);
   }
-  return products;
+  
+  return filteredProducts;
 }
 
 export async function getPromotions(): Promise<PromoSlideProps[]> {
+    // Promotions are managed separately and not in Loyverse
     return [
         {
           type: 'firstOrder', title: 'Ksh 500 Off!', subtitle: 'Your First Creme Collections Order', code: 'KARIBU500',
@@ -127,11 +99,11 @@ export async function getPromotions(): Promise<PromoSlideProps[]> {
 }
 
 export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>): Promise<string | null> {
-  console.log("[DEV MODE] addProduct called with:", productData);
+  console.log("[DEV MODE] addProduct is a mock function and does not write to Loyverse. Data:", productData);
   return `mock_product_id_${Date.now()}`;
 }
 
 export async function updateProduct(productId: string, productData: Partial<Product>): Promise<boolean> {
-  console.log(`[DEV MODE] updateProduct called for ID ${productId} with:`, productData);
+  console.log(`[DEV MODE] updateProduct is a mock function and does not write to Loyverse. ID: ${productId}, Data:`, productData);
   return true;
 }
