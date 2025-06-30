@@ -22,7 +22,7 @@ const mockWishlistItems = [
     },
     {
         id: '4', name: 'Wireless Noise-Cancelling Headphones', description: 'Immersive audio experience, free from distractions.',
-        image: '/images/products/headphones.png', dataAiHint: 'audio headphones',
+        image: 'https://placehold.co/600x400.png', dataAiHint: 'audio headphones',
         fixedOfferPrice: 19999, fixedOriginalPrice: 24000, rating: '4.9', reviewsCount: 350,
     }
 ];
