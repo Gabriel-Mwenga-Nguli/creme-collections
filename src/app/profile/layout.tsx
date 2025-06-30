@@ -9,7 +9,8 @@ import { cn } from '@/lib/utils';
 import { PROFILE_NAV_LINKS } from '@/lib/constants';
 import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Award, ListOrdered, Heart } from 'lucide-react';
+import ProfileStatCard from '@/components/features/profile/ProfileStatCard';
 
 export default function ProfileLayout({
   children,
@@ -32,7 +33,7 @@ export default function ProfileLayout({
   }
 
   return (
-    <div className="bg-muted/30">
+    <div className="bg-muted/30 dark:bg-slate-900">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="bg-gradient-to-br from-primary via-primary/80 to-secondary p-6 rounded-2xl shadow-lg mb-8 text-primary-foreground dark:from-slate-800 dark:via-slate-800/80 dark:to-slate-900 dark:text-primary-foreground">
             <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -43,23 +44,28 @@ export default function ProfileLayout({
                   </AvatarFallback>
                 </Avatar>
                 <div className="text-center sm:text-left">
+                    <p className="text-md opacity-80">Welcome back,</p>
                     <h1 className="text-2xl md:text-3xl font-bold font-headline">{userProfile?.name}</h1>
-                    <p className="text-md opacity-80">{userProfile?.email}</p>
                 </div>
             </div>
         </div>
 
         <div className="grid md:grid-cols-4 gap-8 items-start">
-          <aside className="md:col-span-1">
+          <aside className="md:col-span-1 space-y-4">
+             <div className="space-y-2">
+                <ProfileStatCard icon={Award} title="Loyalty Points" value="1,250" description="Gold Tier" />
+                <ProfileStatCard icon={ListOrdered} title="Total Orders" value="2" description="View History" />
+                <ProfileStatCard icon={Heart} title="Wishlist Items" value="2" description="View Wishlist" />
+             </div>
             <Card className="shadow-lg sticky top-24">
-              <CardContent className="p-3">
+              <CardContent className="p-2">
                 <nav className="flex flex-col space-y-1">
                   {PROFILE_NAV_LINKS.map((link) => (
                     <Button
                       key={link.href}
                       asChild
                       variant={pathname === link.href ? 'default' : 'ghost'}
-                      className="justify-start text-base py-6"
+                      className="justify-start text-base h-11"
                     >
                       <Link href={link.href}>
                         {link.icon && <link.icon className={cn("mr-3 h-5 w-5", pathname === link.href ? "" : "text-muted-foreground group-hover:text-primary")} />}

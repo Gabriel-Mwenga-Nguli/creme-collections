@@ -6,10 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, Shield, Loader2 } from 'lucide-react';
+import { User, Shield, Loader2, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { manageLoyaltyPoints } from '@/ai/flows/loyalty-points-flow';
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -33,13 +34,35 @@ export default function SettingsPage() {
       toast({ title: 'Name cannot be empty', variant: 'destructive' });
       return;
     }
+    if (!user) {
+        toast({ title: 'User not found', variant: 'destructive' });
+        return;
+    }
     setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate async
+    
+    // Simulate updating profile in the main auth context
     updateUserProfile({ name });
-    toast({
-      title: 'Profile Updated',
-      description: 'Your personal details have been saved.',
-    });
+    
+    try {
+        // After updating, call the AI flow to award points
+        const loyaltyResponse = await manageLoyaltyPoints({
+            userId: user.uid,
+            activityType: 'profile_update',
+        });
+        toast({
+            title: 'Profile Updated Successfully!',
+            description: `You've earned ${loyaltyResponse.pointsChange} loyalty points.`,
+            action: <Award className="h-5 w-5 text-yellow-500" />,
+        });
+    } catch(error) {
+        console.error("Failed to award loyalty points:", error);
+        toast({
+            title: 'Profile Updated',
+            description: 'Your personal details have been saved, but there was an issue awarding loyalty points.',
+            variant: 'default' // Still a success, but with a note
+        });
+    }
+
     setIsSaving(false);
   };
 

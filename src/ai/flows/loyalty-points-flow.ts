@@ -77,8 +77,8 @@ const loyaltyPointsFlow = ai.defineFlow(
   },
   async (input) => {
     // Firestore logic removed. Using mock data.
-    const currentPoints = 0; // Mock current points
-    const userSegment = 'new'; // Mock user segment
+    const currentPoints = 1250; // Mock current points
+    const userSegment = 'gold'; // Mock user segment
 
     const promptInputForAI = {
         currentPoints,
@@ -96,12 +96,14 @@ const loyaltyPointsFlow = ai.defineFlow(
     const pointsChange = aiDecision.pointsToAwardOrDeduct;
     const newTotalPoints = currentPoints + pointsChange;
 
+    // In a real app, you would save `newTotalPoints` to the user's profile in Firestore here.
+    
     return {
       userId: input.userId,
       previousPoints: currentPoints,
       pointsChange,
       newTotalPoints,
-      message: `[MOCK] User ${input.userId} ${pointsChange >= 0 ? 'awarded' : 'deducted'} ${Math.abs(pointsChange)} points. New total: ${newTotalPoints}. Reason: ${aiDecision.calculationReasoning}`,
+      message: `User ${input.userId} ${pointsChange >= 0 ? 'awarded' : 'deducted'} ${Math.abs(pointsChange)} points for ${input.activityType}. New total: ${newTotalPoints}. Reason: ${aiDecision.calculationReasoning}`,
     };
   }
 );

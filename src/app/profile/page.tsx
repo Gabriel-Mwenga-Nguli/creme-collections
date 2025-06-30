@@ -4,13 +4,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Camera, User, BarChart2, Award } from 'lucide-react';
+import { Loader2, Camera, User, BarChart2, Award, Shield, CheckCircle, Package } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import OrderHistoryChart from '@/components/features/profile/OrderHistoryChart';
 import ProfileStatCard from '@/components/features/profile/ProfileStatCard';
+
+const achievements = [
+    { icon: Package, title: "First Purchase", unlocked: true },
+    { icon: CheckCircle, title: "Profile Complete", unlocked: true },
+    { icon: Award, title: "Top Reviewer", unlocked: false },
+    { icon: Shield, title: "Loyalty Member", unlocked: true },
+];
 
 export default function ProfileDashboardPage() {
   const { toast } = useToast();
@@ -87,7 +94,6 @@ export default function ProfileDashboardPage() {
                     </Button>
                 </CardContent>
             </Card>
-            <ProfileStatCard icon={Award} title="Loyalty Status" value="Gold Tier" description="1,250 Points" />
         </div>
         <div className="lg:col-span-2">
             <Card className="shadow-lg h-full">
@@ -103,6 +109,24 @@ export default function ProfileDashboardPage() {
             </Card>
         </div>
       </div>
+       <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-xl font-headline flex items-center">
+            <Award className="mr-2 h-5 w-5 text-primary" /> Achievements
+          </CardTitle>
+          <CardDescription>Badges you've earned on your shopping journey.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {achievements.map(ach => (
+                <div key={ach.title} className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 ${ach.unlocked ? 'border-primary/50 bg-primary/10' : 'border-dashed bg-muted/50'}`}>
+                    <div className={`rounded-full p-3 ${ach.unlocked ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/30 text-muted-foreground'}`}>
+                        <ach.icon className="h-6 w-6" />
+                    </div>
+                    <p className={`mt-2 text-sm font-semibold text-center ${ach.unlocked ? 'text-primary' : 'text-muted-foreground'}`}>{ach.title}</p>
+                </div>
+            ))}
+        </CardContent>
+      </Card>
     </div>
   );
 }
