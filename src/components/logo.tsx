@@ -1,14 +1,15 @@
-
 import Link from 'next/link';
-import { SITE_NAME } from '@/lib/constants';
+import LogoIcon from './LogoIcon'; // Import the new component
+import { cn } from '@/lib/utils';
 
 const Logo = ({ className }: { className?: string }) => {
   return (
     <Link 
       href="/" 
-      className={`text-2xl font-bold text-primary hover:opacity-80 transition-opacity font-headline ${className}`}
+      className="block group"
+      aria-label="Creme Collections Home"
     >
-      {SITE_NAME}
+      <LogoIcon className={cn('h-8 w-auto group-hover:opacity-80 transition-opacity', className)} />
     </Link>
   );
 };

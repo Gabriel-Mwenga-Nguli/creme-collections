@@ -11,6 +11,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { AdminAuthProvider } from '@/context/AdminAuthContext';
 import ChatWidget from '@/components/features/chat/ChatWidget';
 import ShopOfferPopup from '@/components/features/home/ShopOfferPopup';
+import Preloader from '@/components/layout/Preloader';
 
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Preloader />
           <AdminAuthProvider>
             <AuthProvider>
               <CartProvider>
