@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { db, isConfigured } from '@/lib/firebase';
 import { collection, addDoc, getDocs, doc, getDoc, query, where, Timestamp, serverTimestamp, orderBy } from 'firebase/firestore';
 
 export interface OrderItem {
@@ -28,7 +28,7 @@ export type OrderStatus = 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | '
 
 export interface Order {
   id: string; 
-  orderId?: string; // Human-readable order ID
+  orderId?: string; 
   userId: string;
   userEmail?: string;
   items: OrderItem[];
@@ -53,7 +53,7 @@ const fromFirestore = (docSnap: any): Order => {
 
 
 export async function getUserOrders(userId: string): Promise<Order[]> {
-    if (!userId) return [];
+    if (!isConfigured || !db || !userId) return [];
     
     const ordersRef = collection(db, "orders");
     const q = query(ordersRef, where("userId", "==", userId), orderBy("orderDate", "desc"));
@@ -68,12 +68,13 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
 }
 
 export async function getOrderDetails(orderId: string, userId?: string): Promise<Order | null> {
+    if (!isConfigured || !db) return null;
+    
   const docRef = doc(db, "orders", orderId);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
     const order = fromFirestore(docSnap);
-    // If a userId is provided, ensure the order belongs to that user (for security)
     if (userId && order.userId !== userId) {
         return null;
     }
@@ -84,6 +85,7 @@ export async function getOrderDetails(orderId: string, userId?: string): Promise
 
 
 export async function getAllOrdersForAdmin(countLimit?: number): Promise<OrderAdminItem[]> {
+    if (!isConfigured || !db) return [];
   const ordersRef = collection(db, "orders");
   const q = query(ordersRef, orderBy("orderDate", "desc"));
 
@@ -98,6 +100,10 @@ export async function getAllOrdersForAdmin(countLimit?: number): Promise<OrderAd
 
 
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus): Promise<boolean> {
+    if (!isConfigured || !db) {
+        console.warn(`[Demo Mode] updateOrderStatus for ${orderId} ignored.`);
+        return true;
+    }
   const orderRef = doc(db, "orders", orderId);
   try {
       await updateDoc(orderRef, { status: newStatus });
@@ -110,8 +116,8 @@ export async function updateOrderStatus(orderId: string, newStatus: OrderStatus)
 
 function generateReadableOrderId(): string {
   const prefix = "CR";
-  const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
-  const random = Math.floor(Math.random() * 900 + 100).toString(); // 3 random digits
+  const timestamp = Date.now().toString().slice(-6);
+  const random = Math.floor(Math.random() * 900 + 100).toString();
   return `${prefix}${timestamp}${random}`;
 }
 
@@ -123,6 +129,10 @@ export async function createOrder(
     totalAmount: number,
     shippingAddress: OrderShippingAddress
 ): Promise<string | null> {
+    if (!isConfigured || !db) {
+        console.warn("[Demo Mode] createOrder called. No data will be saved.");
+        return `mock_order_${Date.now()}`;
+    }
   try {
     const docRef = await addDoc(collection(db, 'orders'), {
         userId,

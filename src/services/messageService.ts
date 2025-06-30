@@ -1,13 +1,13 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { db, isConfigured } from '@/lib/firebase';
 import { collection, query, where, orderBy, getDocs, doc, updateDoc, Timestamp } from 'firebase/firestore';
 
 export interface Message {
   id: string;
   userId: string;
-  from: string; // e.g., 'Creme Collections Support', 'System Notification'
+  from: string;
   subject: string;
   body: string;
   isRead: boolean;
@@ -24,7 +24,7 @@ const fromFirestore = (docSnap: any): Message => {
 };
 
 export async function getUserMessages(userId: string): Promise<Message[]> {
-  if (!userId) return [];
+  if (!isConfigured || !db || !userId) return [];
   const messagesRef = collection(db, `users/${userId}/messages`);
   const q = query(messagesRef, orderBy('receivedAt', 'desc'));
   try {
@@ -41,7 +41,7 @@ export async function getUserMessages(userId: string): Promise<Message[]> {
 }
 
 export async function markMessageAsRead(userId: string, messageId: string): Promise<boolean> {
-  if (!userId || !messageId) return false;
+  if (!isConfigured || !db || !userId || !messageId) return false;
   const messageRef = doc(db, `users/${userId}/messages`, messageId);
   try {
     await updateDoc(messageRef, { isRead: true });

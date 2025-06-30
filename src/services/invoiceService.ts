@@ -1,6 +1,8 @@
 
 'use server';
 
+import { db, isConfigured } from '@/lib/firebase';
+
 export interface Invoice {
   id: string;
   invoiceId: string;
@@ -12,6 +14,10 @@ export interface Invoice {
 }
 
 export async function getUserInvoices(userId: string): Promise<Invoice[]> {
-  console.log(`[Mock Service] Called getUserInvoices for user ${userId}. Firestore is disabled.`);
+  if (!isConfigured || !db) {
+    console.warn("[Demo Mode] getUserInvoices called. Returning empty array.");
+    return [];
+  }
+  console.log(`Firestore is enabled. Would fetch invoices for user ${userId}.`);
   return [];
 }

@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { auth, db, storage } from '@/lib/firebase';
+import { auth, db, storage, isConfigured } from '@/lib/firebase';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -48,6 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { toast } = useToast();
 
   const fetchUserProfile = useCallback(async (firebaseUser: FirebaseUser): Promise<UserProfile | null> => {
+    if (!isConfigured || !db) return null;
     const userDocRef = doc(db, 'users', firebaseUser.uid);
     const docSnap = await getDoc(userDocRef);
     if (docSnap.exists()) {
@@ -65,6 +66,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   },[pathname, router]);
 
   useEffect(() => {
+    if (!isConfigured || !auth) {
+        setIsLoading(false);
+        return;
+    }
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
@@ -80,12 +85,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [fetchUserProfile]);
 
   const login = useCallback(async (email: string, pass: string): Promise<FirebaseUser> => {
+    if (!isConfigured || !auth) throw new Error("Firebase is not configured. Cannot log in.");
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     handleAuthRedirect(userCredential.user);
     return userCredential.user;
   }, [handleAuthRedirect]);
 
   const register = useCallback(async (name: string, email: string, pass: string): Promise<FirebaseUser> => {
+    if (!isConfigured || !auth || !db) throw new Error("Firebase is not configured. Cannot register.");
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     const { user: firebaseUser } = userCredential;
     
@@ -94,7 +101,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const profileData = {
       uid: firebaseUser.uid,
       name,
-      email,
+      email: firebaseUser.email || '',
       photoURL: firebaseUser.photoURL || null
     };
     
@@ -107,6 +114,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [handleAuthRedirect]);
   
   const googleLogin = useCallback(async (): Promise<FirebaseUser> => {
+    if (!isConfigured || !auth || !db) throw new Error("Firebase is not configured. Cannot use Google login.");
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const { user: firebaseUser } = result;
@@ -129,13 +137,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [handleAuthRedirect]);
 
   const logout = useCallback(async () => {
+    if (!isConfigured || !auth) return;
     await signOut(auth);
     router.push('/');
   }, [router]);
 
   const updateUserProfile = useCallback(async (data: Partial<UserProfile> & { newPhotoDataUrl?: string }) => {
-    if (!user) {
-        toast({ title: 'You must be logged in.', variant: 'destructive' });
+    if (!isConfigured || !user || !db || !storage) {
+        toast({ title: 'This feature is disabled.', description: 'Please configure Firebase to update your profile.', variant: 'destructive' });
         return;
     }
 
@@ -150,23 +159,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } catch (error) {
         console.error("Error uploading profile picture: ", error);
         toast({ title: 'Image Upload Failed', description: 'Could not upload your new picture.', variant: 'destructive'});
-        return; // Exit if upload fails
+        return;
       }
     }
 
     const finalProfileData = { ...profileData, photoURL: photoURL !== undefined ? photoURL : userProfile?.photoURL };
 
-    // Update Firebase Auth profile
     await updateFirebaseProfile(user, {
       displayName: finalProfileData.name,
       photoURL: finalProfileData.photoURL,
     });
     
-    // Update Firestore profile
     const userDocRef = doc(db, 'users', user.uid);
     await updateDoc(userDocRef, finalProfileData);
 
-    // Update local state
     setUserProfile(prev => prev ? { ...prev, ...finalProfileData } : null);
     
     if (data.name !== userProfile?.name) {

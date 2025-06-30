@@ -1,12 +1,12 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { db, isConfigured } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
 export interface GiftCard {
-  id: string; // Firestore document ID
-  code: string; // The redeemable code
+  id: string; 
+  code: string;
   initialBalance: number;
   currentBalance: number;
   recipientEmail: string;
@@ -18,7 +18,6 @@ export interface GiftCard {
   isRedeemed: boolean;
 }
 
-// Function to generate a unique gift card code
 function generateGiftCardCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
@@ -38,6 +37,10 @@ export async function createGiftCard(data: {
   message: string;
   designImageUrl: string;
 }): Promise<string | null> {
+    if (!isConfigured || !db) {
+        console.warn("[Demo Mode] createGiftCard called. No data will be saved.");
+        return `mock_giftcard_${Date.now()}`;
+    }
   try {
     const createdAt = new Date();
     const expiryDate = new Date();
@@ -58,8 +61,6 @@ export async function createGiftCard(data: {
 
     const docRef = await addDoc(collection(db, 'giftCards'), giftCardData);
     console.log("Gift Card created with ID: ", docRef.id);
-    
-    // In a real app, you would trigger an email to the recipient here.
     
     return docRef.id;
   } catch (error) {

@@ -14,16 +14,24 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Add a check for the API key to provide a better error message.
-if (!firebaseConfig.apiKey) {
-    throw new Error("FIREBASE_CONFIG_MISSING: Your Firebase API key is missing. Please create a .env.local file and add your Firebase project configuration. See README.md for details.");
+export const isConfigured = !!firebaseConfig.apiKey;
+
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
+let storage: FirebaseStorage | null = null;
+
+if (isConfigured) {
+    try {
+        app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+        auth = getAuth(app);
+        db = getFirestore(app);
+        storage = getStorage(app);
+    } catch (e) {
+        console.error("Firebase initialization failed:", e);
+    }
+} else {
+    console.warn("Firebase is not configured. App is running in offline/demo mode. Please configure .env.local to enable Firebase services.");
 }
-
-
-// Initialize Firebase
-const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth: Auth = getAuth(app);
-const db: Firestore = getFirestore(app);
-const storage: FirebaseStorage = getStorage(app);
 
 export { app, auth, db, storage };
