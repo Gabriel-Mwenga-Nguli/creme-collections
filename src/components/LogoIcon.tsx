@@ -10,7 +10,7 @@ interface LogoIconProps {
 const LogoIcon = ({ className }: LogoIconProps) => {
   return (
     <Image 
-      src="/logo.svg" 
+      src="/images/logo/logo.svg" 
       alt="Creme Collections Logo" 
       width={140} 
       height={32} 
