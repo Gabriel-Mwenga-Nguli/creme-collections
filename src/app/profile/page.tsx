@@ -24,6 +24,7 @@ export default function ProfileDashboardPage() {
   const { user, userProfile, isLoading, updateUserProfile } = useAuth();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -31,14 +32,22 @@ export default function ProfileDashboardPage() {
     }
   }, [isLoading, user, router]);
 
-  const handlePictureUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setIsUploading(true);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const newPhotoURL = reader.result as string;
-        updateUserProfile({ photoURL: newPhotoURL });
-        toast({ title: 'Picture Updated!', description: 'Your new profile picture has been saved.' });
+      reader.onloadend = async () => {
+        const newPhotoDataUrl = reader.result as string;
+        try {
+            await updateUserProfile({ newPhotoDataUrl });
+            toast({ title: 'Picture Updated!', description: 'Your new profile picture has been saved.' });
+        } catch(error) {
+            // Error is handled in the context, but we can log it here too
+            console.error(error);
+        } finally {
+            setIsUploading(false);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -73,8 +82,10 @@ export default function ProfileDashboardPage() {
                             variant="ghost" 
                             size="icon"
                             onClick={() => fileInputRef.current?.click()}
-                            className="absolute inset-0 h-full w-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                           <Camera className="h-8 w-8"/>
+                            className="absolute inset-0 h-full w-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
+                            disabled={isUploading}
+                        >
+                           {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Camera className="h-8 w-8"/>}
                            <span className="sr-only">Upload picture</span>
                         </Button>
                         <input
@@ -83,6 +94,7 @@ export default function ProfileDashboardPage() {
                             onChange={handlePictureUpload}
                             className="hidden"
                             accept="image/png, image/jpeg, image/gif"
+                            disabled={isUploading}
                         />
                     </div>
                     <CardTitle className="text-2xl font-headline mt-4">{userProfile.name}</CardTitle>

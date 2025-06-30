@@ -12,6 +12,9 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { SITE_NAME } from '@/lib/constants';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
 
 const InvoiceItemSchema = z.object({
   name: z.string().describe("The name of the product."),
@@ -112,7 +115,25 @@ const generateInvoiceEmailFlow = ai.defineFlow(
       throw new Error("AI could not generate an invoice email.");
     }
     
-    // Firestore saving logic has been removed.
+    // Save a record of the invoice to the user's subcollection in Firestore
+    const invoiceRecord = {
+        invoiceId: `INV-${input.orderId}`,
+        orderId: input.orderId,
+        totalAmount: input.totalAmount,
+        invoiceDate: serverTimestamp(),
+        status: 'Paid',
+        subject: emailOutput.subject,
+    };
+
+    try {
+        const invoicesRef = collection(db, `users/${input.userId}/invoices`);
+        await addDoc(invoicesRef, invoiceRecord);
+        console.log(`Invoice record saved for user ${input.userId}`);
+    } catch (error) {
+        console.error("Error saving invoice record to Firestore: ", error);
+        // We don't throw an error here because the primary function (email generation) succeeded.
+        // We just log the error.
+    }
     
     return emailOutput;
   }

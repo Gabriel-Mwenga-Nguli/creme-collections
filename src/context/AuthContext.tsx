@@ -3,21 +3,28 @@
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { auth, db, storage } from '@/lib/firebase';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  updateProfile as updateFirebaseProfile,
+  type User as FirebaseUser
+} from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { useToast } from '@/hooks/use-toast';
 
-// Mock user types for frontend-only mode
-export type FirebaseUser = { 
-  uid: string; 
-  email: string | null; 
-  displayName: string | null; 
-  photoURL?: string | null; 
-};
-
-export type UserProfile = { 
-  name: string; 
+export type UserProfile = {
+  uid: string;
+  name: string;
   email: string;
-  photoURL?: string | null;
+  photoURL: string | null;
+  createdAt?: any;
 };
-
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -27,11 +34,10 @@ interface AuthContextType {
   register: (name: string, email: string, pass: string) => Promise<FirebaseUser>;
   googleLogin: () => Promise<FirebaseUser>;
   logout: () => Promise<void>;
-  updateUserProfile: (data: Partial<UserProfile>) => void;
+  updateUserProfile: (data: Partial<UserProfile> & { newPhotoDataUrl?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const MOCK_SESSION_KEY = 'creme-mock-session';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -39,22 +45,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    // Simulate checking for a session
-    const storedSession = localStorage.getItem(MOCK_SESSION_KEY);
-    if (storedSession) {
-        try {
-            const sessionData = JSON.parse(storedSession);
-            setUser(sessionData.user);
-            setUserProfile(sessionData.userProfile);
-        } catch (e) {
-            localStorage.removeItem(MOCK_SESSION_KEY);
-        }
+  const fetchUserProfile = useCallback(async (firebaseUser: FirebaseUser): Promise<UserProfile | null> => {
+    const userDocRef = doc(db, 'users', firebaseUser.uid);
+    const docSnap = await getDoc(userDocRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as UserProfile;
     }
-    setIsLoading(false);
+    return null;
   }, []);
-  
+
   const handleAuthRedirect = useCallback((loggedInUser: FirebaseUser | null) => {
     if (loggedInUser) {
         if (pathname === '/login' || pathname === '/register') {
@@ -62,65 +63,118 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }
   },[pathname, router]);
-  
-  const createMockSession = (name: string, email: string, photoURL: string | null = null) => {
-      const uid = `mock_user_${email}`; // Use email to make mock UID consistent
-      const mockUser: FirebaseUser = { uid, email, displayName: name, photoURL };
-      const mockProfile: UserProfile = { name, email, photoURL };
-      setUser(mockUser);
-      setUserProfile(mockProfile);
-      localStorage.setItem(MOCK_SESSION_KEY, JSON.stringify({ user: mockUser, userProfile: mockProfile }));
-      handleAuthRedirect(mockUser);
-      return mockUser;
-  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        const profile = await fetchUserProfile(firebaseUser);
+        setUserProfile(profile);
+      } else {
+        setUser(null);
+        setUserProfile(null);
+      }
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, [fetchUserProfile]);
 
   const login = useCallback(async (email: string, pass: string): Promise<FirebaseUser> => {
-    await new Promise(res => setTimeout(res, 500));
-    // In a real app, you would validate the password. Here, we just log in.
-    if (!email || !pass) {
-        throw new Error("Email and password are required.");
-    }
-    return createMockSession('Mock User', email);
+    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+    handleAuthRedirect(userCredential.user);
+    return userCredential.user;
   }, [handleAuthRedirect]);
 
-  const register = useCallback(async (name: string, email: string, pass:string): Promise<FirebaseUser> => {
-    await new Promise(res => setTimeout(res, 500));
-    if (!name || !email || !pass) {
-        throw new Error("All fields are required for registration.");
-    }
-    return createMockSession(name, email);
+  const register = useCallback(async (name: string, email: string, pass: string): Promise<FirebaseUser> => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+    const { user: firebaseUser } = userCredential;
+    
+    await updateFirebaseProfile(firebaseUser, { displayName: name });
+    
+    const profileData = {
+      uid: firebaseUser.uid,
+      name,
+      email,
+      photoURL: firebaseUser.photoURL || null
+    };
+    
+    await setDoc(doc(db, "users", firebaseUser.uid), { ...profileData, createdAt: serverTimestamp() });
+    
+    setUser(firebaseUser);
+    setUserProfile(profileData);
+    handleAuthRedirect(firebaseUser);
+    return firebaseUser;
   }, [handleAuthRedirect]);
   
   const googleLogin = useCallback(async (): Promise<FirebaseUser> => {
-    await new Promise(res => setTimeout(res, 500));
-    const photoURL = `https://i.pravatar.cc/150?u=google.user@example.com`;
-    return createMockSession('Google User', 'google.user@example.com', photoURL);
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const { user: firebaseUser } = result;
+
+    const userDocRef = doc(db, 'users', firebaseUser.uid);
+    const docSnap = await getDoc(userDocRef);
+
+    if (!docSnap.exists()) {
+      await setDoc(userDocRef, {
+        uid: firebaseUser.uid,
+        name: firebaseUser.displayName,
+        email: firebaseUser.email,
+        photoURL: firebaseUser.photoURL,
+        createdAt: serverTimestamp()
+      });
+    }
+
+    handleAuthRedirect(firebaseUser);
+    return firebaseUser;
   }, [handleAuthRedirect]);
 
   const logout = useCallback(async () => {
-    setUser(null);
-    setUserProfile(null);
-    localStorage.removeItem(MOCK_SESSION_KEY);
+    await signOut(auth);
     router.push('/');
   }, [router]);
 
-  const updateUserProfile = useCallback((data: Partial<UserProfile>) => {
-    setUser(prev => prev ? { ...prev, ...data } : null);
-    setUserProfile(prev => prev ? { ...prev, ...data } : null);
-    const storedSession = localStorage.getItem(MOCK_SESSION_KEY);
-    if (storedSession) {
-        try {
-            const sessionData = JSON.parse(storedSession);
-            const updatedSession = {
-                user: { ...sessionData.user, ...data },
-                userProfile: { ...sessionData.userProfile, ...data }
-            };
-            localStorage.setItem(MOCK_SESSION_KEY, JSON.stringify(updatedSession));
-        } catch (e) {
-            console.error("Failed to update session in local storage", e);
-        }
+  const updateUserProfile = useCallback(async (data: Partial<UserProfile> & { newPhotoDataUrl?: string }) => {
+    if (!user) {
+        toast({ title: 'You must be logged in.', variant: 'destructive' });
+        return;
     }
-  }, []);
+
+    const { newPhotoDataUrl, ...profileData } = data;
+    let photoURL = userProfile?.photoURL;
+    
+    if (newPhotoDataUrl) {
+      const storageRef = ref(storage, `profile_pictures/${user.uid}`);
+      try {
+        await uploadString(storageRef, newPhotoDataUrl, 'data_url');
+        photoURL = await getDownloadURL(storageRef);
+      } catch (error) {
+        console.error("Error uploading profile picture: ", error);
+        toast({ title: 'Image Upload Failed', description: 'Could not upload your new picture.', variant: 'destructive'});
+        return; // Exit if upload fails
+      }
+    }
+
+    const finalProfileData = { ...profileData, photoURL: photoURL !== undefined ? photoURL : userProfile?.photoURL };
+
+    // Update Firebase Auth profile
+    await updateFirebaseProfile(user, {
+      displayName: finalProfileData.name,
+      photoURL: finalProfileData.photoURL,
+    });
+    
+    // Update Firestore profile
+    const userDocRef = doc(db, 'users', user.uid);
+    await updateDoc(userDocRef, finalProfileData);
+
+    // Update local state
+    setUserProfile(prev => prev ? { ...prev, ...finalProfileData } : null);
+    
+    if (data.name !== userProfile?.name) {
+       toast({ title: 'Profile Updated!', description: 'Your personal details have been saved.' });
+    }
+
+  }, [user, userProfile, toast]);
+
 
   return (
     <AuthContext.Provider value={{ user, userProfile, isLoading, login, register, googleLogin, logout, updateUserProfile }}>

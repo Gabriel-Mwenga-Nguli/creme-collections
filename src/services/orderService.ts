@@ -1,7 +1,8 @@
 
 'use server';
 
-import { Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, getDocs, doc, getDoc, query, where, Timestamp, serverTimestamp, orderBy } from 'firebase/firestore';
 
 export interface OrderItem {
   productId: string;
@@ -41,54 +42,79 @@ export interface OrderAdminItem extends Order {
     userEmail?: string;
 }
 
-const MOCK_ORDERS: Order[] = [
-    { 
-        id: 'mock_ord_1', userId: 'mock_user_google.user@example.com', orderId: 'CR12345', totalAmount: 15498, status: 'Delivered', orderDate: new Date('2024-06-20T10:30:00Z'),
-        items: [
-            { productId: 'loy-1', name: 'Modern Smartwatch Series X', quantity: 1, priceAtPurchase: 12999, image: '/images/products/smartwatch_main.png' },
-            { productId: 'loy-2', name: 'Classic Men\'s Polo Shirt', quantity: 1, priceAtPurchase: 2499, image: '/images/products/polo_shirt_blue.png' },
-        ],
-        shippingAddress: { name: 'Google User', addressLine1: '123 Test St', city: 'Nairobi', postalCode: '00100', phone: '+254712345678' } 
-    },
-    { 
-        id: 'mock_ord_2', userId: 'mock_user_google.user@example.com', orderId: 'CR12346', totalAmount: 19999, status: 'Shipped', orderDate: new Date('2024-06-22T15:00:00Z'),
-        items: [
-            { productId: 'loy-4', name: 'Wireless Noise-Cancelling Headphones', quantity: 1, priceAtPurchase: 19999, image: '/images/products/headphones.png' },
-        ],
-        shippingAddress: { name: 'Google User', addressLine1: '456 Second Ave', city: 'Nairobi', postalCode: '00200', phone: '+254712345678' } 
-    },
-];
+const fromFirestore = (docSnap: any): Order => {
+  const data = docSnap.data();
+  return {
+    id: docSnap.id,
+    ...data,
+    orderDate: data.orderDate instanceof Timestamp ? data.orderDate.toDate() : new Date(),
+  } as Order;
+};
+
 
 export async function getUserOrders(userId: string): Promise<Order[]> {
-  console.log(`[Mock Service] Called getUserOrders for user ${userId}.`);
-  // Return mock orders for a specific mock user for demonstration
-  const userOrders = MOCK_ORDERS.filter(order => order.userId === userId);
-  return userOrders;
+    if (!userId) return [];
+    
+    const ordersRef = collection(db, "orders");
+    const q = query(ordersRef, where("userId", "==", userId), orderBy("orderDate", "desc"));
+
+    try {
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(fromFirestore);
+    } catch (error) {
+        console.error("Error fetching user orders:", error);
+        return [];
+    }
 }
 
 export async function getOrderDetails(orderId: string, userId?: string): Promise<Order | null> {
-  console.log(`[Mock Service] Called getOrderDetails for order ${orderId}.`);
-  const order = MOCK_ORDERS.find(o => o.id === orderId);
-  
-  if (order) {
-      // If a userId is provided, ensure the order belongs to that user
-      if (userId && order.userId !== userId) {
-          return null;
-      }
-      return order;
+  const docRef = doc(db, "orders", orderId);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const order = fromFirestore(docSnap);
+    // If a userId is provided, ensure the order belongs to that user (for security)
+    if (userId && order.userId !== userId) {
+        return null;
+    }
+    return order;
   }
   return null;
 }
 
+
 export async function getAllOrdersForAdmin(countLimit?: number): Promise<OrderAdminItem[]> {
-  console.log(`[Mock Service] Called getAllOrdersForAdmin. Firestore is disabled.`);
-  return [];
+  const ordersRef = collection(db, "orders");
+  const q = query(ordersRef, orderBy("orderDate", "desc"));
+
+  try {
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => fromFirestore(doc) as OrderAdminItem);
+  } catch(e) {
+      console.error("Error fetching all orders: ", e);
+      return [];
+  }
 }
 
+
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus): Promise<boolean> {
-  console.log(`[Mock Service] Called updateOrderStatus for order ${orderId}. Firestore is disabled.`);
-  return true;
+  const orderRef = doc(db, "orders", orderId);
+  try {
+      await updateDoc(orderRef, { status: newStatus });
+      return true;
+  } catch(e) {
+      console.error(`Error updating order status for ${orderId}: `, e);
+      return false;
+  }
 }
+
+function generateReadableOrderId(): string {
+  const prefix = "CR";
+  const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+  const random = Math.floor(Math.random() * 900 + 100).toString(); // 3 random digits
+  return `${prefix}${timestamp}${random}`;
+}
+
 
 export async function createOrder(
     userId: string,
@@ -97,6 +123,21 @@ export async function createOrder(
     totalAmount: number,
     shippingAddress: OrderShippingAddress
 ): Promise<string | null> {
-  console.log('[DEV MODE] createOrder called. Firestore is disabled.');
-  return `mock_order_${Date.now()}`;
+  try {
+    const docRef = await addDoc(collection(db, 'orders'), {
+        userId,
+        userEmail: userEmail || 'N/A',
+        items,
+        totalAmount,
+        shippingAddress,
+        status: 'Pending',
+        orderDate: serverTimestamp(),
+        orderId: generateReadableOrderId(),
+    });
+    console.log("Order created with ID: ", docRef.id);
+    return docRef.id;
+  } catch (error) {
+      console.error("Error creating order: ", error);
+      return null;
+  }
 }

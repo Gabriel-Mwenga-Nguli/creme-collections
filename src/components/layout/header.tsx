@@ -125,6 +125,10 @@ export default function Header() {
     logout();
   };
 
+  const getInitials = (name: string | null | undefined) => {
+    return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container max-w-screen-2xl px-4 sm:px-6 lg:px-8">
@@ -158,8 +162,8 @@ export default function Header() {
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                         <Avatar className="h-8 w-8">
-                           <AvatarImage src={`https://i.pravatar.cc/150?u=${user.email}`} alt={userProfile.name} />
-                           <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
+                           <AvatarImage src={userProfile.photoURL || undefined} alt={userProfile.name} />
+                           <AvatarFallback>{getInitials(userProfile.name)}</AvatarFallback>
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
