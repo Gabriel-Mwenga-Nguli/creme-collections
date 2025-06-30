@@ -9,7 +9,7 @@ export const ai = genkit({
   plugins: [
     googleAI({apiKey: process.env.GOOGLE_API_KEY}),
   ],
-  model: 'googleai/gemini-2.0-flash', // Default model for generate requests
+  model: 'googleai/gemini-1.5-flash', // Default model for generate requests
   flowStateStore: 'memory',
   traceStore: 'memory',
 });
