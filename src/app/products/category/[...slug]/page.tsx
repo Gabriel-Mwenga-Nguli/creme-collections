@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import ProductCard from '@/components/features/home/product-card';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Home, SlidersHorizontal } from 'lucide-react'; // Added SlidersHorizontal
-import { CATEGORY_NAV_LINKS } from '@/lib/constants';
+import { CATEGORY_LINKS_DATA } from '@/lib/nav-data'; // Use icon-free data
 import { getAllProducts, type Product } from '@/services/productService'; 
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet'; // For mobile filters
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'; // For filter card look
@@ -29,7 +29,7 @@ function getCategoryInfo(slug: string[]) {
   const categorySlug = slug[0];
   const subCategorySlug = slug[1];
 
-  const category = CATEGORY_NAV_LINKS.find(cat => cat.href.endsWith(categorySlug));
+  const category = CATEGORY_LINKS_DATA.find(cat => cat.href.endsWith(categorySlug));
   if (!category) return null;
 
   if (subCategorySlug) {
