@@ -174,7 +174,7 @@ export const PROFILE_NAV_LINKS: NavLink[] = [
   { href: "/profile/address", label: "Address Book", icon: MapPin },
   { href: "/profile/inbox", label: "Inbox", icon: Inbox },
   { href: "/profile/support", label: "AI Support", icon: Bot },
-  { href: "/wishlist", label: "Wishlist", icon: Heart },
+  { href: "/profile/wishlist", label: "Wishlist", icon: Heart },
   { href: "/profile/settings", label: "Settings", icon: Settings },
 ];
 
