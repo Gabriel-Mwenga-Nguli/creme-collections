@@ -1,9 +1,10 @@
 
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
-import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
+// import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
 
-enableFirebaseTelemetry();
+// Telemetry is temporarily disabled to resolve a build issue.
+// enableFirebaseTelemetry();
 
 export const ai = genkit({
   plugins: [
