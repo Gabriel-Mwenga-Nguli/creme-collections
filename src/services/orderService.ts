@@ -51,9 +51,9 @@ const MOCK_ORDERS: Order[] = [
         shippingAddress: { name: 'Google User', addressLine1: '123 Test St', city: 'Nairobi', postalCode: '00100', phone: '+254712345678' } 
     },
     { 
-        id: 'mock_ord_2', userId: 'mock_user_google.user@example.com', orderId: 'CR12346', totalAmount: 2499, status: 'Shipped', orderDate: new Date('2024-06-22T15:00:00Z'),
+        id: 'mock_ord_2', userId: 'mock_user_google.user@example.com', orderId: 'CR12346', totalAmount: 19999, status: 'Shipped', orderDate: new Date('2024-06-22T15:00:00Z'),
         items: [
-            { productId: 'loy-2', name: 'Classic Men\'s Polo Shirt', quantity: 1, priceAtPurchase: 2499, image: '/images/products/polo_shirt_blue.png' },
+            { productId: 'loy-4', name: 'Wireless Noise-Cancelling Headphones', quantity: 1, priceAtPurchase: 19999, image: '/images/products/headphones.png' },
         ],
         shippingAddress: { name: 'Google User', addressLine1: '456 Second Ave', city: 'Nairobi', postalCode: '00200', phone: '+254712345678' } 
     },

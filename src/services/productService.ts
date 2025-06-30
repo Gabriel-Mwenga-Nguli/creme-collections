@@ -98,6 +98,8 @@ export async function getPromotions(): Promise<PromoSlideProps[]> {
     ];
 }
 
+// These functions are no longer needed as they write to the database.
+// They are kept here but return dummy data to avoid breaking imports.
 export async function addProduct(productData: Omit<Product, 'id' | 'createdAt'>): Promise<string | null> {
   console.log("[DEV MODE] addProduct is a mock function and does not write to Loyverse. Data:", productData);
   return `mock_product_id_${Date.now()}`;

@@ -1,20 +1,31 @@
 
 "use client";
 
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { User, Shield, Award, Edit, Loader2 } from 'lucide-react';
+import { User, Shield, Award, Edit, Loader2, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function MyAccountPage() {
   const { toast } = useToast();
-  const { user, userProfile, isLoading } = useAuth();
+  const { user, userProfile, isLoading, updateUserProfile } = useAuth();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [name, setName] = useState(userProfile?.name || '');
+  const [profilePic, setProfilePic] = useState<string | null>(userProfile?.photoURL || null);
+
+  useEffect(() => {
+    setName(userProfile?.name || '');
+    setProfilePic(userProfile?.photoURL || null);
+  }, [userProfile]);
 
   if (isLoading) {
     return (
@@ -25,17 +36,39 @@ export default function MyAccountPage() {
   }
 
   if (!user || !userProfile) {
-    // This should ideally not happen if layout protects the route, but as a fallback:
     router.push('/login');
     return null;
   }
 
-  const handleUpdate = (feature: string) => {
+  const handleProfileUpdate = () => {
+    updateUserProfile({ name, photoURL: profilePic });
+    toast({
+      title: `Profile Updated`,
+      description: `Your profile details have been updated.`,
+    });
+  };
+
+  const handlePasswordUpdate = () => {
     toast({
       title: `Update Simulated`,
-      description: `${feature} details have been "updated" for this session.`,
+      description: `Password details have been "updated" for this session.`,
     });
   }
+
+  const handlePictureUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
 
   return (
     <div className="space-y-6">
@@ -46,22 +79,40 @@ export default function MyAccountPage() {
           </CardTitle>
           <CardDescription>Manage your personal details. Click "Save" to simulate an update.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={profilePic || undefined} alt={name} />
+              <AvatarFallback className="text-2xl">
+                {getInitials(name)}
+              </AvatarFallback>
+            </Avatar>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+              <Camera className="mr-2 h-4 w-4" /> Change Picture
+            </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handlePictureUpload}
+              className="hidden"
+              accept="image/png, image/jpeg"
+            />
+          </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="fullName">Full Name</Label>
-              <Input id="fullName" defaultValue={userProfile.name} />
+              <Input id="fullName" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div>
               <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" defaultValue={userProfile.email} disabled />
+              <Input id="email" type="email" value={userProfile.email} disabled />
             </div>
           </div>
           <div>
             <Label htmlFor="phone">Phone Number</Label>
             <Input id="phone" type="tel" placeholder="+254 7XX XXX XXX" />
           </div>
-          <Button onClick={() => handleUpdate('Profile')}>Save Changes</Button>
+          <Button onClick={handleProfileUpdate}>Save Changes</Button>
         </CardContent>
       </Card>
 
@@ -94,7 +145,7 @@ export default function MyAccountPage() {
             <Label htmlFor="new-password">New Password</Label>
             <Input id="new-password" type="password" />
           </div>
-          <Button onClick={() => handleUpdate('Password')}>Update Password</Button>
+          <Button onClick={handlePasswordUpdate}>Update Password</Button>
         </CardContent>
       </Card>
     </div>

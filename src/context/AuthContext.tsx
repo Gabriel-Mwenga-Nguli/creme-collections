@@ -5,8 +5,18 @@ import React, { createContext, useContext, useState, ReactNode, useCallback, use
 import { useRouter, usePathname } from 'next/navigation';
 
 // Mock user types for frontend-only mode
-export type FirebaseUser = { uid: string; email: string; displayName: string; };
-export type UserProfile = { name: string; email: string; };
+export type FirebaseUser = { 
+  uid: string; 
+  email: string | null; 
+  displayName: string | null; 
+  photoURL?: string | null; 
+};
+
+export type UserProfile = { 
+  name: string; 
+  email: string;
+  photoURL?: string | null;
+};
 
 
 interface AuthContextType {
@@ -17,6 +27,7 @@ interface AuthContextType {
   register: (name: string, email: string, pass: string) => Promise<FirebaseUser>;
   googleLogin: () => Promise<FirebaseUser>;
   logout: () => Promise<void>;
+  updateUserProfile: (data: Partial<UserProfile>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,10 +63,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   },[pathname, router]);
   
-  const createMockSession = (name: string, email: string) => {
+  const createMockSession = (name: string, email: string, photoURL: string | null = null) => {
       const uid = `mock_user_${email}`; // Use email to make mock UID consistent
-      const mockUser = { uid, email, displayName: name };
-      const mockProfile = { name, email };
+      const mockUser: FirebaseUser = { uid, email, displayName: name, photoURL };
+      const mockProfile: UserProfile = { name, email, photoURL };
       setUser(mockUser);
       setUserProfile(mockProfile);
       localStorage.setItem(MOCK_SESSION_KEY, JSON.stringify({ user: mockUser, userProfile: mockProfile }));
@@ -82,7 +93,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   const googleLogin = useCallback(async (): Promise<FirebaseUser> => {
     await new Promise(res => setTimeout(res, 500));
-    return createMockSession('Google User', 'google.user@example.com');
+    const photoURL = `https://i.pravatar.cc/150?u=google.user@example.com`;
+    return createMockSession('Google User', 'google.user@example.com', photoURL);
   }, [handleAuthRedirect]);
 
   const logout = useCallback(async () => {
@@ -92,8 +104,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     router.push('/');
   }, [router]);
 
+  const updateUserProfile = useCallback((data: Partial<UserProfile>) => {
+    setUser(prev => prev ? { ...prev, ...data } : null);
+    setUserProfile(prev => prev ? { ...prev, ...data } : null);
+    const storedSession = localStorage.getItem(MOCK_SESSION_KEY);
+    if (storedSession) {
+        try {
+            const sessionData = JSON.parse(storedSession);
+            const updatedSession = {
+                user: { ...sessionData.user, ...data },
+                userProfile: { ...sessionData.userProfile, ...data }
+            };
+            localStorage.setItem(MOCK_SESSION_KEY, JSON.stringify(updatedSession));
+        } catch (e) {
+            console.error("Failed to update session in local storage", e);
+        }
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, userProfile, isLoading, login, register, googleLogin, logout }}>
+    <AuthContext.Provider value={{ user, userProfile, isLoading, login, register, googleLogin, logout, updateUserProfile }}>
       {children}
     </AuthContext.Provider>
   );
