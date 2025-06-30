@@ -183,7 +183,7 @@ const HeroSlider = () => {
               style={{ objectFit: 'cover' }}
               priority={index === 0}
               className={cn(
-                "transition-transform duration-[7s] ease-linear", // Ken burns duration
+                "transition-transform duration-[7000ms] ease-linear", // Ken burns duration
                 index === currentIndex ? 'scale-110 animate-kenburns' : 'scale-100' // Apply animation only to current slide
               )}
               data-ai-hint={slide.dataAiHint}
