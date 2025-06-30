@@ -1,23 +1,22 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Inbox } from 'lucide-react';
+"use client";
+
+import { useAuth } from '@/context/AuthContext';
+import InboxView from '@/components/features/profile/InboxView';
+import { Loader2 } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 export default function InboxPage() {
-  return (
-    <Card className="shadow-lg h-full flex flex-col min-h-[400px]">
-      <CardHeader>
-        <CardTitle className="text-xl font-headline flex items-center">
-          <Inbox className="mr-2 h-5 w-5 text-primary" /> My Inbox
-        </CardTitle>
-        <CardDescription>View messages from sellers and customer support.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow flex items-center justify-center">
-        <div className="text-center text-muted-foreground">
-          <Inbox className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
-          <p>Your inbox is empty.</p>
-           <p className="text-sm">This feature is for demonstration purposes.</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
+    const { user, isLoading } = useAuth();
+
+    if(isLoading) {
+        return (
+            <Card className="shadow-lg h-full flex items-center justify-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </Card>
+        );
+    }
+    
+    // The InboxView component will handle the case where user is null
+    return <InboxView userId={user?.uid || null} userEmail={user?.email || null} />;
 }
