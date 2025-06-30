@@ -34,17 +34,17 @@ export default function ProfileLayout({
   return (
     <div className="bg-muted/30">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="bg-card p-6 rounded-2xl shadow-lg mb-8">
+        <div className="bg-gradient-to-br from-primary via-primary/80 to-secondary p-6 rounded-2xl shadow-lg mb-8 text-primary-foreground dark:from-slate-800 dark:via-slate-800/80 dark:to-slate-900 dark:text-primary-foreground">
             <div className="flex flex-col sm:flex-row items-center gap-4">
-                <Avatar className="h-20 w-20 md:h-24 md:w-24 border-4 border-primary/50">
-                  <AvatarImage src={userProfile?.photoURL || undefined} alt={userProfile?.name} />
-                  <AvatarFallback className="text-3xl bg-secondary text-secondary-foreground">
+                <Avatar className="h-20 w-20 md:h-24 md:w-24 border-4 border-primary-foreground/50">
+                  <AvatarImage src={userProfile?.photoURL || undefined} alt={userProfile?.name} className="object-cover"/>
+                  <AvatarFallback className="text-3xl bg-secondary text-secondary-foreground dark:bg-slate-700 dark:text-slate-200">
                     {getInitials(userProfile?.name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="text-center sm:text-left">
-                    <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">{userProfile?.name}</h1>
-                    <p className="text-md text-muted-foreground">{userProfile?.email}</p>
+                    <h1 className="text-2xl md:text-3xl font-bold font-headline">{userProfile?.name}</h1>
+                    <p className="text-md opacity-80">{userProfile?.email}</p>
                 </div>
             </div>
         </div>

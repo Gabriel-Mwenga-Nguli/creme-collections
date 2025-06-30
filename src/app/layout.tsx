@@ -10,6 +10,7 @@ import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { AdminAuthProvider } from '@/context/AdminAuthContext';
 import ChatWidget from '@/components/features/chat/ChatWidget';
+import ShopOfferPopup from '@/components/features/home/ShopOfferPopup';
 
 
 export const metadata: Metadata = {
@@ -49,6 +50,7 @@ export default function RootLayout({
                 <Footer />
                 <Toaster />
                 <ChatWidget />
+                <ShopOfferPopup />
               </CartProvider>
             </AuthProvider>
           </AdminAuthProvider>
