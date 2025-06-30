@@ -17,6 +17,7 @@ interface LoyverseRawProduct {
   item_name: string;
   description?: string; // Loyverse might have a different field for long description
   category_name?: string;
+  category_slug?: string;
   // Loyverse uses variants for different prices, stock levels per option
   variants: Array<{
     variant_id: string;
@@ -39,8 +40,61 @@ interface LoyverseRawProduct {
   is_featured_custom_field?: boolean; // Example conceptual field
   is_weekly_deal_custom_field?: boolean; // Example conceptual field
   created_at?: string; // ISO date string
+  brand?: string;
   // Add other relevant fields from Loyverse: barcode, tags, etc.
 }
+
+const MOCK_LOYVERSE_PRODUCTS: LoyverseRawProduct[] = [
+    { 
+        id: 'loy-1', item_name: 'Modern Smartwatch Series X', description: 'Sleek smartwatch with advanced health tracking and notifications.', 
+        variants: [{variant_id: 'v1_1', sku: 'LV-SWX-01', price: 12999, stock_level: 50, base_price: 15999 }], 
+        category_name: 'Electronics', category_slug: 'electronics', brand: 'TechNova',
+        image_url: '/images/products/smartwatch_main.png', image_urls: ['/images/products/smartwatch_main.png', '/images/products/smartwatch_side.png'],
+        is_featured_custom_field: true, is_weekly_deal_custom_field: false
+    },
+    { 
+        id: 'loy-2', item_name: 'Classic Men\'s Polo Shirt', description: 'Comfortable and stylish polo shirt for everyday wear.', 
+        variants: [{variant_id: 'v2_1', sku: 'LV-POLO-01', price: 2499, stock_level: 120, base_price: 3200 }], 
+        category_name: 'Fashion', category_slug: 'fashion', brand: 'UrbanStyle',
+        image_url: '/images/products/polo_shirt_blue.png', image_urls: ['/images/products/polo_shirt_blue.png', '/images/products/polo_shirt_green.png'],
+        is_featured_custom_field: false, is_weekly_deal_custom_field: true
+    },
+    { 
+        id: 'loy-3', item_name: 'Stainless Steel Cookware Set', description: 'Durable 10-piece cookware set for the modern kitchen.', 
+        variants: [{variant_id: 'v3_1', sku: 'LV-COOK-01', price: 7999, stock_level: 30, base_price: 9500 }], 
+        category_name: 'Home & Living', category_slug: 'home-living', brand: 'KitchenMaster',
+        image_url: '/images/products/cookware_set.png',
+        is_featured_custom_field: true, is_weekly_deal_custom_field: false
+    },
+    { 
+        id: 'loy-4', item_name: 'Wireless Noise-Cancelling Headphones', description: 'Immersive audio experience, free from distractions.', 
+        variants: [{variant_id: 'v4_1', sku: 'LV-HP-01', price: 19999, stock_level: 40, base_price: 24000 }], 
+        category_name: 'Electronics', category_slug: 'electronics', brand: 'AudioPhile',
+        image_url: '/images/products/headphones.png',
+        is_featured_custom_field: true, is_weekly_deal_custom_field: true
+    },
+    { 
+        id: 'loy-5', item_name: 'Organic Green Tea', description: '25 bags of premium organic green tea, rich in antioxidants.', 
+        variants: [{variant_id: 'v5_1', sku: 'LV-TEA-01', price: 599, stock_level: 200, base_price: 750 }], 
+        category_name: 'Groceries', category_slug: 'groceries', brand: 'PureLeaf',
+        image_url: '/images/products/green_tea.png',
+        is_featured_custom_field: false, is_weekly_deal_custom_field: true
+    },
+    {
+        id: 'loy-6', item_name: 'Leather Messenger Bag', description: 'Stylish and durable bag for work or travel.',
+        variants: [{ variant_id: 'v6_1', sku: 'LV-BAG-01', price: 6500, stock_level: 25, base_price: 8000 }],
+        category_name: 'Fashion', category_slug: 'fashion', brand: 'UrbanStyle',
+        image_url: 'https://placehold.co/600x400.png',
+        is_featured_custom_field: true,
+    },
+    {
+        id: 'loy-7', item_name: '4K Ultra HD Action Camera', description: 'Capture your adventures in stunning detail.',
+        variants: [{ variant_id: 'v7_1', sku: 'LV-CAM-01', price: 14500, stock_level: 35, base_price: 17000 }],
+        category_name: 'Electronics', category_slug: 'electronics', brand: 'TechNova',
+        image_url: 'https://placehold.co/600x400.png',
+        is_weekly_deal_custom_field: true,
+    }
+];
 
 /**
  * Placeholder function to simulate fetching products from Loyverse API.
@@ -52,76 +106,32 @@ async function fetchProductsFromLoyverseAPI(
   filters?: { categoryId?: string; featured?: boolean; weeklyDeal?: boolean, limit?: number, ids?: string[] }
 ): Promise<LoyverseRawProduct[]> {
   if (!apiKey || apiKey === "YOUR_LOYVERSE_API_KEY_PLEASE_REPLACE_IN_DOT_ENV_LOCAL") {
+    console.warn("Loyverse API key is not set. Returning empty array.");
     return [];
   }
 
-  // Example endpoint (conceptual, replace with actual Loyverse endpoint)
-  let url = `${LOYVERSE_API_BASE_URL}/items`;
-  const params = new URLSearchParams();
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 50)); 
+
+  let results = MOCK_LOYVERSE_PRODUCTS;
+  
+  if (filters?.ids?.length) {
+    results = results.filter(p => filters.ids!.includes(p.id));
+  }
+  
+  if (filters?.featured) {
+    results = results.filter(p => p.is_featured_custom_field);
+  }
+
+  if (filters?.weeklyDeal) {
+    results = results.filter(p => p.is_weekly_deal_custom_field);
+  }
+
   if (filters?.limit) {
-    params.append('limit', String(filters.limit));
+    results = results.slice(0, filters.limit);
   }
-  if (filters?.ids && filters.ids.length > 0) {
-    // Loyverse API might have a specific way to fetch multiple items by ID
-    // This is a conceptual example:
-    // url = `${LOYVERSE_API_BASE_URL}/items?ids=${filters.ids.join(',')}`;
-    // For now, we'll just return all and filter later, or return empty for placeholder.
-    // return []; // Or fetch all and filter client-side in this conceptual stage.
-  }
-  // Add other filter parameters as needed based on Loyverse API capabilities
-  // e.g., params.append('category_id', filters.categoryId);
-
-  if (params.toString()) {
-    url += `?${params.toString()}`;
-  }
-
-  try {
-    // const response = await fetch(url, {
-    //   headers: {
-    //     'Authorization': `Bearer ${apiKey}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    // });
-    // if (!response.ok) {
-    //   return [];
-    // }
-    // const data = await response.json();
-    // return data.items || []; // Adjust based on actual API response structure
-
-    // Placeholder: Return mock data
-    await new Promise(resolve => setTimeout(resolve, 50)); // Simulate network delay
-    
-    // If fetching specific IDs, this mock needs to be smarter or return empty
-    if (filters?.ids && filters.ids.length > 0) {
-        const mockSingleProduct: LoyverseRawProduct = {
-            id: filters.ids[0], item_name: `Loyverse Product ${filters.ids[0]}`,
-            description: 'A great product from Loyverse.',
-            variants: [{ variant_id: 'v1', price: 1200, stock_level: 15, base_price: 1500 }],
-            image_url: 'https://placehold.co/600x400.png?text=Loyverse+Item',
-        };
-        return [mockSingleProduct];
-    }
-
-
-    const mockData: LoyverseRawProduct[] = [
-      { id: 'loyverse_prod_1', item_name: 'Loyverse T-Shirt (Red)', description: 'Comfy red t-shirt from Loyverse.', variants: [{variant_id: 'v1', sku: 'LV001', price: 1500, stock_level: 10, base_price: 2000 }], category_name: 'Fashion', image_url: 'https://placehold.co/600x400.png?text=Red+T-Shirt' },
-      { id: 'loyverse_prod_2', item_name: 'Loyverse Coffee Mug', description: 'Standard coffee mug, Loyverse branded.', variants: [{variant_id: 'v2', sku: 'LV002', price: 800, stock_level: 25, base_price: 1000 }], category_name: 'Home Goods', image_url: 'https://placehold.co/600x400.png?text=Coffee+Mug', is_featured_custom_field: true },
-      { id: 'loyverse_prod_3', item_name: 'Loyverse Super Widget', description: 'Amazing widget for all your needs.', variants: [{variant_id: 'v3', sku: 'LV003', price: 3500, stock_level: 5, base_price: 4000 }], category_name: 'Electronics', image_url: 'https://placehold.co/600x400.png?text=Widget', is_weekly_deal_custom_field: true},
-    ];
-    
-    let filteredMockData = mockData;
-    if (filters?.featured) {
-        filteredMockData = filteredMockData.filter(p => p.is_featured_custom_field);
-    }
-    if (filters?.weeklyDeal) {
-        filteredMockData = filteredMockData.filter(p => p.is_weekly_deal_custom_field);
-    }
-
-    return filters?.limit ? filteredMockData.slice(0, filters.limit) : filteredMockData;
-
-  } catch (error) {
-    return [];
-  }
+  
+  return results;
 }
 
 /**
@@ -148,18 +158,17 @@ function transformLoyverseProduct(rawProduct: LoyverseRawProduct): Product {
     reviewsCount: 0,
     availability: (primaryVariant?.stock_level ?? 0) > 0 ? 'In Stock' : 'Out of Stock',
     category: rawProduct.category_name || 'Uncategorized',
-    categorySlug: rawProduct.category_name?.toLowerCase().replace(/\s+/g, '-') || 'uncategorized',
+    categorySlug: rawProduct.category_slug,
     // SubCategory and Brand might also be custom fields or derived
     subCategory: undefined, 
     subCategorySlug: undefined,
-    brand: undefined, // Loyverse might have a 'manufacturer' field or similar
+    brand: rawProduct.brand,
     stock: primaryVariant?.stock_level,
     sku: primaryVariant?.sku,
     // isFeatured and isWeeklyDeal depend on how you manage this in Loyverse (e.g., tags, custom fields)
     isFeatured: rawProduct.is_featured_custom_field || false,
     isWeeklyDeal: rawProduct.is_weekly_deal_custom_field || false,
-    // CreatedAt might need conversion if Loyverse provides it
-    // createdAt: rawProduct.created_at ? Timestamp.fromDate(new Date(rawProduct.created_at)) : undefined,
+    createdAt: rawProduct.created_at ? new Date(rawProduct.created_at) : undefined,
   };
 }
 
@@ -197,12 +206,10 @@ export async function getProductByIdFromLoyverse(id: string): Promise<Product | 
     return null;
   }
   
-  // Conceptual: Loyverse API might have a direct /items/{id} endpoint
-  // For this placeholder, we'll use the filter mechanism of our mock.
   try {
     const rawProducts = await fetchProductsFromLoyverseAPI(apiKey, { ids: [id] });
     if (rawProducts && rawProducts.length > 0) {
-      const product = rawProducts.find(p => p.id === id); // Ensure correct product if API returns multiple
+      const product = rawProducts.find(p => p.id === id);
       return product ? transformLoyverseProduct(product) : null;
     }
     return null;
@@ -210,11 +217,3 @@ export async function getProductByIdFromLoyverse(id: string): Promise<Product | 
     return null;
   }
 }
-
-// You would add more functions here for:
-// - Fetching categories from Loyverse
-// - Fetching customers from Loyverse
-// - Creating/updating orders in Loyverse
-// - Updating inventory in Loyverse
-// - etc.
-// Each would require understanding the specific Loyverse API endpoints and data structures.

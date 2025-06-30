@@ -41,22 +41,41 @@ export interface OrderAdminItem extends Order {
     userEmail?: string;
 }
 
+const MOCK_ORDERS: Order[] = [
+    { 
+        id: 'mock_ord_1', userId: 'mock_user_google.user@example.com', orderId: 'CR12345', totalAmount: 15498, status: 'Delivered', orderDate: new Date('2024-06-20T10:30:00Z'),
+        items: [
+            { productId: 'loy-1', name: 'Modern Smartwatch Series X', quantity: 1, priceAtPurchase: 12999, image: '/images/products/smartwatch_main.png' },
+            { productId: 'loy-2', name: 'Classic Men\'s Polo Shirt', quantity: 1, priceAtPurchase: 2499, image: '/images/products/polo_shirt_blue.png' },
+        ],
+        shippingAddress: { name: 'Google User', addressLine1: '123 Test St', city: 'Nairobi', postalCode: '00100', phone: '+254712345678' } 
+    },
+    { 
+        id: 'mock_ord_2', userId: 'mock_user_google.user@example.com', orderId: 'CR12346', totalAmount: 2499, status: 'Shipped', orderDate: new Date('2024-06-22T15:00:00Z'),
+        items: [
+            { productId: 'loy-2', name: 'Classic Men\'s Polo Shirt', quantity: 1, priceAtPurchase: 2499, image: '/images/products/polo_shirt_blue.png' },
+        ],
+        shippingAddress: { name: 'Google User', addressLine1: '456 Second Ave', city: 'Nairobi', postalCode: '00200', phone: '+254712345678' } 
+    },
+];
+
 export async function getUserOrders(userId: string): Promise<Order[]> {
-  console.log(`[Mock Service] Called getUserOrders for user ${userId}. Firestore is disabled.`);
+  console.log(`[Mock Service] Called getUserOrders for user ${userId}.`);
   // Return mock orders for a specific mock user for demonstration
-  if (userId.startsWith('mock_user')) {
-    return [
-      { id: 'mock_ord_1', userId, orderId: 'CR12345', totalAmount: 15498, status: 'Delivered', orderDate: new Date('2024-06-20T10:30:00Z'), items: [], shippingAddress: { name: 'Mock User', addressLine1: '123 Test St', city: 'Nairobi', postalCode: '00100', phone: '123456789' } },
-      { id: 'mock_ord_2', userId, orderId: 'CR12346', totalAmount: 2499, status: 'Shipped', orderDate: new Date('2024-06-22T15:00:00Z'), items: [], shippingAddress: { name: 'Mock User', addressLine1: '123 Test St', city: 'Nairobi', postalCode: '00100', phone: '123456789' } },
-    ];
-  }
-  return [];
+  const userOrders = MOCK_ORDERS.filter(order => order.userId === userId);
+  return userOrders;
 }
 
 export async function getOrderDetails(orderId: string, userId?: string): Promise<Order | null> {
-  console.log(`[Mock Service] Called getOrderDetails for order ${orderId}. Firestore is disabled.`);
-  if (orderId === 'mock_ord_1') {
-      return { id: 'mock_ord_1', userId: 'mock_user_1', orderId: 'CR12345', totalAmount: 15498, status: 'Delivered', orderDate: new Date('2024-06-20T10:30:00Z'), items: [], shippingAddress: { name: 'Mock User', addressLine1: '123 Test St', city: 'Nairobi', postalCode: '00100', phone: '123456789' } };
+  console.log(`[Mock Service] Called getOrderDetails for order ${orderId}.`);
+  const order = MOCK_ORDERS.find(o => o.id === orderId);
+  
+  if (order) {
+      // If a userId is provided, ensure the order belongs to that user
+      if (userId && order.userId !== userId) {
+          return null;
+      }
+      return order;
   }
   return null;
 }

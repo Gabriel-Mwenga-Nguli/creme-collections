@@ -10,6 +10,7 @@ import { ListOrdered, FileText, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getUserOrders, type Order } from '@/services/orderService';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 const statusVariantMap = {
   Delivered: 'default',
@@ -21,11 +22,14 @@ const statusVariantMap = {
 
 
 export default function OrdersPage() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
+    if (isAuthLoading) return; // Wait until auth state is resolved
+
     async function fetchOrders() {
       if (user) {
         setIsLoading(true);
@@ -33,12 +37,28 @@ export default function OrdersPage() {
         setOrders(userOrders);
         setIsLoading(false);
       } else {
-        setOrders([]);
-        setIsLoading(false);
+        // If no user, redirect to login. This page should be protected.
+        router.push('/login');
       }
     }
     fetchOrders();
-  }, [user]);
+  }, [user, isAuthLoading, router]);
+
+  if (isAuthLoading || isLoading) {
+      return (
+          <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-xl font-headline flex items-center">
+                    <ListOrdered className="mr-2 h-5 w-5 text-primary" /> My Orders
+                </CardTitle>
+                <CardDescription>View your order history and track current orders.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center items-center h-48">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </CardContent>
+          </Card>
+      );
+  }
 
   return (
     <Card className="shadow-lg">
@@ -49,11 +69,7 @@ export default function OrdersPage() {
         <CardDescription>View your order history and track current orders.</CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center items-center h-48">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : orders.length > 0 ? (
+        {orders.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -67,7 +83,7 @@ export default function OrdersPage() {
             <TableBody>
               {orders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">#{order.orderId?.substring(0, 8) || order.id.substring(0,8)}</TableCell>
+                  <TableCell className="font-medium">#{order.orderId || order.id.substring(0,8)}</TableCell>
                   <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Badge variant={statusVariantMap[order.status] || 'default'}>

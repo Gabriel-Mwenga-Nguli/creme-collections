@@ -1,56 +1,58 @@
 
+"use client";
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronLeft, Package, Home, User, Truck } from 'lucide-react';
+import { ChevronLeft, Package, Home, Truck, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
+import { getOrderDetails, type Order } from '@/services/orderService';
+import { notFound } from 'next/navigation';
 
-const mockOrder = {
-  id: 'ORD746352',
-  date: 'June 20, 2024',
-  status: 'Delivered',
-  total: 15498,
-  shippingAddress: {
-    name: 'Jane Doe',
-    addressLine1: '123 Riverside Drive, Apt 4B',
-    city: 'Nairobi',
-    phone: '+254 712 345678',
-  },
-  items: [
-    {
-      id: '1',
-      name: 'Modern Smartwatch Series X',
-      image: 'https://placehold.co/64x64.png',
-      dataAiHint: 'smartwatch technology',
-      price: 12999,
-      quantity: 1,
-    },
-    {
-      id: '2',
-      name: 'Classic Men\'s Polo Shirt',
-      image: 'https://placehold.co/64x64.png',
-      dataAiHint: 'men shirt',
-      price: 2499,
-      quantity: 1,
-    },
-  ],
-  payment: {
-    method: 'M-PESA',
-    status: 'Paid',
-  },
-};
+export default function OrderDetailsPage() {
+  const params = useParams<{ orderId: string }>();
+  const { orderId } = params;
+  const { user } = useAuth();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-
-export default function OrderDetailsPage({ params }: { params: { orderId: string }}) {
-  const order = mockOrder; // In a real app, fetch order by params.orderId
+  useEffect(() => {
+    async function fetchOrder() {
+      if (orderId && user) {
+        setIsLoading(true);
+        const fetchedOrder = await getOrderDetails(orderId, user.uid);
+        if (fetchedOrder) {
+          setOrder(fetchedOrder);
+        } else {
+            setOrder(null); // Explicitly set to null if not found or no access
+        }
+        setIsLoading(false);
+      } else if (!user) {
+          setIsLoading(false); // If no user, stop loading
+      }
+    }
+    fetchOrder();
+  }, [orderId, user]);
   
-  if (!order) {
-    return <p>Order not found.</p>;
+  if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      );
   }
 
-  const subtotal = order.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  if (!order) {
+    notFound();
+    return null;
+  }
+
+  const subtotal = order.items.reduce((acc, item) => acc + item.priceAtPurchase * item.quantity, 0);
   const shipping = 500; // Mock shipping
 
   return (
@@ -61,7 +63,7 @@ export default function OrderDetailsPage({ params }: { params: { orderId: string
         </Button>
         <div>
             <h1 className="text-2xl font-bold font-headline">Order Details</h1>
-            <p className="text-sm text-muted-foreground">Order ID: {order.id} | Placed on {order.date}</p>
+            <p className="text-sm text-muted-foreground">Order ID: #{order.orderId || order.id.substring(0,8)} | Placed on {new Date(order.orderDate).toLocaleDateString()}</p>
         </div>
       </div>
 
@@ -72,13 +74,13 @@ export default function OrderDetailsPage({ params }: { params: { orderId: string
         <CardContent>
           <div className="space-y-4">
             {order.items.map((item) => (
-              <div key={item.id} className="flex items-center gap-4">
-                <Image src={item.image} alt={item.name} width={64} height={64} className="rounded-md border object-cover" data-ai-hint={item.dataAiHint} />
+              <div key={item.productId} className="flex items-center gap-4">
+                <Image src={item.image || 'https://placehold.co/64x64.png'} alt={item.name} width={64} height={64} className="rounded-md border object-cover" data-ai-hint="product item" />
                 <div className="flex-grow">
                   <p className="font-semibold">{item.name}</p>
                   <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                 </div>
-                <p className="font-medium">KES {(item.price * item.quantity).toLocaleString()}</p>
+                <p className="font-medium">KES {(item.priceAtPurchase * item.quantity).toLocaleString()}</p>
               </div>
             ))}
           </div>
@@ -114,16 +116,12 @@ export default function OrderDetailsPage({ params }: { params: { orderId: string
             <Separator/>
             <div className="flex justify-between font-bold text-base">
               <span>Total</span>
-              <span>KES {order.total.toLocaleString()}</span>
+              <span>KES {order.totalAmount.toLocaleString()}</span>
             </div>
-             <Separator/>
-             <div className="flex justify-between pt-1">
-                 <span className="text-muted-foreground">Payment Method</span>
-                 <span className="font-medium">{order.payment.method}</span>
-             </div>
           </CardContent>
         </Card>
       </div>
     </div>
   );
 }
+

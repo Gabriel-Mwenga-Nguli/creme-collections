@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   },[pathname, router]);
   
   const createMockSession = (name: string, email: string) => {
-      const uid = `mock_user_${Date.now()}`;
+      const uid = `mock_user_${email}`; // Use email to make mock UID consistent
       const mockUser = { uid, email, displayName: name };
       const mockProfile = { name, email };
       setUser(mockUser);
