@@ -1,4 +1,3 @@
-
 "use client"; 
 
 import { useState, type FormEvent } from 'react';
@@ -11,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { isConfigured } from '@/lib/firebase';
 
 const GoogleIcon = () => (
   <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
@@ -24,6 +24,7 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { login, googleLogin } = useAuth();
+  const isAuthDisabled = !isConfigured;
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -72,6 +73,13 @@ export default function LoginForm() {
         <CardDescription className="text-sm sm:text-base">Sign in to continue to your account.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 px-4 pb-6 sm:px-6">
+        {isAuthDisabled && (
+          <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400/50 rounded-md text-center">
+              <p className="text-xs text-yellow-800 dark:text-yellow-300">
+                  Login is disabled. The app is not connected to a backend. See README for setup instructions.
+              </p>
+          </div>
+        )}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <Label htmlFor="email">Email Address</Label>
@@ -85,7 +93,7 @@ export default function LoginForm() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || isAuthDisabled}
             />
           </div>
           <div>
@@ -105,11 +113,11 @@ export default function LoginForm() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || isAuthDisabled}
             />
           </div>
           <div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || isAuthDisabled}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Login
             </Button>
@@ -128,7 +136,7 @@ export default function LoginForm() {
         </div>
 
         <div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading}>
+          <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading || isAuthDisabled}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
             Login with Google
           </Button>

@@ -1,4 +1,3 @@
-
 "use client"; 
 
 import { useState, type FormEvent } from 'react';
@@ -12,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/context/AuthContext';
+import { isConfigured } from '@/lib/firebase';
 
 const GoogleIcon = () => (
   <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
@@ -26,6 +26,7 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { register, googleLogin } = useAuth();
+  const isAuthDisabled = !isConfigured;
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,13 +75,20 @@ export default function RegisterForm() {
         <CardDescription className="text-sm sm:text-base">Join us and start shopping smarter today.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 px-4 pb-6 sm:px-6">
+        {isAuthDisabled && (
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400/50 rounded-md text-center">
+                <p className="text-xs text-yellow-800 dark:text-yellow-300">
+                    Registration is disabled. The app is not connected to a backend. See README for setup instructions.
+                </p>
+            </div>
+        )}
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
             <Label htmlFor="fullName">Full Name</Label>
             <Input 
               type="text" name="fullName" id="fullName" autoComplete="name" required 
               className="mt-1 text-base sm:text-sm" placeholder="Jane Doe"
-              value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={isLoading}
+              value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={isLoading || isAuthDisabled}
             />
           </div>
           <div>
@@ -88,7 +96,7 @@ export default function RegisterForm() {
             <Input 
               type="email" name="email" id="email" autoComplete="email" required 
               className="mt-1 text-base sm:text-sm" placeholder="you@example.com"
-              value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading}
+              value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading || isAuthDisabled}
             />
           </div>
           <div>
@@ -96,17 +104,17 @@ export default function RegisterForm() {
             <Input 
               type="password" name="password" id="password" autoComplete="new-password" required 
               className="mt-1 text-base sm:text-sm" placeholder="••••••••"
-              value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading}
+              value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading || isAuthDisabled}
             />
           </div>
           <div className="flex items-center space-x-2">
-            <Checkbox id="terms" required />
+            <Checkbox id="terms" required disabled={isAuthDisabled} />
             <Label htmlFor="terms" className="text-xs text-muted-foreground">
               I agree to the <Link href="/terms" className="underline hover:text-primary">Terms & Conditions</Link>.
             </Label>
           </div>
           <div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || isAuthDisabled}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
@@ -125,7 +133,7 @@ export default function RegisterForm() {
         </div>
 
         <div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleRegister} disabled={isLoading}>
+          <Button variant="outline" className="w-full" onClick={handleGoogleRegister} disabled={isLoading || isAuthDisabled}>
              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
             Sign up with Google
           </Button>
