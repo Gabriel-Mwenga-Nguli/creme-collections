@@ -56,21 +56,6 @@ const slidesData: Slide[] = [
     contentAnimation: 'animate-fade-in-up'
   },
   {
-    id: 3,
-    image: '/images/banners/slide3.png',
-    dataAiHint: 'cozy home interior',
-    title: 'Home Sweet Home',
-    subtitle: 'Furnishings & decor that bring comfort and elegance.',
-    buttonText: 'Explore Home',
-    buttonLink: '/products/category/home-living',
-    textAlign: 'right',
-    textColor: 'text-white', 
-    overlayColor: 'bg-amber-100/30',
-    titleSize: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
-    subtitleSize: 'text-lg sm:text-xl md:text-2xl',
-    contentAnimation: 'animate-fade-in-left'
-  },
-  {
     id: 4,
     image: '/images/banners/promo1.png',
     dataAiHint: 'shopping promotion sale',
