@@ -7,21 +7,13 @@ runConfig:
   # cpu: 1
   # memoryMiB: 512
 
-  # Environment variables and secrets.
-  # See https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
-  # - variable: MESSAGE
-  #   value: Hello world!
-  #   availability:
-  #     - BUILD
-  #     - RUNTIME
-
-  # Grant access to secrets in Cloud Secret Manager.
-  # See https://firebase.google.com/docs/app-hosting/configure#secret-parameters
-  # - variable: MY_SECRET
-  #   secret: mySecretRef
 env:
+  # --- Genkit AI API Key ---
+  # Before deploying, create a secret for your Genkit API Key:
+  # firebase apphosting:secrets:set GOOGLE_API_KEY
   - variable: GOOGLE_API_KEY
     secret: GOOGLE_API_KEY
+
   # --- Firebase Web SDK Configuration for Deployed App ---
   # Your deployed application needs these environment variables to connect to Firebase.
   # 1. Create a secret for each variable below by running `firebase apphosting:secrets:set <VARIABLE_NAME>`

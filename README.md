@@ -17,43 +17,43 @@ Follow these steps to set up and run the project with a live Firebase backend.
 
 #### **For Local Development**
 
-1.  **Firebase Configuration (`.env.local`)**:
-    *   Create a file named `.env.local` in the root of the project.
-    *   Copy the contents of `.env.example` into `.env.local`.
-    *   Go to your Firebase project settings, find your web app configuration, and copy the values into the corresponding variables in `.env.local`.
+1.  **Create `.env.local` file**:
+    *   In the root directory of your project, create a new file named exactly `.env.local`.
+    *   Copy the entire contents from the `.env.example` file and paste it into your new `.env.local` file.
 
-2.  **Genkit API Key**:
-    *   In your Google Cloud Console (for your Firebase project), enable the "Vertex AI API".
-    *   Go to "APIs & Services" > "Credentials" and create a new API key.
-    *   For local development, add this key to your `.env.local` file as `GOOGLE_API_KEY=YOUR_API_KEY_HERE`.
+2.  **Get Firebase Configuration**:
+    *   Open your project in the [Firebase Console](https://console.firebase.google.com/).
+    *   Click the **gear icon** ⚙️ next to "Project Overview" and select **Project settings**.
+    *   In the "General" tab, scroll down to the "Your apps" section.
+    *   Find your web app (if you don't have one, click "Add app" and select the Web icon `</>`).
+    *   In your web app's settings, find the `firebaseConfig` object. It looks like this:
+        ```javascript
+        const firebaseConfig = {
+          apiKey: "AIza...",
+          authDomain: "your-project.firebaseapp.com",
+          projectId: "your-project-id",
+          // ...and so on
+        };
+        ```
+    *   Copy the value for each key from this object and paste it into the corresponding `NEXT_PUBLIC_FIREBASE_...` variable in your `.env.local` file.
+
+3.  **Get Genkit (Vertex AI) API Key**:
+    *   This key is required for all AI features.
+    *   Open the [Google Cloud Console](https://console.cloud.google.com/) and make sure your Firebase project is selected.
+    *   In the navigation menu, go to **APIs & Services > Credentials**.
+    *   Click **+ CREATE CREDENTIALS** at the top and select **API key**.
+    *   A new API key will be created. Copy this key.
+    *   Paste the key into your `.env.local` file for the `GOOGLE_API_KEY` variable.
+    *   **Important**: Make sure the **Vertex AI API** is enabled for your project. You can do this in the "APIs & Services > Library" section of the Google Cloud Console.
+
+4.  **Restart the Development Server**:
+    *   If your server is running, you **must stop it and restart it** for the changes in `.env.local` to take effect.
+    *   Run `npm run dev` in your terminal.
 
 #### **For Production Deployment (App Hosting)**
 
-When you deploy your application, the variables in `.env.local` **are not used**. You must configure secrets in your App Hosting environment for both the Genkit API key and the Firebase SDK configuration.
+When you deploy your application, the variables in `.env.local` **are not used**. You must configure secrets in your App Hosting environment. See the "Production Deployment" section in `README.md` for full instructions.
 
-1.  **Set Secrets via Firebase CLI**:
-    For **each** variable in `.env.example` (both `GOOGLE_API_KEY` and all `NEXT_PUBLIC_FIREBASE_*` variables), run the following command in your terminal. You will be prompted to paste the secret value.
-
-    ```bash
-    firebase apphosting:secrets:set <VARIABLE_NAME>
-    ```
-    *Example:*
-    ```bash
-    firebase apphosting:secrets:set GOOGLE_API_KEY
-    # (Paste your key)
-    firebase apphosting:secrets:set NEXT_PUBLIC_FIREBASE_API_KEY
-    # (Paste your key)
-    ```
-
-2.  **Update `apphosting.yaml`**:
-    Open the `apphosting.yaml` file. It now contains a template for exposing these secrets to your deployed app. Uncomment the section under "Firebase Web SDK Configuration for Deployed App" and ensure the secret names match the secrets you created. The `availability` property is required for `NEXT_PUBLIC_` variables.
-
-3.  **Install Dependencies & Deploy**:
-    After setting secrets and updating `apphosting.yaml`, install dependencies and deploy your app:
-    ```bash
-    npm install
-    firebase deploy
-    ```
 
 ### 3. Firebase Backend Setup
 
