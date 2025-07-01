@@ -43,7 +43,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendBrandedEmail = functions.https.onCall(async (data, context) => {
+export const sendBrandedEmail = functions.https.onCall(async (data: any, context: functions.https.CallableContext) => {
   // Check authentication
   if (!context.auth) {
     throw new functions.https.HttpsError(
@@ -89,13 +89,13 @@ export const sendBrandedEmail = functions.https.onCall(async (data, context) => 
 
 // A simple Helloworld HTTP function for testing.
 // You can access this function via its URL after deployment.
-export const helloWorld = functions.https.onRequest((request, response) => {
+export const helloWorld = functions.https.onRequest((request: functions.Request, response: functions.Response) => {
   functions.logger.info("Hello World function called!", {structuredData: true});
   response.status(200).send("Hello from Firebase Cloud Functions!");
 });
 
 // Example: A callable function
-export const addMessage = functions.https.onCall(async (data, context) => {
+export const addMessage = functions.https.onCall(async (data: any, context: functions.https.CallableContext) => {
   // Check authentication
   if (!context.auth) {
     throw new functions.https.HttpsError(
