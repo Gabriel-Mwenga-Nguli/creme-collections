@@ -1,3 +1,4 @@
+
 # Creme Collections - Next.js E-Commerce Platform
 
 This is a Next.js e-commerce starter project built for Firebase Studio, featuring a modern tech stack and AI-powered capabilities.
@@ -50,7 +51,11 @@ Your application will not work correctly until you set up your Firestore databas
     *   Copy the entire rules content and paste it into the rules editor in your console, replacing the default rules.
     *   Click **Publish**.
 
-3.  **Set Up Firestore Indexes**:
+3.  **Set Up Cloud Functions for Email**:
+    *   This project includes a Cloud Function for sending emails. To make it work, you need to provide it with email credentials.
+    *   Follow the detailed instructions in the `EMAIL_SETUP.md` file to configure this feature.
+
+4.  **Set Up Firestore Indexes**:
     *   Your app requires specific database indexes to filter and sort data correctly.
     *   Run the app locally (`npm run dev`) and navigate to pages like `/products`.
     *   Open your browser's developer console. You will likely see errors from Firebase with a message like `The query requires an index.`
