@@ -15,7 +15,9 @@ Follow these steps to set up and run the project with a live Firebase backend.
 
 ### 2. Environment Setup
 
-1.  **Firebase Configuration**:
+#### **For Local Development**
+
+1.  **Firebase Configuration (`.env.local`)**:
     *   Create a file named `.env.local` in the root of the project.
     *   Copy the contents of `.env.example` into `.env.local`.
     *   Go to your Firebase project settings, find your web app configuration, and copy the values into the corresponding variables in `.env.local`.
@@ -23,15 +25,34 @@ Follow these steps to set up and run the project with a live Firebase backend.
 2.  **Genkit API Key**:
     *   In your Google Cloud Console (for your Firebase project), enable the "Vertex AI API".
     *   Go to "APIs & Services" > "Credentials" and create a new API key.
-    *   In your terminal, set this key as a secret for App Hosting:
-        ```bash
-        firebase apphosting:secrets:set GOOGLE_API_KEY
-        ```
-        Paste your API key when prompted. This will make it available to your deployed app. For local development, add it to `.env.local`.
+    *   For local development, add this key to your `.env.local` file as `GOOGLE_API_KEY=YOUR_API_KEY_HERE`.
 
-3.  **Install Dependencies**:
+#### **For Production Deployment (App Hosting)**
+
+When you deploy your application, the variables in `.env.local` **are not used**. You must configure secrets in your App Hosting environment for both the Genkit API key and the Firebase SDK configuration.
+
+1.  **Set Secrets via Firebase CLI**:
+    For **each** variable in `.env.example` (both `GOOGLE_API_KEY` and all `NEXT_PUBLIC_FIREBASE_*` variables), run the following command in your terminal. You will be prompted to paste the secret value.
+
+    ```bash
+    firebase apphosting:secrets:set <VARIABLE_NAME>
+    ```
+    *Example:*
+    ```bash
+    firebase apphosting:secrets:set GOOGLE_API_KEY
+    # (Paste your key)
+    firebase apphosting:secrets:set NEXT_PUBLIC_FIREBASE_API_KEY
+    # (Paste your key)
+    ```
+
+2.  **Update `apphosting.yaml`**:
+    Open the `apphosting.yaml` file. It now contains a template for exposing these secrets to your deployed app. Uncomment the section under "Firebase Web SDK Configuration for Deployed App" and ensure the secret names match the secrets you created. The `availability` property is required for `NEXT_PUBLIC_` variables.
+
+3.  **Install Dependencies & Deploy**:
+    After setting secrets and updating `apphosting.yaml`, install dependencies and deploy your app:
     ```bash
     npm install
+    firebase deploy
     ```
 
 ### 3. Firebase Backend Setup
@@ -64,7 +85,7 @@ Your application will not work correctly until you set up your Firestore databas
 
 ### 4. Running the Development Server
 
-Once the setup is complete, you can run the app:
+Once the local setup is complete, you can run the app:
 
 ```bash
 npm run dev
