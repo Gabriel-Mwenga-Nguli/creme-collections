@@ -26,47 +26,52 @@ export default function AddProductPage() {
     setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
+    const categoryLabel = formData.get('category') as string;
+    const categoryInfo = CATEGORY_NAV_LINKS.find(cat => cat.label === categoryLabel);
+    
     const productData = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       longDescription: formData.get('longDescription') as string,
       offerPrice: Number(formData.get('offerPrice')),
       originalPrice: Number(formData.get('originalPrice')),
-      category: formData.get('category') as string,
-      categorySlug: (formData.get('category') as string)?.toLowerCase().replace(/\s+/g, '-'),
+      category: categoryInfo?.label,
+      categorySlug: categoryInfo?.href.split('/').pop(),
       brand: formData.get('brand') as string,
       stock: Number(formData.get('stock')),
       isFeatured: formData.get('isFeatured') === 'on',
       isWeeklyDeal: formData.get('isWeeklyDeal') === 'on',
-      image: '/images/products/placeholder.png', // Default placeholder
+      image: 'https://placehold.co/600x400.png', // Default placeholder
       dataAiHint: 'product placeholder', // Default hint
       availability: Number(formData.get('stock')) > 0 ? 'In Stock' : 'Out of Stock',
     };
     
-    // Basic validation
     if (!productData.name || !productData.offerPrice) {
         toast({ title: "Validation Error", description: "Name and Offer Price are required.", variant: "destructive" });
         setIsLoading(false);
         return;
     }
 
-    const newProductId = await addProduct(productData);
-
-    if (newProductId) {
-      toast({
-        title: "Product Added",
-        description: "The new product has been successfully added to the catalog.",
-      });
-      router.push('/admin/products');
-    } else {
-      toast({
-        title: "Error",
-        description: "Failed to add the product. Please try again.",
-        variant: "destructive",
-      });
+    try {
+        const newProductId = await addProduct(productData);
+        if (newProductId) {
+          toast({
+            title: "Product Added",
+            description: "The new product has been successfully added to the catalog.",
+          });
+          router.push('/admin/products');
+        } else {
+          throw new Error("Failed to get new product ID.");
+        }
+    } catch (error) {
+         toast({
+            title: "Error",
+            description: "Failed to add the product. Please try again.",
+            variant: "destructive",
+          });
+    } finally {
+        setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
