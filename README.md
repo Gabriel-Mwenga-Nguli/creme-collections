@@ -133,7 +133,7 @@ Your project includes a fully-featured, simulated admin dashboard.
 
 *   **URL**: Navigate to `/admin/login` on your local or hosted site.
 *   **Login**: The login is **for demonstration purposes only**. You can enter **any email and password** to access the dashboard.
-*   **Functionality**: The dashboard UI is fully built, but actions like adding products or managing users are not connected to a live backend.
+*   **Functionality**: The dashboard UI is fully built. You can add and edit products, which will save to your live Firestore database if you have configured it. Other sections use mock data for demonstration.
 
 ### 6. Running Genkit AI Flows Locally
 

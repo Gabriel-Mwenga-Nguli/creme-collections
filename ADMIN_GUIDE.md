@@ -1,18 +1,35 @@
-# Admin Guide: Managing Your App's Data in Firestore
+# Admin Guide: Managing Your App's Data
 
-Welcome, Admin! This guide explains how to manage your application's data using the Firebase Console. For this project, the **Firestore database serves as your primary admin backend**. Here, you can manually view, add, edit, and delete products, promotions, orders, and user data.
+Welcome, Admin! This guide explains how to manage your application's data. For this project, you have two primary ways to act as an administrator:
 
-## 1. Accessing Your Admin Backend (Firestore)
+1.  **The Admin Dashboard UI**: A user-friendly web interface for managing products and viewing orders.
+2.  **The Firestore Database**: A powerful developer tool for direct data manipulation.
+
+---
+
+## 1. Accessing the Admin Dashboard UI
+
+This project includes a custom-built Admin Dashboard for managing your store.
+
+*   **URL**: Navigate to `/admin/login` on your website.
+*   **Login**: The login is currently for demonstration purposes. You can enter **any email and password** to access the dashboard.
+*   **Functionality**: From the dashboard, you can view, add, and edit products, and see mock data for orders and customers. As you connect more features to the backend, this will become your primary tool for store management.
+
+---
+
+## 2. Accessing Your Data Backend (Firestore)
+
+Your Firestore database serves as your primary data backend. Here, you can manually view, add, edit, and delete all of your application's data.
 
 1.  **Go to the Firebase Console**: Open your project at [https://console.firebase.google.com/](https://console.firebase.google.com/).
 2.  **Select Your Project**: Choose the Firebase project connected to this application.
 3.  **Navigate to Firestore**: In the left-hand navigation menu, click on **Build > Firestore Database**.
 
-You are now in your app's admin backend. You will see a list of "collections," which are like folders for your data (e.g., `products`, `users`). Clicking on a collection shows you the "documents" inside it.
+You are now in your app's raw data backend. You will see a list of "collections," which are like folders for your data (e.g., `products`, `users`). Clicking on a collection shows you the "documents" inside it.
 
 ---
 
-## 2. Managing Your App's Data Collections
+## 3. Managing Your App's Data Collections
 
 Here is an overview of the main data collections and how to manage them.
 
@@ -20,14 +37,14 @@ Here is an overview of the main data collections and how to manage them.
 
 *   **Collection Name**: `products`
 *   **Purpose**: This is your entire product catalog. Every document in this collection is a single product displayed in your store.
-*   **How to Manage**: To add or edit products, you must follow a specific structure so that the app can display them correctly on the homepage and category pages.
-*   **➡️ Detailed Instructions**: For a step-by-step guide on adding products with the correct fields (like `name`, `offerPrice`, `categorySlug`, `isFeatured`, etc.), please refer to the **`DATA_SETUP.md`** file in your project.
+*   **How to Manage**: To add or edit products, you can either use the **Admin Dashboard UI** or follow the specific structure in Firestore.
+*   **➡️ Detailed Instructions**: For a step-by-step guide on the required data structure (`name`, `offerPrice`, `categorySlug`, `isFeatured`, etc.), please refer to the **`DATA_SETUP.md`** file.
 
 ### 🏷️ Promotions
 
 *   **Collection Name**: `promotions`
 *   **Purpose**: This collection powers the "Today's Best Promotions" slider on your homepage. Each document is a single promotional card.
-*   **How to Manage**: You can add various types of promotions (e.g., first-order discounts, tiered discounts) and control their appearance and order.
+*   **How to Manage**: You can add various types of promotions and control their appearance and order.
 *   **➡️ Detailed Instructions**: For a step-by-step guide on adding promotions with the correct fields (`type`, `title`, `isActive`, `displayOrder`, etc.), please see the **`PROMOTIONS_SETUP.md`** file.
 
 ### 🎁 Gift Cards
@@ -39,7 +56,7 @@ Here is an overview of the main data collections and how to manage them.
 
 ### 🧑 Users, Orders, and Other Data
 
-*   **`users`**: When a user registers, their profile information (name, email, etc.) is stored in a document here. Their user ID will match their Firebase Authentication UID.
+*   **`users`**: When a user registers, their profile information (name, email, etc.) is stored in a document here.
 *   **`orders`**: When a user completes a checkout, their order details are saved here.
 *   **Subcollections**: User-specific data like `invoices` or `wishlist` items are stored in subcollections inside that user's document (e.g., `/users/{someUserId}/invoices/{invoiceId}`).
 

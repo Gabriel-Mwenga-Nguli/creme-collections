@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
           <ShieldCheck className="mx-auto h-10 w-10 text-primary mb-2" />
           <CardTitle className="text-2xl font-bold text-primary font-headline">Admin Panel</CardTitle>
           <CardDescription>
-            Please sign in to continue.
+            This is a simulated login. You can enter any email and password to proceed.
           </CardDescription>
         </CardHeader>
         <CardContent>
