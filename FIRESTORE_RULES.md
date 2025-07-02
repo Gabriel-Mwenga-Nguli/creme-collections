@@ -41,6 +41,12 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow read, write: if request.auth != null; // For admin/redemption logic
     }
+    
+    // Allow public read access to categories. Writes are restricted to admins with custom claims.
+    match /categories/{categoryId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.token.admin == true;
+    }
 
     // Allow users to create, read, and write their own document in the 'users' collection.
     match /users/{userId} {

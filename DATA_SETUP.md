@@ -33,7 +33,7 @@ You'll now add individual product documents to this `products` collection. For e
 *   `description` (Type: `string`) - Example: `Sleek smartwatch with advanced health tracking and notifications.`
 *   `longDescription` (Type: `string`) - Example: `Full-featured Modern Smartwatch Series X with a vibrant AMOLED display, heart rate monitoring, SpO2 sensor, GPS, and up to 7 days battery life. Compatible with Android and iOS.`
 *   `image` (Type: `string`) - Example: `/images/products/smartwatch_main.png`
-*   `images` (Type: `array`)
+*   `/images/products/smartwatch_main.png` (Type: `array`)
     *   `0` (Type: `string`) - `/images/products/smartwatch_main.png`
     *   `1` (Type: `string`) - `/images/products/smartwatch_side.png`
 *   `dataAiHint` (Type: `string`) - Example: `smartwatch technology`
