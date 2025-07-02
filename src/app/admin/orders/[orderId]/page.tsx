@@ -1,63 +1,45 @@
-
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronLeft, Package, User, Truck, DollarSign } from 'lucide-react';
+import { ChevronLeft, Package, User, Truck, DollarSign, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-
-const mockOrder = {
-  id: 'ORD746352',
-  date: 'June 20, 2024',
-  status: 'Delivered',
-  total: 15498,
-  shippingAddress: {
-    name: 'Jane Doe',
-    addressLine1: '123 Riverside Drive, Apt 4B',
-    city: 'Nairobi',
-    phone: '+254 712 345678',
-  },
-  customer: {
-      name: 'Jane Doe',
-      email: 'jane.doe@example.com',
-  },
-  items: [
-    {
-      id: '1',
-      name: 'Modern Smartwatch Series X',
-      image: 'https://placehold.co/64x64.png',
-      dataAiHint: 'smartwatch technology',
-      price: 12999,
-      quantity: 1,
-    },
-    {
-      id: '2',
-      name: 'Classic Men\'s Polo Shirt',
-      image: 'https://placehold.co/64x64.png',
-      dataAiHint: 'men shirt',
-      price: 2499,
-      quantity: 1,
-    },
-  ],
-  payment: {
-    method: 'M-PESA',
-    status: 'Paid',
-    transactionId: 'SGF8723YHJ',
-  },
-};
+import { getOrderDetails, type Order } from '@/services/orderService';
+import { notFound } from 'next/navigation';
 
 export default function AdminOrderDetailsPage({ params }: { params: { orderId: string }}) {
-  const order = mockOrder; // In a real app, fetch order by params.orderId
+  const { orderId } = params;
+  const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+      if (!orderId) return;
+      async function fetchOrder() {
+          setIsLoading(true);
+          const fetchedOrder = await getOrderDetails(orderId);
+          setOrder(fetchedOrder);
+          setIsLoading(false);
+      }
+      fetchOrder();
+  }, [orderId]);
+  
+  if (isLoading) {
+      return (
+          <div className="flex items-center justify-center h-96">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      );
+  }
   
   if (!order) {
-    return <p>Order not found.</p>;
+    return notFound();
   }
 
-  const subtotal = order.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = order.items.reduce((acc, item) => acc + item.priceAtPurchase * item.quantity, 0);
   const shipping = 500; // Mock shipping
 
   return (
@@ -68,7 +50,7 @@ export default function AdminOrderDetailsPage({ params }: { params: { orderId: s
         </Button>
         <div>
             <h1 className="text-2xl font-bold font-headline">Order Details</h1>
-            <p className="text-sm text-muted-foreground">Order ID: {order.id} | Placed on {order.date}</p>
+            <p className="text-sm text-muted-foreground">Order ID: #{order.orderId || order.id.substring(0,8)} | Placed on {new Date(order.orderDate).toLocaleDateString()}</p>
         </div>
       </div>
       
@@ -81,13 +63,13 @@ export default function AdminOrderDetailsPage({ params }: { params: { orderId: s
                 <CardContent>
                 <div className="space-y-4">
                     {order.items.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4">
-                        <Image src={item.image} alt={item.name} width={64} height={64} className="rounded-md border object-cover" data-ai-hint={item.dataAiHint} />
+                    <div key={item.productId} className="flex items-center gap-4">
+                        <Image src={item.image || 'https://placehold.co/64x64.png'} alt={item.name} width={64} height={64} className="rounded-md border object-cover" data-ai-hint={'product item'} />
                         <div className="flex-grow">
                         <p className="font-semibold">{item.name}</p>
                         <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                         </div>
-                        <p className="font-medium">KES {(item.price * item.quantity).toLocaleString()}</p>
+                        <p className="font-medium">KES {(item.priceAtPurchase * item.quantity).toLocaleString()}</p>
                     </div>
                     ))}
                 </div>
@@ -101,15 +83,15 @@ export default function AdminOrderDetailsPage({ params }: { params: { orderId: s
                 <CardContent className="space-y-2 text-sm">
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Payment Method</span>
-                        <span className="font-medium">{order.payment.method}</span>
+                        <span className="font-medium">M-PESA (Mock)</span>
                     </div>
                      <div className="flex justify-between">
                         <span className="text-muted-foreground">Payment Status</span>
-                        <Badge variant={order.payment.status === 'Paid' ? 'default' : 'destructive'}>{order.payment.status}</Badge>
+                        <Badge variant={'default'}>Paid</Badge>
                     </div>
                      <div className="flex justify-between">
                         <span className="text-muted-foreground">Transaction ID</span>
-                        <span className="font-mono text-xs">{order.payment.transactionId}</span>
+                        <span className="font-mono text-xs">SGF8723YHJ (Mock)</span>
                     </div>
                 </CardContent>
             </Card>
@@ -121,8 +103,8 @@ export default function AdminOrderDetailsPage({ params }: { params: { orderId: s
                     <CardTitle className='flex items-center gap-2'><User className='w-5 h-5'/>Customer</CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm space-y-1">
-                    <p className="font-semibold">{order.customer.name}</p>
-                    <p className="text-muted-foreground">{order.customer.email}</p>
+                    <p className="font-semibold">{order.shippingAddress.name}</p>
+                    <p className="text-muted-foreground">{order.userEmail}</p>
                 </CardContent>
             </Card>
             <Card>
@@ -152,7 +134,7 @@ export default function AdminOrderDetailsPage({ params }: { params: { orderId: s
                     <Separator/>
                     <div className="flex justify-between font-bold text-base">
                     <span>Total</span>
-                    <span>KES {order.total.toLocaleString()}</span>
+                    <span>KES {order.totalAmount.toLocaleString()}</span>
                     </div>
                 </CardContent>
             </Card>

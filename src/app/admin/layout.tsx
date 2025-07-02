@@ -1,25 +1,32 @@
-
 "use client";
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebar";
-import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
-import { useAdminAuth } from "@/context/AdminAuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
+import { ADMIN_EMAIL } from "@/lib/constants";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { isAdmin, isLoading, user } = useAdminAuth();
+  const { user, isLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
+  const isAdmin = user?.email === ADMIN_EMAIL;
+
   React.useEffect(() => {
-    if (!isLoading && !isAdmin && pathname !== '/admin/login') {
-      router.replace('/admin/login');
+    if (!isLoading) {
+      if (!user && pathname !== '/admin/login') {
+        router.replace('/admin/login');
+      } else if (user && !isAdmin) {
+        router.replace('/'); 
+      }
     }
-  }, [isAdmin, isLoading, pathname, router]);
+  }, [user, isAdmin, isLoading, pathname, router]);
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
@@ -33,8 +40,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!isAdmin) {
-    return null; // Redirect is handled by useEffect
+  if (!user || !isAdmin) {
+    return (
+        <div className="flex items-center justify-center h-screen bg-muted">
+            <Card className="max-w-md text-center">
+                <CardHeader>
+                    <CardTitle>Access Denied</CardTitle>
+                    <CardDescription>You do not have permission to view this page. Redirecting...</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild><a href="/">Go to Homepage</a></Button>
+                </CardContent>
+            </Card>
+        </div>
+    );
   }
 
   return (
@@ -47,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </SidebarHeader>
         <SidebarContent>
-          <AdminSidebarNav user={user} />
+          <AdminSidebarNav />
         </SidebarContent>
       </Sidebar>
       <SidebarInset>

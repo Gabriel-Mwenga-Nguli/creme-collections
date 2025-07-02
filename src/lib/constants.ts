@@ -110,3 +110,5 @@ export function getAllCategorySlugs(navLinks: NavLink[]): string[][] {
   generateSlugs(navLinks);
   return slugs;
 }
+
+export const ADMIN_EMAIL = "admin@cremecollections.shop";

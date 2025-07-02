@@ -1,23 +1,17 @@
-
 "use client";
 
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarGroup, SidebarGroupLabel, SidebarMenuBadge, SidebarSeparator } from '@/components/ui/sidebar';
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenuBadge, SidebarSeparator } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LayoutDashboard, ShoppingBag, ListOrdered, Users, Settings, LogOut, BarChart2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAdminAuth } from '@/context/AdminAuthContext';
+import { useAuth } from '@/context/AuthContext';
 
-interface AdminUser {
-  name: string;
-  email: string;
-}
-
-export function AdminSidebarNav({ user }: { user: AdminUser | null }) {
+export function AdminSidebarNav() {
   const pathname = usePathname();
-  const { logout } = useAdminAuth();
+  const { user, userProfile, logout } = useAuth();
 
   const isActive = (path: string) => {
     return pathname === path || (path !== '/admin' && pathname.startsWith(path));
@@ -73,11 +67,11 @@ export function AdminSidebarNav({ user }: { user: AdminUser | null }) {
         <SidebarSeparator className="my-2" />
         <div className="flex items-center gap-3 p-2">
            <Avatar className="h-9 w-9">
-             <AvatarImage src={`https://i.pravatar.cc/150?u=${user?.email}`} alt={user?.name} />
-             <AvatarFallback>{user?.name?.charAt(0) || 'A'}</AvatarFallback>
+             <AvatarImage src={userProfile?.photoURL || `https://i.pravatar.cc/150?u=${user?.email}`} alt={userProfile?.name} />
+             <AvatarFallback>{userProfile?.name?.charAt(0) || 'A'}</AvatarFallback>
            </Avatar>
            <div className="overflow-hidden">
-             <p className="text-sm font-medium truncate">{user?.name || 'Admin'}</p>
+             <p className="text-sm font-medium truncate">{userProfile?.name || 'Admin'}</p>
              <p className="text-xs text-muted-foreground truncate">{user?.email || 'admin@example.com'}</p>
            </div>
         </div>

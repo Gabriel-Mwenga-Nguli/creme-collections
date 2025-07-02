@@ -8,7 +8,6 @@ import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
-import { AdminAuthProvider } from '@/context/AdminAuthContext';
 import ChatWidget from '@/components/features/chat/ChatWidget';
 import ShopOfferPopup from '@/components/features/home/ShopOfferPopup';
 import Preloader from '@/components/layout/Preloader';
@@ -45,18 +44,16 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Preloader />
-          <AdminAuthProvider>
-            <AuthProvider>
-              <CartProvider>
-                <Header />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-                <Toaster />
-                <ChatWidget />
-                <ShopOfferPopup />
-              </CartProvider>
-            </AuthProvider>
-          </AdminAuthProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <Toaster />
+              <ChatWidget />
+              <ShopOfferPopup />
+            </CartProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, type FormEvent } from 'react';
@@ -8,33 +7,47 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShieldCheck } from 'lucide-react';
-import { useAdminAuth } from '@/context/AdminAuthContext';
+import { useAuth } from '@/context/AuthContext';
 import Logo from '@/components/logo';
+import { ADMIN_EMAIL } from '@/lib/constants';
+import { useRouter } from 'next/navigation';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { login } = useAdminAuth();
+  const { login } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call for admin login
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // In a real app, you'd check credentials. Here, we just simulate success.
-    login({ email, name: 'Admin User' }); // Simulate logging in as an admin
-
-    toast({
-      title: "Admin Login Successful",
-      description: "Redirecting to the dashboard.",
-    });
-
-    // The redirect is handled by the AdminLayout
-    setIsLoading(false);
+    try {
+      const userCredential = await login(email, password);
+      if (userCredential.email === ADMIN_EMAIL) {
+        toast({
+          title: "Admin Login Successful",
+          description: "Redirecting to the dashboard.",
+        });
+        router.push('/admin/dashboard');
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Authorization Failed',
+          description: 'You do not have permission to access the admin panel.',
+        });
+      }
+    } catch (error: any) {
+       toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: error.message || 'An unexpected error occurred.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,7 +62,7 @@ export default function AdminLoginPage() {
           <ShieldCheck className="mx-auto h-10 w-10 text-primary mb-2" />
           <CardTitle className="text-2xl font-bold text-primary font-headline">Admin Panel</CardTitle>
           <CardDescription>
-            This is a simulated login. You can enter any email and password to proceed.
+            Enter your admin credentials to access the dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
