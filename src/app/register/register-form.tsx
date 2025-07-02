@@ -1,3 +1,4 @@
+
 "use client"; 
 
 import { useState, type FormEvent } from 'react';
@@ -76,10 +77,16 @@ export default function RegisterForm() {
       </CardHeader>
       <CardContent className="space-y-6 px-4 pb-6 sm:px-6">
         {isAuthDisabled && (
-            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400/50 rounded-md text-center">
-                <p className="text-xs text-yellow-800 dark:text-yellow-300">
-                    Registration is disabled. The app is not connected to a backend. See README for setup instructions.
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400/50 rounded-md text-center text-xs text-yellow-800 dark:text-yellow-300">
+                <p className="font-bold mb-1">Authentication Not Configured</p>
+                <p>
+                The app's connection to the backend is missing.
                 </p>
+                <ul className="list-disc list-inside text-left mt-2">
+                    <li><strong>For local development:</strong> Ensure your <code>.env.local</code> file is correctly set up.</li>
+                    <li><strong>For deployed app:</strong> Firebase secrets must be set in your hosting environment.</li>
+                </ul>
+                <p className="mt-2">Please see the <code>README.md</code> for detailed instructions.</p>
             </div>
         )}
         <form onSubmit={handleRegister} className="space-y-4">

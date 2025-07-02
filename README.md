@@ -1,3 +1,4 @@
+
 # Creme Collections - Next.js E-Commerce Platform
 
 This is a Next.js e-commerce starter project built for Firebase Studio, featuring a modern tech stack and AI-powered capabilities.
@@ -24,16 +25,20 @@ If your error page mentions **"Missing or insufficient permissions"**, this is e
 9.  Go back to your running application and **reload the page**. The error should be gone.
 
 ---
-### Problem 2: "Action Required: Configure Firebase API Key"
+### Problem 2: "Authentication Not Configured" or "Invalid API Key"
 
-If the error page mentions **"auth/invalid-api-key"** or **"Firebase is not configured"**, it means your app can't connect to your backend.
+If the login/register page shows an **"Authentication Not Configured"** message, or your error page mentions **"auth/invalid-api-key"**, it means your app can't connect to your Firebase backend. This happens for two different reasons depending on where you are running the app.
 
-**➡️ The Fix: Create and Configure your `.env.local` file**
+**➡️ The Fix (For Local Development): Create your `.env.local` file**
 
 1.  In the root of your project, find the file `.env.example` and **make a copy of it**.
 2.  Rename the copy to **`.env.local`**. (This file is ignored by git and is where your secret keys go).
-3.  Follow the instructions in the "Environment Setup" section below to get your API keys from the Firebase and Google Cloud consoles and paste them into your new `.env.local` file.
+3.  Follow the instructions in the "Getting Your API Keys" section below to get your keys from the Firebase and Google Cloud consoles and paste them into your new `.env.local` file.
 4.  **Important**: You must **stop and restart** your development server (`npm run dev`) after creating or changing the `.env.local` file.
+
+**➡️ The Fix (For a Deployed App on App Hosting): Configure Production Secrets**
+
+Your live, deployed application **does not** use the `.env.local` file. You must set the API keys as secrets in your hosting environment. See the **Production Deployment** section for full instructions.
 
 ---
 
@@ -47,49 +52,43 @@ Follow these steps to set up and run the project with a live Firebase backend.
 *   A Firebase project. If you don't have one, create one at [firebase.google.com](https://firebase.google.com).
 *   Firebase CLI: `npm install -g firebase-tools`
 
-### 2. Environment Setup
+### 2. Getting Your API Keys
 
-#### **For Local Development**
+#### **A) Firebase Web SDK Keys**
+
+1.  Open your project in the [Firebase Console](https://console.firebase.google.com/).
+2.  Click the **gear icon** ⚙️ next to "Project Overview" and select **Project settings**.
+3.  In the "General" tab, scroll down to the "Your apps" section.
+4.  Find your web app (if you don't have one, click "Add app" and select the Web icon `</>`).
+5.  In your web app's settings, find the `firebaseConfig` object. It looks like this:
+    ```javascript
+    const firebaseConfig = {
+      apiKey: "AIza...",
+      authDomain: "your-project.firebaseapp.com",
+      projectId: "your-project-id",
+      // ...and so on
+    };
+    ```
+6.  You will use these values to configure your local development and production environments.
+
+#### **B) Genkit (Vertex AI) API Key**
+
+1.  Open the [Google Cloud Console](https://console.cloud.google.com/) and make sure your Firebase project is selected.
+2.  In the navigation menu, go to **APIs & Services > Credentials**.
+3.  Click **+ CREATE CREDENTIALS** at the top and select **API key**.
+4.  A new API key will be created. Copy this key. This will be your `GOOGLE_API_KEY`.
+5.  **Important**: Make sure the **Vertex AI API** is enabled for your project. You can do this in the "APIs & Services > Library" section of the Google Cloud Console.
+
+### 3. Environment Setup for Local Development
 
 1.  **Create `.env.local` file**:
-    *   In the root directory of your project, create a new file named exactly `.env.local`.
-    *   Copy the entire contents from the `.env.example` file and paste it into your new `.env.local` file.
-
-2.  **Get Firebase Configuration**:
-    *   Open your project in the [Firebase Console](https://console.firebase.google.com/).
-    *   Click the **gear icon** ⚙️ next to "Project Overview" and select **Project settings**.
-    *   In the "General" tab, scroll down to the "Your apps" section.
-    *   Find your web app (if you don't have one, click "Add app" and select the Web icon `</>`).
-    *   In your web app's settings, find the `firebaseConfig` object. It looks like this:
-        ```javascript
-        const firebaseConfig = {
-          apiKey: "AIza...",
-          authDomain: "your-project.firebaseapp.com",
-          projectId: "your-project-id",
-          // ...and so on
-        };
-        ```
-    *   Copy the value for each key from this object and paste it into the corresponding `NEXT_PUBLIC_FIREBASE_...` variable in your `.env.local` file.
-
-3.  **Get Genkit (Vertex AI) API Key**:
-    *   This key is required for all AI features.
-    *   Open the [Google Cloud Console](https://console.cloud.google.com/) and make sure your Firebase project is selected.
-    *   In the navigation menu, go to **APIs & Services > Credentials**.
-    *   Click **+ CREATE CREDENTIALS** at the top and select **API key**.
-    *   A new API key will be created. Copy this key.
-    *   Paste the key into your `.env.local` file for the `GOOGLE_API_KEY` variable.
-    *   **Important**: Make sure the **Vertex AI API** is enabled for your project. You can do this in the "APIs & Services > Library" section of the Google Cloud Console.
-
-4.  **Restart the Development Server**:
+    *   As mentioned in the "Critical Setup" section, copy `.env.example` to a new file named `.env.local`.
+    *   Copy the values from your `firebaseConfig` object and your new Google API key into the corresponding variables in `.env.local`.
+2.  **Restart the Development Server**:
     *   If your server is running, you **must stop it and restart it** for the changes in `.env.local` to take effect.
     *   Run `npm run dev` in your terminal.
 
-#### **For Production Deployment (App Hosting)**
-
-When you deploy your application, the variables in `.env.local` **are not used**. You must configure secrets in your App Hosting environment. See the "Production Deployment" section in `README.md` for full instructions.
-
-
-### 3. Firebase Backend Setup
+### 4. Firebase Backend Setup
 
 Your application will not work correctly until you set up your Firestore database and security rules.
 
@@ -117,7 +116,7 @@ Your application will not work correctly until you set up your Firestore databas
     *   **Click the link provided in the error message.** It will take you directly to the Firebase console to create the required index. Click "Create Index".
     *   Repeat this process for any other index-related errors you see as you navigate the site.
 
-### 4. Running the Development Server
+### 5. Running the Development Server
 
 Once the local setup is complete, you can run the app:
 
@@ -127,21 +126,63 @@ npm run dev
 
 This will start the Next.js app on `http://localhost:9002` (or another port if 9002 is busy).
 
-### 5. Accessing the Admin Dashboard
+---
 
-Your project includes a fully-featured, simulated admin dashboard.
+## Production Deployment (on App Hosting)
 
+When you deploy your application, the variables in `.env.local` **are not used**. You must configure secrets in your App Hosting environment.
+
+1.  **Set the Genkit API Key Secret**:
+    ```bash
+    firebase apphosting:secrets:set GOOGLE_API_KEY
+    ```
+    When prompted, paste your `GOOGLE_API_KEY` value.
+
+2.  **Set the Firebase Web SDK Secrets**:
+    Run the `set` command for each of the `NEXT_PUBLIC_FIREBASE_` variables. For example:
+    ```bash
+    firebase apphosting:secrets:set NEXT_PUBLIC_FIREBASE_API_KEY
+    firebase apphosting:secrets:set NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    # ... and so on for all the keys from your firebaseConfig object.
+    ```
+
+3.  **Update `apphosting.yaml`**:
+    *   Open the `apphosting.yaml` file.
+    *   **Uncomment** all the lines under the `env:` section for the Firebase variables. Your file should look like this:
+
+    ```yaml
+    # ... (other settings) ...
+    env:
+      - variable: GOOGLE_API_KEY
+        secret: GOOGLE_API_KEY
+    
+      - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+        secret: NEXT_PUBLIC_FIREBASE_API_KEY
+        availability:
+          - BUILD
+          - RUNTIME
+      - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+        # ... (and so on for all variables, uncommented)
+    ```
+
+4.  **Deploy Your App**:
+    After setting all the secrets and updating the YAML file, deploy your application:
+    ```bash
+    firebase deploy --only hosting
+    ```
+
+---
+
+## Other Features
+
+### Accessing the Admin Dashboard
 *   **URL**: Navigate to `/admin/login` on your local or hosted site.
-*   **Login**: The login is **for demonstration purposes only**. You can enter **any email and password** to access the dashboard.
-*   **Functionality**: The dashboard UI is fully built. You can add and edit products, which will save to your live Firestore database if you have configured it. Other sections use mock data for demonstration.
+*   **Setup**: Follow the `ADMIN_SETUP.md` guide to create your first admin user via custom claims.
 
-### 6. Running Genkit AI Flows Locally
-
+### Running Genkit AI Flows Locally
 To test and debug AI flows, run the Genkit development UI in a separate terminal:
-
 ```bash
 # Start the Genkit development server
 npm run genkit:dev
 ```
-
 This will typically start on `http://localhost:4000`.
