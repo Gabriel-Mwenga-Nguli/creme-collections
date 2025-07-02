@@ -1,4 +1,3 @@
-
 'use client' // Error components must be Client Components
 
 import { useEffect } from 'react'
@@ -17,6 +16,11 @@ export default function Error({
     // Log the error to an error reporting service
     console.error(error)
   }, [error])
+
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  const rulesUrl = projectId 
+    ? `https://console.firebase.google.com/project/${projectId}/firestore/rules`
+    : `https://console.firebase.google.com/`;
 
   const isPermissionError = error.message.includes('permission-denied') || error.message.includes('insufficient permissions');
   const isApiKeyError = error.message.includes('auth/invalid-api-key') || error.message.includes('FIREBASE_CONFIG_MISSING');
@@ -70,10 +74,16 @@ export default function Error({
                     <div className="bg-card/50 p-4 rounded-md text-sm">
                         <h4 className="font-bold mb-2">Steps:</h4>
                         <ol className="list-decimal list-inside space-y-1">
-                            <li>Open your project in the <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Firebase Console</a>.</li>
-                            <li>Navigate to the <strong>Firestore Database</strong> section.</li>
-                            <li>Click on the <strong>Rules</strong> tab.</li>
-                            <li>Delete the existing rules and replace them with the content from the <code>src/FIRESTORE_RULES.md</code> file in your project.</li>
+                            <li>
+                              Click this direct link to open the 
+                              <a href={rulesUrl} target="_blank" rel="noopener noreferrer" className="underline font-semibold mx-1">
+                                Firestore Rules page
+                              </a> 
+                              for your project.
+                            </li>
+                            <li>Delete the existing rules.</li>
+                            <li>Copy the full contents from the <code>FIRESTORE_RULES.md</code> file in your project's root directory.</li>
+                            <li>Paste the new rules into the editor in the Firebase Console.</li>
                             <li>Click <strong>Publish</strong>.</li>
                         </ol>
                     </div>
