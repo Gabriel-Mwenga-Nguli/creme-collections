@@ -30,6 +30,7 @@ export type UserProfile = {
 interface AuthContextType {
   user: FirebaseUser | null;
   userProfile: UserProfile | null;
+  isAdmin: boolean;
   isLoading: boolean;
   login: (email: string, pass: string) => Promise<FirebaseUser>;
   register: (name: string, email: string, pass: string) => Promise<FirebaseUser>;
@@ -43,6 +44,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
@@ -66,9 +68,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(firebaseUser);
         const profile = await fetchUserProfileService(firebaseUser.uid);
         setUserProfile(profile);
+        const idTokenResult = await firebaseUser.getIdTokenResult();
+        setIsAdmin(!!idTokenResult.claims.admin);
       } else {
         setUser(null);
         setUserProfile(null);
+        setIsAdmin(false);
       }
       setIsLoading(false);
     });
@@ -78,9 +83,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = useCallback(async (email: string, pass: string): Promise<FirebaseUser> => {
     if (!isConfigured || !auth) throw new Error("Firebase is not configured. Cannot log in.");
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    handleAuthRedirect(userCredential.user);
+    // Auth redirect is handled by the admin login page for admin users
+    if (!pathname.startsWith('/admin')) {
+      handleAuthRedirect(userCredential.user);
+    }
     return userCredential.user;
-  }, [handleAuthRedirect]);
+  }, [handleAuthRedirect, pathname]);
 
   const register = useCallback(async (name: string, email: string, pass: string): Promise<FirebaseUser> => {
     if (!isConfigured || !auth) throw new Error("Firebase is not configured. Cannot register.");
@@ -89,7 +97,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     await updateFirebaseProfile(firebaseUser, { displayName: name });
     
-    // Create profile locally and in the service (which is now mocked)
+    // Create profile locally and in the service
     const profileData = { uid: firebaseUser.uid, name, email: firebaseUser.email || '', photoURL: firebaseUser.photoURL || null };
     await createUserProfile(firebaseUser.uid, profileData);
     
@@ -114,15 +122,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
     }
 
-    handleAuthRedirect(firebaseUser);
+    // Auth redirect is handled by the admin login page for admin users
+    if (!pathname.startsWith('/admin')) {
+        handleAuthRedirect(firebaseUser);
+    }
     return firebaseUser;
-  }, [handleAuthRedirect]);
+  }, [handleAuthRedirect, pathname]);
 
   const logout = useCallback(async () => {
     if (!isConfigured || !auth) return;
     await signOut(auth);
-    router.push('/');
-  }, [router]);
+    setUser(null);
+    setUserProfile(null);
+    setIsAdmin(false);
+    if (pathname.startsWith('/admin')) {
+        router.push('/admin/login');
+    } else {
+        router.push('/');
+    }
+  }, [router, pathname]);
 
   const updateUserProfile = useCallback(async (data: Partial<UserProfile> & { newPhotoDataUrl?: string }) => {
     if (!user) {
@@ -133,10 +151,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { newPhotoDataUrl, ...profileData } = data;
     let photoURL = userProfile?.photoURL;
     
-    // Mock upload if running in demo mode without storage
     if (newPhotoDataUrl && !storage) {
         console.warn("[Demo Mode] Profile picture update skipped. Storage not configured.");
-        photoURL = newPhotoDataUrl; // Show locally for demo effect
+        photoURL = newPhotoDataUrl; 
     } else if (newPhotoDataUrl && storage) {
       const storageRef = ref(storage, `profile_pictures/${user.uid}`);
       try {
@@ -151,10 +168,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const finalProfileData = { ...profileData, photoURL: photoURL !== undefined ? photoURL : userProfile?.photoURL };
 
-    await updateFirebaseProfile(user, {
-      displayName: finalProfileData.name,
-      photoURL: finalProfileData.photoURL,
-    });
+    if(auth.currentUser){
+        await updateFirebaseProfile(auth.currentUser, {
+            displayName: finalProfileData.name,
+            photoURL: finalProfileData.photoURL ?? null,
+        });
+    }
     
     if (db) {
         const userDocRef = doc(db, 'users', user.uid);
@@ -172,7 +191,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [user, userProfile, toast]);
 
   return (
-    <AuthContext.Provider value={{ user, userProfile, isLoading, login, register, googleLogin, logout, updateUserProfile }}>
+    <AuthContext.Provider value={{ user, userProfile, isAdmin, isLoading, login, register, googleLogin, logout, updateUserProfile }}>
       {children}
     </AuthContext.Provider>
   );

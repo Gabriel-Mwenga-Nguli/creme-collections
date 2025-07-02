@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, type FormEvent } from 'react';
@@ -9,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import Logo from '@/components/logo';
-import { ADMIN_EMAIL } from '@/lib/constants';
 import { useRouter } from 'next/navigation';
 
 export default function AdminLoginPage() {
@@ -17,7 +17,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -26,13 +26,18 @@ export default function AdminLoginPage() {
 
     try {
       const userCredential = await login(email, password);
-      if (userCredential.email === ADMIN_EMAIL) {
+      // Force a token refresh to get the latest claims
+      const idTokenResult = await userCredential.getIdTokenResult(true);
+      const isAdmin = !!idTokenResult.claims.admin;
+      
+      if (isAdmin) {
         toast({
           title: "Admin Login Successful",
           description: "Redirecting to the dashboard.",
         });
         router.push('/admin/dashboard');
       } else {
+        await logout(); // Log out the non-admin user
         toast({
           variant: 'destructive',
           title: 'Authorization Failed',

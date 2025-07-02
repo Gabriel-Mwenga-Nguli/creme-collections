@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -7,26 +8,30 @@ import { AdminSidebarNav } from "@/components/admin/AdminSidebar";
 import Logo from "@/components/logo";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
-import { ADMIN_EMAIL } from "@/lib/constants";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-
-  const isAdmin = user?.email === ADMIN_EMAIL;
-
+  const { toast } = useToast();
+  
   React.useEffect(() => {
     if (!isLoading) {
       if (!user && pathname !== '/admin/login') {
         router.replace('/admin/login');
-      } else if (user && !isAdmin) {
+      } else if (user && !isAdmin && pathname !== '/admin/login') {
+        toast({
+            title: 'Access Denied',
+            description: 'You do not have administrative privileges.',
+            variant: 'destructive',
+        });
         router.replace('/'); 
       }
     }
-  }, [user, isAdmin, isLoading, pathname, router]);
+  }, [user, isAdmin, isLoading, pathname, router, toast]);
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
@@ -46,10 +51,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Card className="max-w-md text-center">
                 <CardHeader>
                     <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>You do not have permission to view this page. Redirecting...</CardDescription>
+                    <CardDescription>Redirecting...</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Button asChild><a href="/">Go to Homepage</a></Button>
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 </CardContent>
             </Card>
         </div>
