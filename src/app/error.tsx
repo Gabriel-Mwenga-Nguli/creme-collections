@@ -17,13 +17,14 @@ export default function Error({
     console.error(error)
   }, [error])
 
+  const isApiKeyError = !process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || error.message.includes('auth/invalid-api-key') || error.message.includes('FIREBASE_CONFIG_MISSING');
+  const isPermissionError = error.message.includes('permission-denied') || error.message.includes('insufficient permissions');
+  
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   const rulesUrl = projectId 
     ? `https://console.firebase.google.com/project/${projectId}/firestore/rules`
     : `https://console.firebase.google.com/`;
 
-  const isPermissionError = error.message.includes('permission-denied') || error.message.includes('insufficient permissions');
-  const isApiKeyError = error.message.includes('auth/invalid-api-key') || error.message.includes('FIREBASE_CONFIG_MISSING');
 
   return (
     <div className="container mx-auto px-4 py-16 text-center">
@@ -31,27 +32,27 @@ export default function Error({
             <Card className="max-w-2xl mx-auto bg-destructive/10 border-destructive">
                 <CardHeader>
                     <KeyRound className="h-12 w-12 text-destructive mx-auto mb-4" />
-                    <CardTitle className="text-destructive text-2xl">Action Required: Configure Firebase API Key</CardTitle>
+                    <CardTitle className="text-destructive text-2xl">Action Required: Configure Firebase API Keys</CardTitle>
                 </CardHeader>
                 <CardContent className="text-left space-y-4 text-destructive-foreground">
                     <p>
-                        Your app is failing to connect to Firebase because the API key is missing or invalid. This is a common setup issue.
+                        Your app cannot connect to Firebase because the necessary API keys are missing. This is a required setup step.
                     </p>
                     <p>
-                        <strong>To fix this, you must add your Firebase project's credentials to the <code>.env.local</code> file.</strong>
+                        <strong>To fix this, you must create and fill out a <code>.env.local</code> file with your project's credentials.</strong>
                     </p>
                     <div className="bg-card/50 p-4 rounded-md text-sm">
                         <h4 className="font-bold mb-2">Steps:</h4>
                         <ol className="list-decimal list-inside space-y-1">
-                            <li>Find or create the <code>.env.local</code> file in your project's root directory.</li>
-                            <li>Go to your <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Firebase Console</a>, select your project, and go to <strong>Project Settings</strong>.</li>
-                            <li>Under "Your apps", find your web app and copy its configuration object.</li>
-                            <li>Paste the values into the corresponding <code>NEXT_PUBLIC_...</code> variables in your <code>.env.local</code> file.</li>
-                            <li>Make sure to restart the development server after saving the file.</li>
+                            <li>In your project, find the file named <code>.env.example</code> and make a copy of it.</li>
+                            <li>Rename the copy to exactly <code>.env.local</code>.</li>
+                            <li>Open your <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Firebase Console</a>, go to <strong>Project Settings</strong>, find your web app, and copy the configuration values.</li>
+                            <li>Paste the values into the corresponding variables in your <code>.env.local</code> file.</li>
+                            <li>Restart the development server after saving the file.</li>
                         </ol>
                     </div>
                      <p>
-                        You can find a template for this file in <code>.env.example</code> and detailed instructions in <code>README.md</code>.
+                        For a complete guide, please see the **Critical Setup** section in the main <code>README.md</code> file.
                     </p>
                     <Button onClick={() => window.location.reload()} className="mt-4">
                         I've configured my keys, reload the app
@@ -66,7 +67,7 @@ export default function Error({
                 </CardHeader>
                 <CardContent className="text-left space-y-4 text-destructive-foreground">
                     <p>
-                        Your app is correctly trying to fetch data, but it's being blocked by Firebase's default security rules. This is a standard security measure for all new projects.
+                        Your app is correctly trying to fetch data, but it's being blocked by Firebase's default security rules. This is an expected security measure for all new projects.
                     </p>
                     <p>
                         <strong>To fix this, you must update the rules in your Firebase Console.</strong>
@@ -81,14 +82,14 @@ export default function Error({
                               </a> 
                               for your project.
                             </li>
-                            <li>Delete the existing rules.</li>
-                            <li>Copy the full contents from the <code>FIRESTORE_RULES.md</code> file in your project's root directory.</li>
-                            <li>Paste the new rules into the editor in the Firebase Console.</li>
+                            <li>Delete the existing rules in the editor.</li>
+                            <li>Open the <code>FIRESTORE_RULES.md</code> file from your project's main directory.</li>
+                            <li>Copy the full contents of that file and paste them into the editor in the Firebase Console.</li>
                             <li>Click <strong>Publish</strong>.</li>
                         </ol>
                     </div>
                     <p>
-                        After publishing the new rules, the error will be resolved. You can then try reloading the page.
+                        After publishing the new rules, the error will be resolved. You can then try again.
                     </p>
                     <Button onClick={() => reset()} className="mt-4">
                         Try Again After Updating Rules

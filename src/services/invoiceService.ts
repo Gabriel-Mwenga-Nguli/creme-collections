@@ -1,8 +1,6 @@
 
 'use server';
 
-import { db, isConfigured } from '@/lib/firebase';
-
 export interface Invoice {
   id: string;
   invoiceId: string;
@@ -13,11 +11,9 @@ export interface Invoice {
   subject: string;
 }
 
+// Mocked Service Function for Demo Mode
+
 export async function getUserInvoices(userId: string): Promise<Invoice[]> {
-  if (!isConfigured || !db) {
-    console.warn("[Demo Mode] getUserInvoices called. Returning empty array.");
-    return [];
-  }
-  console.log(`Firestore is enabled. Would fetch invoices for user ${userId}.`);
+  console.log(`[Demo Mode] Called getUserInvoices for user ${userId}. Returning empty array.`);
   return [];
 }

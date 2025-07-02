@@ -17,6 +17,7 @@ import {
 import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { useToast } from '@/hooks/use-toast';
+import { getUserProfile as fetchUserProfileService, createUserProfile } from '@/services/userService';
 
 export type UserProfile = {
   uid: string;
@@ -47,16 +48,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const pathname = usePathname();
   const { toast } = useToast();
 
-  const fetchUserProfile = useCallback(async (firebaseUser: FirebaseUser): Promise<UserProfile | null> => {
-    if (!isConfigured || !db) return null;
-    const userDocRef = doc(db, 'users', firebaseUser.uid);
-    const docSnap = await getDoc(userDocRef);
-    if (docSnap.exists()) {
-      return docSnap.data() as UserProfile;
-    }
-    return null;
-  }, []);
-
   const handleAuthRedirect = useCallback((loggedInUser: FirebaseUser | null) => {
     if (loggedInUser) {
         if (pathname === '/login' || pathname === '/register') {
@@ -73,7 +64,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        const profile = await fetchUserProfile(firebaseUser);
+        const profile = await fetchUserProfileService(firebaseUser.uid);
         setUserProfile(profile);
       } else {
         setUser(null);
@@ -82,7 +73,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, [fetchUserProfile]);
+  }, []);
 
   const login = useCallback(async (email: string, pass: string): Promise<FirebaseUser> => {
     if (!isConfigured || !auth) throw new Error("Firebase is not configured. Cannot log in.");
@@ -92,20 +83,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [handleAuthRedirect]);
 
   const register = useCallback(async (name: string, email: string, pass: string): Promise<FirebaseUser> => {
-    if (!isConfigured || !auth || !db) throw new Error("Firebase is not configured. Cannot register.");
+    if (!isConfigured || !auth) throw new Error("Firebase is not configured. Cannot register.");
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     const { user: firebaseUser } = userCredential;
     
     await updateFirebaseProfile(firebaseUser, { displayName: name });
     
-    const profileData = {
-      uid: firebaseUser.uid,
-      name,
-      email: firebaseUser.email || '',
-      photoURL: firebaseUser.photoURL || null
-    };
-    
-    await setDoc(doc(db, "users", firebaseUser.uid), { ...profileData, createdAt: serverTimestamp() });
+    // Create profile locally and in the service (which is now mocked)
+    const profileData = { uid: firebaseUser.uid, name, email: firebaseUser.email || '', photoURL: firebaseUser.photoURL || null };
+    await createUserProfile(firebaseUser.uid, profileData);
     
     setUser(firebaseUser);
     setUserProfile(profileData);
@@ -114,22 +100,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [handleAuthRedirect]);
   
   const googleLogin = useCallback(async (): Promise<FirebaseUser> => {
-    if (!isConfigured || !auth || !db) throw new Error("Firebase is not configured. Cannot use Google login.");
+    if (!isConfigured || !auth) throw new Error("Firebase is not configured. Cannot use Google login.");
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const { user: firebaseUser } = result;
 
-    const userDocRef = doc(db, 'users', firebaseUser.uid);
-    const docSnap = await getDoc(userDocRef);
-
-    if (!docSnap.exists()) {
-      await setDoc(userDocRef, {
-        uid: firebaseUser.uid,
-        name: firebaseUser.displayName,
-        email: firebaseUser.email,
-        photoURL: firebaseUser.photoURL,
-        createdAt: serverTimestamp()
-      });
+    const existingProfile = await fetchUserProfileService(firebaseUser.uid);
+    if (!existingProfile) {
+        await createUserProfile(firebaseUser.uid, {
+            name: firebaseUser.displayName || 'New User',
+            email: firebaseUser.email || '',
+            photoURL: firebaseUser.photoURL || undefined
+        });
     }
 
     handleAuthRedirect(firebaseUser);
@@ -143,15 +125,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [router]);
 
   const updateUserProfile = useCallback(async (data: Partial<UserProfile> & { newPhotoDataUrl?: string }) => {
-    if (!isConfigured || !user || !db || !storage) {
-        toast({ title: 'This feature is disabled.', description: 'Please configure Firebase to update your profile.', variant: 'destructive' });
+    if (!user) {
+        toast({ title: 'You must be logged in to update your profile.', variant: 'destructive' });
         return;
     }
 
     const { newPhotoDataUrl, ...profileData } = data;
     let photoURL = userProfile?.photoURL;
     
-    if (newPhotoDataUrl) {
+    // Mock upload if running in demo mode without storage
+    if (newPhotoDataUrl && !storage) {
+        console.warn("[Demo Mode] Profile picture update skipped. Storage not configured.");
+        photoURL = newPhotoDataUrl; // Show locally for demo effect
+    } else if (newPhotoDataUrl && storage) {
       const storageRef = ref(storage, `profile_pictures/${user.uid}`);
       try {
         await uploadString(storageRef, newPhotoDataUrl, 'data_url');
@@ -170,8 +156,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       photoURL: finalProfileData.photoURL,
     });
     
-    const userDocRef = doc(db, 'users', user.uid);
-    await updateDoc(userDocRef, finalProfileData);
+    if (db) {
+        const userDocRef = doc(db, 'users', user.uid);
+        await updateDoc(userDocRef, finalProfileData);
+    } else {
+        console.warn("[Demo Mode] Firestore is not configured. Profile update is not saved.");
+    }
 
     setUserProfile(prev => prev ? { ...prev, ...finalProfileData } : null);
     
@@ -180,7 +170,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
   }, [user, userProfile, toast]);
-
 
   return (
     <AuthContext.Provider value={{ user, userProfile, isLoading, login, register, googleLogin, logout, updateUserProfile }}>

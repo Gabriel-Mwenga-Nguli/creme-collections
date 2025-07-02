@@ -1,8 +1,7 @@
 
 'use server';
 
-import { db, isConfigured } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 export interface GiftCard {
   id: string; 
@@ -18,17 +17,7 @@ export interface GiftCard {
   isRedeemed: boolean;
 }
 
-function generateGiftCardCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 16; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-    if ((i + 1) % 4 === 0 && i < 15) {
-      code += '-';
-    }
-  }
-  return code;
-}
+// Mocked Service Function for Demo Mode
 
 export async function createGiftCard(data: {
   recipientEmail: string;
@@ -37,34 +26,7 @@ export async function createGiftCard(data: {
   message: string;
   designImageUrl: string;
 }): Promise<string | null> {
-    if (!isConfigured || !db) {
-        console.warn("[Demo Mode] createGiftCard called. No data will be saved.");
-        return `mock_giftcard_${Date.now()}`;
-    }
-  try {
-    const createdAt = new Date();
-    const expiryDate = new Date();
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-
-    const giftCardData = {
-      code: generateGiftCardCode(),
-      initialBalance: data.amount,
-      currentBalance: data.amount,
-      recipientEmail: data.recipientEmail,
-      senderName: data.senderName,
-      message: data.message,
-      designImageUrl: data.designImageUrl,
-      createdAt: Timestamp.fromDate(createdAt),
-      expiryDate: Timestamp.fromDate(expiryDate),
-      isRedeemed: false,
-    };
-
-    const docRef = await addDoc(collection(db, 'giftCards'), giftCardData);
-    console.log("Gift Card created with ID: ", docRef.id);
-    
-    return docRef.id;
-  } catch (error) {
-    console.error("Error creating gift card: ", error);
-    return null;
-  }
+    console.warn("[Demo Mode] createGiftCard called. No data will be saved to Firestore.");
+    console.log("[Demo Mode] Gift card data:", data);
+    return `mock_giftcard_${Date.now()}`;
 }

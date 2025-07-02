@@ -1,7 +1,41 @@
-
 # Creme Collections - Next.js E-Commerce Platform
 
 This is a Next.js e-commerce starter project built for Firebase Studio, featuring a modern tech stack and AI-powered capabilities.
+
+---
+## ⚠️ Critical Setup: Read This First If Your App Fails to Start
+
+If you see an error page after running the app, it's almost always one of two common setup issues. Please check them in order.
+
+### Problem 1: "Action Required: Update Firestore Security Rules"
+
+If your error page mentions **"Missing or insufficient permissions"**, this is expected. Your database is currently locked down.
+
+**➡️ The Fix: Update Your Firestore Rules**
+
+1.  **Go to your Firebase project:** [Firebase Console](https://console.firebase.google.com/)
+2.  Navigate to **Build > Firestore Database**.
+3.  Click the **Rules** tab.
+4.  **Delete** the existing default rule (it will look something like `allow read, write: if false;`).
+5.  Open the file named **`FIRESTORE_RULES.md`** in the root of this project.
+6.  **Copy the entire contents** of that file.
+7.  **Paste** the new rules into the editor in the Firebase Console.
+8.  Click **Publish**. The changes are almost instant.
+9.  Go back to your running application and **reload the page**. The error should be gone.
+
+---
+### Problem 2: "Action Required: Configure Firebase API Key"
+
+If the error page mentions **"auth/invalid-api-key"** or **"Firebase is not configured"**, it means your app can't connect to your backend.
+
+**➡️ The Fix: Create and Configure your `.env.local` file**
+
+1.  In the root of your project, find the file `.env.example` and **make a copy of it**.
+2.  Rename the copy to **`.env.local`**. (This file is ignored by git and is where your secret keys go).
+3.  Follow the instructions in the "Environment Setup" section below to get your API keys from the Firebase and Google Cloud consoles and paste them into your new `.env.local` file.
+4.  **Important**: You must **stop and restart** your development server (`npm run dev`) after creating or changing the `.env.local` file.
+
+---
 
 ## Getting Started
 
@@ -99,7 +133,7 @@ Your project includes a fully-featured, simulated admin dashboard.
 
 *   **URL**: Navigate to `/admin/login` on your local or hosted site.
 *   **Login**: The login is **for demonstration purposes only**. You can enter **any email and password** to access the dashboard.
-*   **Functionality**: The dashboard UI is fully built, but actions like adding products or managing users are simulated and will not save data permanently until connected to a live backend.
+*   **Functionality**: The dashboard UI is fully built, but actions like adding products or managing users are not connected to a live backend.
 
 ### 6. Running Genkit AI Flows Locally
 
