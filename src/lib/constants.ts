@@ -19,7 +19,7 @@ export const MAIN_NAV_LINKS: NavLink[] = [
   { href: '#', label: 'All Categories', icon: MenuIcon, isMegaMenuTrigger: true },
   { href: '/products/category/electronics', label: 'Electronics', icon: Smartphone },
   { href: '/products/category/fashion', label: 'Fashion', icon: Shirt },
-  { href: '/products/category/home-living', label: 'Home & Living', icon: HomeIcon },
+  { href: '/loyverse-products', label: 'Loyverse Stock', icon: Package },
   { href: '/gift-card', label: 'Gift Cards', icon: Gift },
   { href: '/products', label: 'All Products', icon: ShoppingBasket },
 ];
