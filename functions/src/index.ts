@@ -27,6 +27,8 @@ import axios from "axios";
 // The SDK automatically discovers credentials if deployed in a Firebase environment.
 admin.initializeApp();
 
+// --- Email Service ---
+
 // Helper to get environment variables for email
 const gmailEmail = functions.config().gmail?.email;
 const gmailPassword = functions.config().gmail?.app_password;
@@ -52,14 +54,6 @@ export const sendBrandedEmail = functions.https.onCall(async (data: any, context
         "The function must be called while authenticated.",
     );
   }
-
-  // In a real-world scenario, you would also verify that the caller has admin/manager privileges.
-  // Example (requires custom claims or a user roles collection in Firestore):
-  // const userRecord = await admin.auth().getUser(context.auth.uid);
-  // if (!userRecord.customClaims?.isAdmin) {
-  //   throw new functions.https.HttpsError("permission-denied", "You do not have permission to send emails.");
-  // }
-
 
   const { to, subject, html } = data;
 
@@ -88,45 +82,6 @@ export const sendBrandedEmail = functions.https.onCall(async (data: any, context
   }
 });
 
-// A simple Helloworld HTTP function for testing.
-// You can access this function via its URL after deployment.
-export const helloWorld = functions.https.onRequest((request: functions.Request, response: functions.Response) => {
-  functions.logger.info("Hello World function called!", {structuredData: true});
-  response.status(200).send("Hello from Firebase Cloud Functions!");
-});
-
-// Example: A callable function
-export const addMessage = functions.https.onCall(async (data: any, context: functions.https.CallableContext) => {
-  // Check authentication
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-        "unauthenticated",
-        "The function must be called while authenticated.",
-    );
-  }
-
-  const text = data.text;
-  if (!(typeof text === "string") || text.length === 0) {
-    throw new functions.https.HttpsError(
-        "invalid-argument",
-        "The function must be called with " +
-        "one argument \"text\" containing the message text to add.",
-    );
-  }
-
-  try {
-    const writeResult = await admin.firestore().collection("messages").add({
-      text: text,
-      author: context.auth.uid,
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    return {messageId: writeResult.id, result: `Message with ID: ${writeResult.id} added.`};
-  } catch (error) {
-    functions.logger.error("Error adding message:", error);
-    throw new functions.https.HttpsError("unknown", "Error writing to database", error);
-  }
-});
-
 
 // --- Loyverse Integration ---
 
@@ -137,7 +92,6 @@ const loyverseApiToken = functions.config().loyverse?.apitoken;
 if (!loyverseApiToken) {
     functions.logger.error("CRITICAL: Loyverse API token is not set in Firebase config. Run 'firebase functions:config:set loyverse.apitoken=YOUR_TOKEN'");
 }
-
 
 /**
  * Firebase Callable Function to fetch products from Loyverse.
