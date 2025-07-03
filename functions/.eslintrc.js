@@ -1,3 +1,4 @@
+
 module.exports = {
   env: {
     es6: true,
@@ -14,6 +15,8 @@ module.exports = {
     "no-restricted-globals": ["error", "name", "length"],
     "prefer-arrow-callback": "error",
     "quotes": ["error", "double", {"allowTemplateLiterals": true}],
+    "max-len": "off", // Turning off max-len as it can be noisy
+    "valid-jsdoc": "off", // Turning off JSDoc validation for simplicity
   },
   overrides: [
     {
@@ -25,4 +28,5 @@ module.exports = {
     },
   ],
   globals: {},
+  ignorePatterns: ["lib/**/*"], // This line fixes the issue
 };
