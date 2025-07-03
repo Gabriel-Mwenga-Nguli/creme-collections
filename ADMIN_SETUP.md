@@ -67,11 +67,11 @@ A service account key is a JSON file that gives a script administrative access t
       try {
         const user = await admin.auth().getUserByEmail(userEmail);
         await admin.auth().setCustomUserClaims(user.uid, { admin: true });
-        console.log(`✅ Success! The admin role has been set for ${userEmail}.`);
+        console.log(`Success! The admin role has been set for ${userEmail}.`);
         console.log('They will get their new permissions the next time they log in.');
         process.exit(0);
       } catch (error) {
-        console.error('❌ Error setting custom claim:', error.message);
+        console.error('Error setting custom claim:', error.message);
         process.exit(1);
       }
     }
@@ -89,7 +89,7 @@ A service account key is a JSON file that gives a script administrative access t
     node setAdmin.js
     ```
 3.  **Check the Output**:
-    *   If successful, you will see a message like: `✅ Success! The admin role has been set for your-admin-email@example.com.`
+    *   If successful, you will see a message like: `Success! The admin role has been set for your-admin-email@example.com.`
     *   If it fails, it will show an error message. The most common error is not finding the user, so double-check that the email is correct and the user account exists.
 
 That's it! The specified user now has admin privileges. The next time they log into your application, they will be able to access the Admin Panel. You can repeat this process for any other users you wish to make admins.
