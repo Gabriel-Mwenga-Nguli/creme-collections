@@ -39,7 +39,7 @@ Now, use the Firebase CLI to set the Loyverse API token you just copied as an en
 Run the following command in your terminal from your project's root directory, replacing the example token with your own:
 
 ```bash
-firebase functions:config:set loyverse.apitoken="91381885677646a6b7a70a0f6342b22f"
+firebase functions:config:set loyverse.apitoken="your token here"
 ```
 
 ## Step 3: Deploy Your Functions
